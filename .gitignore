@@ -1,0 +1,91 @@
+# 🔐 Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 🧪 Testing
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# 🔧 Virtual Environments
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 💻 IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.vs/
+.cursor/
+
+# 📊 Jupyter Notebook
+.ipynb_checkpoints
+
+# 🐳 Docker
+docker-compose.override.yml
+
+# 📁 Logs
+logs/
+*.log
+*.log.*
+
+# 📂 Data & Uploads
+data/
+uploads/
+temp/
+cache/
+*.db
+*.sqlite
+*.sqlite3
+
+# 🎯 Nextvision Specific
+.nextvision/
+nextvision_cache/
+matching_cache/
+embeddings_cache/
+
+# 🤖 AI Models Downloaded
+transformers_cache/
+sentence_transformers/
+.cache/huggingface/

@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 🤖 Nextvision API
+  nextvision-api:
+    build: .
+    container_name: nextvision-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgresql://nextvision:nextvision123@postgres:5432/nextvision
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+    networks:
+      - nextvision-network
+
+  # 🐘 PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: nextvision-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nextvision
+      POSTGRES_USER: nextvision
+      POSTGRES_PASSWORD: nextvision123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nextvision-network
+
+  # 🔴 Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: nextvision-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nextvision-network
+
+networks:
+  nextvision-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
