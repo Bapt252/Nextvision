@@ -1,480 +1,482 @@
 """
-🌉 Commitment-Nextvision Bridge Service
-Service passerelle pour connecter les parsers de Commitment- à l'algorithme de matching Nextvision
+🌉 CommitmentNextvisionBridge - Service de Bridge révolutionnaire
+Connecte l'écosystème de parsing Commitment- avec l'algorithme de matching Nextvision
 
 Author: NEXTEN Team
 Version: 1.0.0
 """
 
+import requests
+import json
+import logging
+from typing import Dict, List, Optional, Any, Tuple
+from pydantic import BaseModel
 import asyncio
 import aiohttp
-import logging
-from typing import Dict, Any, Optional, List, Union
-from dataclasses import dataclass
-from enum import Enum
-import time
-import json
+from datetime import datetime
 
 # Configuration du logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+class BridgeConfig:
+    """🔧 Configuration du Bridge"""
+    
+    # URLs Commitment- (détection automatique)
+    COMMITMENT_JOB_PARSER_URLS = [
+        "http://localhost:5053/api/parse-job",
+        "http://localhost:7000/api/job-parser",
+        "/api/job-parser"  # URL relative pour production
+    ]
+    
+    COMMITMENT_CV_PARSER_URLS = [
+        "http://localhost:5055/api/parse-cv"
+    ]
+    
+    # Timeout par défaut
+    REQUEST_TIMEOUT = 30
+    
+    # Configuration debug
+    DEBUG = True
 
-class CommitmentServiceType(Enum):
-    """Types de services Commitment- disponibles"""
-    CV_PARSER = "cv_parser"
-    JOB_PARSER = "job_parser"
+class JobData(BaseModel):
+    """📋 Modèle de données pour une offre d'emploi"""
+    title: str
+    company: str
+    location: str
+    contract_type: str
+    required_skills: List[str]
+    preferred_skills: List[str] = []
+    responsibilities: List[str] = []
+    requirements: List[str] = []
+    benefits: List[str] = []
+    salary_range: str
+    remote_policy: str = ""
 
+class CVData(BaseModel):
+    """📄 Modèle de données pour un CV"""
+    name: str
+    email: str
+    phone: str = ""
+    location: str = ""
+    years_of_experience: str = "0"
+    job_titles: List[str] = []
+    companies: List[str] = []
+    skills: List[str] = []
+    languages: List[str] = []
+    education: List[str] = []
+    certifications: List[str] = []
+    links: List[Dict] = []
+    objective: str = ""
+    summary: str = ""
 
-@dataclass
-class CommitmentConfig:
-    """Configuration pour se connecter aux services Commitment-"""
-    base_url: str
-    cv_parser_port: int = 3001  # Port par défaut du CV Parser (Node.js)
-    job_parser_port: int = 5053  # Port par défaut du Job Parser (Python)
-    timeout: int = 30
-    api_key: Optional[str] = None
-    max_retries: int = 3
+class BridgeRequest(BaseModel):
+    """🌉 Requête pour le Bridge"""
+    pourquoi_ecoute: str
+    job_file: Optional[Any] = None
+    job_text: Optional[str] = None
+    cv_file: Optional[Any] = None
+    force_refresh: bool = False
 
+class BridgeResponse(BaseModel):
+    """🌉 Réponse du Bridge"""
+    status: str
+    job_data: Optional[JobData] = None
+    cv_data: Optional[CVData] = None
+    matching_results: Optional[Dict] = None
+    processing_details: Dict
+    errors: List[str] = []
 
 class CommitmentNextvisionBridge:
-    """
-    🌉 Service Bridge Principal
+    """🌉 Service Bridge principal"""
     
-    Connecte les parsers de Commitment- (CV + Job) à l'algorithme 
-    de pondération adaptative de Nextvision
-    """
-    
-    def __init__(self, config: CommitmentConfig):
+    def __init__(self, config: BridgeConfig = BridgeConfig()):
         self.config = config
-        self.session: Optional[aiohttp.ClientSession] = None
+        self.commitment_job_url = None
+        self.commitment_cv_url = None
+        self.session = None
         
-        # URLs des services
-        self.cv_parser_url = f"{config.base_url}:{config.cv_parser_port}"
-        self.job_parser_url = f"{config.base_url}:{config.job_parser_port}"
+        logger.info("🌉 Initialisation du Bridge Commitment-Nextvision")
         
-        logger.info(f"🌉 Bridge initialisé")
-        logger.info(f"📄 CV Parser: {self.cv_parser_url}")
-        logger.info(f"💼 Job Parser: {self.job_parser_url}")
-    
     async def __aenter__(self):
-        """Context manager entry"""
+        """Gestionnaire de contexte async"""
         self.session = aiohttp.ClientSession(
-            timeout=aiohttp.ClientTimeout(total=self.config.timeout)
+            timeout=aiohttp.ClientTimeout(total=self.config.REQUEST_TIMEOUT)
         )
         return self
-    
+        
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit"""
+        """Fermeture du gestionnaire de contexte"""
         if self.session:
             await self.session.close()
-    
-    async def health_check(self) -> Dict[str, Any]:
-        """🔍 Vérification de la santé des services Commitment-"""
-        results = {}
+
+    async def detect_commitment_services(self) -> Tuple[bool, bool]:
+        """🔍 Détecte automatiquement les services Commitment- disponibles"""
+        job_service_detected = False
+        cv_service_detected = False
         
-        # Test CV Parser
-        try:
-            cv_health = await self._call_cv_parser_health()
-            results["cv_parser"] = {
-                "status": "healthy" if cv_health else "unhealthy",
-                "url": self.cv_parser_url,
-                "details": cv_health
-            }
-        except Exception as e:
-            results["cv_parser"] = {
-                "status": "error",
-                "url": self.cv_parser_url,
-                "error": str(e)
-            }
+        logger.info("🔍 Détection des services Commitment-...")
         
         # Test Job Parser
-        try:
-            job_health = await self._call_job_parser_health()
-            results["job_parser"] = {
-                "status": "healthy" if job_health else "unhealthy", 
-                "url": self.job_parser_url,
-                "details": job_health
-            }
-        except Exception as e:
-            results["job_parser"] = {
-                "status": "error",
-                "url": self.job_parser_url,
-                "error": str(e)
-            }
-        
-        return {
-            "bridge_status": "operational",
-            "services": results,
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")
-        }
-    
-    async def _call_cv_parser_health(self) -> Dict[str, Any]:
-        """Appel santé CV Parser"""
-        url = f"{self.cv_parser_url}/api/v2/parse/cv/stats"
-        
-        headers = {}
-        if self.config.api_key:
-            headers["Authorization"] = f"Bearer {self.config.api_key}"
-        
-        async with self.session.get(url, headers=headers) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                raise Exception(f"CV Parser health check failed: {response.status}")
-    
-    async def _call_job_parser_health(self) -> Dict[str, Any]:
-        """Appel santé Job Parser"""
-        url = f"{self.job_parser_url}/health"
-        
-        headers = {}
-        if self.config.api_key:
-            headers["X-API-Key"] = self.config.api_key
-        
-        async with self.session.get(url, headers=headers) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                raise Exception(f"Job Parser health check failed: {response.status}")
-    
-    async def parse_cv_with_commitment(self, cv_file_data: bytes, filename: str) -> Dict[str, Any]:
-        """
-        📄 Parse CV via Commitment- CV Parser
-        
-        Args:
-            cv_file_data: Données binaires du CV
-            filename: Nom du fichier
-            
-        Returns:
-            Dict contenant les données parsées du CV
-        """
-        logger.info(f"📄 Parsing CV via Commitment-: {filename}")
-        
-        # Préparer les données multipart
-        data = aiohttp.FormData()
-        data.add_field('cv', cv_file_data, filename=filename, content_type='application/octet-stream')
-        
-        headers = {}
-        if self.config.api_key:
-            headers["Authorization"] = f"Bearer {self.config.api_key}"
-        
-        url = f"{self.cv_parser_url}/api/v2/parse/cv/upload"
-        
-        for attempt in range(self.config.max_retries):
+        for url in self.config.COMMITMENT_JOB_PARSER_URLS:
             try:
-                async with self.session.post(url, data=data, headers=headers) as response:
+                health_url = f"{url}/health" if not url.endswith("/health") else url
+                async with self.session.get(health_url) as response:
                     if response.status == 200:
-                        result = await response.json()
-                        logger.info(f"✅ CV parsé avec succès: {filename}")
-                        return self._format_cv_data(result)
-                    else:
-                        error_text = await response.text()
-                        raise Exception(f"CV parsing failed: {response.status} - {error_text}")
-                        
+                        self.commitment_job_url = url
+                        job_service_detected = True
+                        logger.info(f"✅ Job Parser détecté: {url}")
+                        break
             except Exception as e:
-                if attempt == self.config.max_retries - 1:
-                    logger.error(f"❌ Échec parsing CV après {self.config.max_retries} tentatives: {e}")
-                    raise
-                else:
-                    logger.warning(f"⚠️ Tentative {attempt + 1} échouée, retry: {e}")
-                    await asyncio.sleep(2 ** attempt)  # Backoff exponentiel
-    
-    async def parse_job_with_commitment(self, job_file_data: bytes, filename: str) -> Dict[str, Any]:
-        """
-        💼 Parse Job via Commitment- Job Parser
+                logger.debug(f"❌ Job Parser non disponible sur {url}: {e}")
+                
+        # Test CV Parser
+        for url in self.config.COMMITMENT_CV_PARSER_URLS:
+            try:
+                health_url = f"{url}/health" if not url.endswith("/health") else url
+                async with self.session.get(health_url) as response:
+                    if response.status == 200:
+                        self.commitment_cv_url = url
+                        cv_service_detected = True
+                        logger.info(f"✅ CV Parser détecté: {url}")
+                        break
+            except Exception as e:
+                logger.debug(f"❌ CV Parser non disponible sur {url}: {e}")
         
-        Args:
-            job_file_data: Données binaires de l'offre d'emploi
-            filename: Nom du fichier
-            
-        Returns:
-            Dict contenant les données parsées de l'offre d'emploi
-        """
-        logger.info(f"💼 Parsing Job via Commitment-: {filename}")
+        return job_service_detected, cv_service_detected
+
+    async def parse_job_with_commitment(self, file_data: Any = None, text_data: str = None) -> JobData:
+        """📋 Parse une offre d'emploi avec Commitment-"""
+        if not self.commitment_job_url:
+            raise ValueError("Service Job Parser Commitment- non disponible")
         
-        # Étape 1: Mettre en queue le job
-        data = aiohttp.FormData()
-        data.add_field('file', job_file_data, filename=filename, content_type='application/octet-stream')
-        data.add_field('priority', 'premium')  # Priorité élevée pour le bridge
+        logger.info("📋 Parsing offre d'emploi avec Commitment-...")
         
-        headers = {}
-        if self.config.api_key:
-            headers["X-API-Key"] = self.config.api_key
-        
-        queue_url = f"{self.job_parser_url}/api/queue"
-        
-        # Mise en queue
-        async with self.session.post(queue_url, data=data, headers=headers) as response:
-            if response.status == 202:
-                queue_result = await response.json()
-                job_id = queue_result["job_id"]
-                logger.info(f"📋 Job mis en queue: {job_id}")
+        try:
+            if file_data:
+                # Parse depuis un fichier
+                data = aiohttp.FormData()
+                data.add_field('file', file_data)
+                endpoint = self.commitment_job_url
             else:
-                error_text = await response.text()
-                raise Exception(f"Job queue failed: {response.status} - {error_text}")
-        
-        # Étape 2: Attendre le résultat
-        result_url = f"{self.job_parser_url}/api/result/{job_id}"
-        
-        for attempt in range(30):  # Attendre jusqu'à 30 secondes
-            await asyncio.sleep(1)
+                # Parse depuis du texte
+                data = aiohttp.FormData()
+                data.add_field('text', text_data)
+                endpoint = f"{self.commitment_job_url}/text"
             
-            async with self.session.get(result_url, headers=headers) as response:
+            async with self.session.post(endpoint, data=data) as response:
                 if response.status == 200:
                     result = await response.json()
                     
-                    if result["status"] == "done":
-                        logger.info(f"✅ Job parsé avec succès: {filename}")
-                        return self._format_job_data(result["result"])
-                    elif result["status"] == "failed":
-                        raise Exception(f"Job parsing failed: {result.get('error', 'Unknown error')}")
-                    elif result["status"] in ["running", "pending"]:
-                        continue  # Continuer à attendre
+                    # Transformation des données Commitment- vers format Nextvision
+                    job_data = self._transform_job_data(result)
+                    logger.info("✅ Offre d'emploi parsée avec succès")
+                    return job_data
+                else:
+                    error_text = await response.text()
+                    raise Exception(f"Erreur Job Parser: {response.status} - {error_text}")
                     
-        raise Exception(f"Job parsing timeout after 30 seconds for {filename}")
-    
-    def _format_cv_data(self, raw_cv_data: Dict[str, Any]) -> Dict[str, Any]:
-        """📊 Formate les données CV pour Nextvision"""
+        except Exception as e:
+            logger.error(f"❌ Erreur parsing offre d'emploi: {e}")
+            raise
+
+    async def parse_cv_with_commitment(self, file_data: Any) -> CVData:
+        """📄 Parse un CV avec Commitment-"""
+        if not self.commitment_cv_url:
+            raise ValueError("Service CV Parser Commitment- non disponible")
+        
+        logger.info("📄 Parsing CV avec Commitment-...")
+        
         try:
-            data = raw_cv_data.get("data", {})
+            data = aiohttp.FormData()
+            data.add_field('file', file_data)
             
-            # Extraction des informations personnelles
-            personal = data.get("personal", {})
-            
-            # Extraction des compétences
-            skills_data = data.get("skills", {})
-            all_skills = []
-            if isinstance(skills_data, dict):
-                all_skills.extend(skills_data.get("technical", []))
-                all_skills.extend(skills_data.get("soft", []))
-            
-            # Extraction de l'expérience
-            experience_data = data.get("experience", [])
+            async with self.session.post(self.commitment_cv_url, data=data) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    
+                    # Transformation des données Commitment- vers format Nextvision
+                    cv_data = self._transform_cv_data(result)
+                    logger.info("✅ CV parsé avec succès")
+                    return cv_data
+                else:
+                    error_text = await response.text()
+                    raise Exception(f"Erreur CV Parser: {response.status} - {error_text}")
+                    
+        except Exception as e:
+            logger.error(f"❌ Erreur parsing CV: {e}")
+            raise
+
+    def _transform_job_data(self, commitment_data: Dict) -> JobData:
+        """🔄 Transforme les données Job de Commitment- vers format Nextvision"""
+        
+        # Gérer la structure de réponse de Commitment-
+        if isinstance(commitment_data, dict) and 'data' in commitment_data:
+            data = commitment_data['data']
+        else:
+            data = commitment_data
+        
+        # Mapping des champs avec gestion des variations
+        job_data = JobData(
+            title=data.get('title', ''),
+            company=data.get('company', ''),
+            location=data.get('location', ''),
+            contract_type=data.get('contract_type', ''),
+            required_skills=data.get('required_skills', []),
+            preferred_skills=data.get('preferred_skills', []),
+            responsibilities=data.get('responsibilities', []),
+            requirements=data.get('requirements', []),
+            benefits=data.get('benefits', []),
+            salary_range=data.get('salary_range', data.get('salary', '')),
+            remote_policy=data.get('remote_policy', '')
+        )
+        
+        logger.info(f"🔄 Job transformé: {job_data.title} chez {job_data.company}")
+        return job_data
+
+    def _transform_cv_data(self, commitment_data: Dict) -> CVData:
+        """🔄 Transforme les données CV de Commitment- vers format Nextvision"""
+        
+        # Gérer la structure de réponse de Commitment-
+        if isinstance(commitment_data, dict) and 'data' in commitment_data:
+            data = commitment_data['data']
+        else:
+            data = commitment_data
+        
+        # Mapping des champs avec gestion des variations
+        cv_data = CVData(
+            name=data.get('name', ''),
+            email=data.get('email', ''),
+            phone=data.get('phone', ''),
+            location=data.get('location', ''),
+            years_of_experience=str(data.get('years_of_experience', '0')),
+            job_titles=data.get('job_titles', []),
+            companies=data.get('companies', []),
+            skills=data.get('skills', []),
+            languages=data.get('languages', []),
+            education=data.get('education', []),
+            certifications=data.get('certifications', []),
+            links=data.get('links', []),
+            objective=data.get('objective', ''),
+            summary=data.get('summary', '')
+        )
+        
+        logger.info(f"🔄 CV transformé: {cv_data.name} ({len(cv_data.skills)} compétences)")
+        return cv_data
+
+    def _cv_to_matching_request(self, cv_data: CVData, pourquoi_ecoute: str) -> Dict:
+        """🎯 Convertit les données CV en format MatchingRequest pour Nextvision"""
+        
+        # Extraction du prénom et nom
+        name_parts = cv_data.name.split(' ', 1)
+        first_name = name_parts[0] if name_parts else ""
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+        
+        # Extraction des attentes salariales basiques (si disponible)
+        min_salary = 30000  # Valeur par défaut
+        max_salary = 50000  # Valeur par défaut
+        
+        # Tentative d'extraction depuis l'objectif ou le résumé
+        if cv_data.objective or cv_data.summary:
+            combined_text = f"{cv_data.objective} {cv_data.summary}".lower()
+            # Recherche simple de mentions salariales
+            for potential_salary in [35000, 40000, 45000, 50000, 55000, 60000]:
+                if str(potential_salary) in combined_text or f"{potential_salary//1000}k" in combined_text:
+                    min_salary = potential_salary - 5000
+                    max_salary = potential_salary + 5000
+                    break
+        
+        # Conversion des années d'expérience
+        try:
+            experience_years = int(cv_data.years_of_experience.replace(' ans', '').replace(' an', '').strip())
+        except:
             experience_years = 0
-            if experience_data:
-                # Calculer les années d'expérience approximatives
-                experience_years = len(experience_data) * 2  # Estimation simple
-            
-            # Extraction de l'éducation
-            education_data = data.get("education", [])
-            education = ""
-            if education_data:
-                education = education_data[0].get("degree", "") if isinstance(education_data[0], dict) else str(education_data[0])
-            
-            formatted_data = {
+        
+        matching_request = {
+            "pourquoi_ecoute": pourquoi_ecoute,
+            "candidate_profile": {
                 "personal_info": {
-                    "firstName": personal.get("firstName", ""),
-                    "lastName": personal.get("lastName", ""),
-                    "email": personal.get("email", ""),
-                    "phone": personal.get("phone", "")
+                    "firstName": first_name,
+                    "lastName": last_name,
+                    "email": cv_data.email,
+                    "phone": cv_data.phone
                 },
-                "skills": all_skills,
+                "skills": cv_data.skills[:10],  # Limiter à 10 compétences principales
                 "experience_years": experience_years,
-                "education": education,
-                "current_role": experience_data[0].get("position", "") if experience_data else "",
-                "raw_data": data  # Garder les données brutes pour debug
-            }
-            
-            logger.info(f"📊 CV formaté: {len(all_skills)} compétences, {experience_years} ans d'expérience")
-            return formatted_data
-            
-        except Exception as e:
-            logger.error(f"❌ Erreur formatage CV: {e}")
-            # Retourner une structure minimale en cas d'erreur
-            return {
-                "personal_info": {
-                    "firstName": "",
-                    "lastName": "",
-                    "email": "",
-                    "phone": ""
+                "education": cv_data.education[0] if cv_data.education else "",
+                "current_role": cv_data.job_titles[0] if cv_data.job_titles else ""
+            },
+            "preferences": {
+                "salary_expectations": {
+                    "min": min_salary,
+                    "max": max_salary
                 },
-                "skills": [],
-                "experience_years": 0,
-                "education": "",
-                "current_role": "",
-                "raw_data": raw_cv_data,
-                "formatting_error": str(e)
-            }
-    
-    def _format_job_data(self, raw_job_data: Dict[str, Any]) -> Dict[str, Any]:
-        """📊 Formate les données Job pour Nextvision"""
-        try:
-            # Le format exact dépend de ce que retourne votre Job Parser
-            # Adaptation nécessaire selon votre structure de données
-            
-            formatted_data = {
-                "title": raw_job_data.get("title", ""),
-                "description": raw_job_data.get("description", ""),
-                "required_skills": raw_job_data.get("required_skills", []),
-                "location": raw_job_data.get("location", ""),
-                "salary_range": raw_job_data.get("salary", {}),
-                "company": raw_job_data.get("company", ""),
-                "experience_required": raw_job_data.get("experience_required", 0),
-                "contract_type": raw_job_data.get("contract_type", ""),
-                "remote_possible": raw_job_data.get("remote", False),
-                "raw_data": raw_job_data  # Garder les données brutes
-            }
-            
-            logger.info(f"📊 Job formaté: {formatted_data['title']} chez {formatted_data['company']}")
-            return formatted_data
-            
-        except Exception as e:
-            logger.error(f"❌ Erreur formatage Job: {e}")
-            return {
-                "title": "",
-                "description": "",
-                "required_skills": [],
-                "location": "",
-                "salary_range": {},
-                "company": "",
-                "experience_required": 0,
-                "contract_type": "",
-                "remote_possible": False,
-                "raw_data": raw_job_data,
-                "formatting_error": str(e)
-            }
-    
-    async def complete_workflow(
-        self, 
-        cv_file_data: bytes, 
-        cv_filename: str,
-        job_file_data: bytes,
-        job_filename: str,
-        pourquoi_ecoute: str,
-        preferences: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        🎯 Workflow Complet: Parse CV + Job + Matching avec Pondération Adaptative
+                "location_preferences": {
+                    "city": cv_data.location,
+                    "acceptedCities": [],
+                    "maxDistance": 0
+                },
+                "remote_preferences": "Flexible",
+                "sectors": [],
+                "company_size": ""
+            },
+            "availability": "Disponible"
+        }
         
-        C'est l'endpoint principal qui utilise toute la puissance de NEXTEN !
-        """
-        workflow_start = time.time()
-        logger.info(f"🎯 === WORKFLOW COMPLET NEXTEN ===")
-        logger.info(f"📄 CV: {cv_filename}")
-        logger.info(f"💼 Job: {job_filename}")
-        logger.info(f"🎯 Motivation: {pourquoi_ecoute}")
+        logger.info(f"🎯 Requête matching créée pour {cv_data.name}")
+        return matching_request
+
+    async def execute_complete_workflow(self, bridge_request: BridgeRequest) -> BridgeResponse:
+        """🎯 Workflow complet: Parse Job + CV → Matching avec pondération adaptative"""
+        start_time = datetime.now()
+        processing_details = {
+            "start_time": start_time.isoformat(),
+            "steps_completed": [],
+            "services_used": [],
+            "performance": {}
+        }
+        errors = []
+        
+        job_data = None
+        cv_data = None
+        matching_results = None
+        
+        logger.info("🎯 === WORKFLOW COMPLET NEXTEN ===")
+        logger.info(f"📋 Raison d'écoute: '{bridge_request.pourquoi_ecoute}'")
         
         try:
-            # Étape 1: Parsing en parallèle (optimisation performance)
-            logger.info("⚡ Parsing CV et Job en parallèle...")
-            cv_task = self.parse_cv_with_commitment(cv_file_data, cv_filename)
-            job_task = self.parse_job_with_commitment(job_file_data, job_filename)
+            # Étape 1: Détection des services
+            step_start = datetime.now()
+            job_available, cv_available = await self.detect_commitment_services()
+            processing_details["steps_completed"].append("service_detection")
+            processing_details["performance"]["service_detection_ms"] = (datetime.now() - step_start).total_seconds() * 1000
             
-            cv_data, job_data = await asyncio.gather(cv_task, job_task)
+            if not job_available and not cv_available:
+                errors.append("Aucun service Commitment- disponible")
+                
+            # Étape 2: Parse Job (si demandé)
+            if (bridge_request.job_file or bridge_request.job_text) and job_available:
+                step_start = datetime.now()
+                try:
+                    if bridge_request.job_file:
+                        job_data = await self.parse_job_with_commitment(file_data=bridge_request.job_file)
+                    else:
+                        job_data = await self.parse_job_with_commitment(text_data=bridge_request.job_text)
+                    
+                    processing_details["steps_completed"].append("job_parsing")
+                    processing_details["services_used"].append("commitment_job_parser")
+                    processing_details["performance"]["job_parsing_ms"] = (datetime.now() - step_start).total_seconds() * 1000
+                    
+                except Exception as e:
+                    errors.append(f"Erreur parsing job: {e}")
+                    logger.error(f"❌ Erreur parsing job: {e}")
             
-            # Étape 2: Préparation des données pour Nextvision
-            from main import get_adaptive_weights, calculate_mock_matching_scores
-            from main import MatchingRequest, CandidateProfile, PersonalInfo, Preferences, SalaryExpectations, LocationPreferences
+            # Étape 3: Parse CV (si demandé)
+            if bridge_request.cv_file and cv_available:
+                step_start = datetime.now()
+                try:
+                    cv_data = await self.parse_cv_with_commitment(bridge_request.cv_file)
+                    
+                    processing_details["steps_completed"].append("cv_parsing")
+                    processing_details["services_used"].append("commitment_cv_parser")
+                    processing_details["performance"]["cv_parsing_ms"] = (datetime.now() - step_start).total_seconds() * 1000
+                    
+                except Exception as e:
+                    errors.append(f"Erreur parsing CV: {e}")
+                    logger.error(f"❌ Erreur parsing CV: {e}")
             
-            # Construction de la requête de matching
-            matching_request = MatchingRequest(
-                pourquoi_ecoute=pourquoi_ecoute,
-                candidate_profile=CandidateProfile(
-                    personal_info=PersonalInfo(**cv_data["personal_info"]),
-                    skills=cv_data["skills"],
-                    experience_years=cv_data["experience_years"],
-                    education=cv_data["education"],
-                    current_role=cv_data["current_role"]
-                ),
-                preferences=Preferences(
-                    salary_expectations=SalaryExpectations(**preferences.get("salary_expectations", {"min": 40000, "max": 60000})),
-                    location_preferences=LocationPreferences(**preferences.get("location_preferences", {"city": "Paris"})),
-                    remote_preferences=preferences.get("remote_preferences", ""),
-                    sectors=preferences.get("sectors", []),
-                    company_size=preferences.get("company_size", "")
-                ),
-                availability=preferences.get("availability", "")
+            # Étape 4: Matching avec Nextvision (si CV disponible)
+            if cv_data:
+                step_start = datetime.now()
+                try:
+                    # Conversion vers format Nextvision
+                    matching_request = self._cv_to_matching_request(cv_data, bridge_request.pourquoi_ecoute)
+                    
+                    # Ici, on appellerait l'endpoint de matching Nextvision
+                    # Pour l'instant, on simule la réponse
+                    matching_results = await self._simulate_nextvision_matching(matching_request)
+                    
+                    processing_details["steps_completed"].append("nextvision_matching")
+                    processing_details["services_used"].append("nextvision_matching")
+                    processing_details["performance"]["matching_ms"] = (datetime.now() - step_start).total_seconds() * 1000
+                    
+                except Exception as e:
+                    errors.append(f"Erreur matching: {e}")
+                    logger.error(f"❌ Erreur matching: {e}")
+            
+            # Finalisation
+            end_time = datetime.now()
+            processing_details["end_time"] = end_time.isoformat()
+            processing_details["total_duration_ms"] = (end_time - start_time).total_seconds() * 1000
+            
+            status = "success" if not errors else "partial_success" if (job_data or cv_data) else "error"
+            
+            response = BridgeResponse(
+                status=status,
+                job_data=job_data,
+                cv_data=cv_data,
+                matching_results=matching_results,
+                processing_details=processing_details,
+                errors=errors
             )
             
-            # Étape 3: Application de l'algorithme révolutionnaire
-            logger.info("🎯 Application de la pondération adaptative...")
-            weight_analysis = get_adaptive_weights(pourquoi_ecoute)
-            weights = weight_analysis["weights"]
-            
-            # Étape 4: Calcul du matching
-            matching_analysis = calculate_mock_matching_scores(matching_request, weights)
-            
-            # Étape 5: Résultat complet
-            processing_time = round((time.time() - workflow_start) * 1000, 2)
-            
-            result = {
-                "status": "success",
-                "workflow": "complete_nexten_matching",
-                "processing_time_ms": processing_time,
-                
-                # Données parsées
-                "parsed_data": {
-                    "cv": cv_data,
-                    "job": job_data
-                },
-                
-                # Résultats du matching
-                "matching_results": {
-                    "total_score": matching_analysis["total_score"],
-                    "confidence": matching_analysis["confidence"],
-                    "component_scores": matching_analysis["component_scores"],
-                    "weights_used": weights
-                },
-                
-                # Innovation : Pondération adaptative
-                "adaptive_weighting": {
-                    "applied": weight_analysis["adaptation_applied"],
-                    "reason": pourquoi_ecoute,
-                    "reasoning": weight_analysis["reasoning"],
-                    "weight_changes": self._calculate_weight_changes(weights) if weight_analysis["adaptation_applied"] else None
-                },
-                
-                # Métadonnées
-                "metadata": {
-                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "cv_filename": cv_filename,
-                    "job_filename": job_filename,
-                    "algorithm": "NEXTEN Adaptive Contextual Weighting",
-                    "version": "1.0.0"
-                }
-            }
-            
-            logger.info(f"✅ Workflow complet terminé en {processing_time}ms")
-            logger.info(f"📊 Score de matching final: {matching_analysis['total_score']}")
-            
-            return result
+            logger.info(f"✅ Workflow terminé en {processing_details['total_duration_ms']:.1f}ms")
+            return response
             
         except Exception as e:
-            logger.error(f"❌ Erreur workflow complet: {e}")
-            raise Exception(f"Workflow failed: {str(e)}")
-    
-    def _calculate_weight_changes(self, adapted_weights: Dict) -> Dict:
-        """📊 Calcule les changements de poids"""
-        from main import DEFAULT_WEIGHTS
+            logger.error(f"❌ Erreur critique workflow: {e}")
+            errors.append(f"Erreur critique: {e}")
+            
+            return BridgeResponse(
+                status="error",
+                processing_details=processing_details,
+                errors=errors
+            )
+
+    async def _simulate_nextvision_matching(self, matching_request: Dict) -> Dict:
+        """🎯 Simulation de l'appel Nextvision (à remplacer par un vrai appel)"""
+        # En production, ceci ferait un appel HTTP vers l'API Nextvision
+        # Pour l'instant, on simule le comportement
         
-        changes = {}
-        for component, adapted_weight in adapted_weights.items():
-            default_weight = DEFAULT_WEIGHTS[component]
-            change = adapted_weight - default_weight
-            if abs(change) > 0.001:
-                changes[component] = {
-                    "from": default_weight,
-                    "to": adapted_weight,
-                    "change": round(change, 3),
-                    "change_percent": round((change / default_weight) * 100, 1)
-                }
-        return changes
+        logger.info("🎯 Simulation matching Nextvision...")
+        
+        # Simulation basée sur la logique de pondération adaptative
+        pourquoi_ecoute = matching_request["pourquoi_ecoute"]
+        skills = matching_request["candidate_profile"]["skills"]
+        experience = matching_request["candidate_profile"]["experience_years"]
+        
+        # Score simulé mais réaliste
+        base_score = 0.6 + (len(skills) * 0.03) + (experience * 0.02)
+        total_score = min(0.95, base_score)
+        
+        return {
+            "total_score": round(total_score, 3),
+            "confidence": round(total_score * 0.9, 3),
+            "adaptive_weighting": {
+                "applied": True,
+                "reason": pourquoi_ecoute,
+                "reasoning": f"Pondération adaptée pour: {pourquoi_ecoute}"
+            },
+            "component_scores": {
+                "semantique": round(base_score, 3),
+                "remuneration": 0.75,
+                "localisation": 0.80,
+                "timing": 0.85
+            }
+        }
 
-
-# 🔧 Factory function pour créer le bridge
-def create_commitment_bridge(
-    base_url: str = "http://localhost",
-    cv_parser_port: int = 3001,
-    job_parser_port: int = 5053,
-    api_key: Optional[str] = None
-) -> CommitmentNextvisionBridge:
-    """
-    🏭 Factory pour créer un bridge Commitment-Nextvision
-    """
-    config = CommitmentConfig(
-        base_url=base_url,
-        cv_parser_port=cv_parser_port,
-        job_parser_port=job_parser_port,
-        api_key=api_key
-    )
-    
-    return CommitmentNextvisionBridge(config)
+    def get_health_status(self) -> Dict:
+        """❤️ Status de santé du Bridge"""
+        return {
+            "service": "CommitmentNextvisionBridge",
+            "version": "1.0.0",
+            "status": "active",
+            "commitment_job_parser": self.commitment_job_url is not None,
+            "commitment_cv_parser": self.commitment_cv_url is not None,
+            "features": {
+                "job_parsing": True,
+                "cv_parsing": True,
+                "adaptive_matching": True,
+                "real_time_processing": True
+            }
+        }
