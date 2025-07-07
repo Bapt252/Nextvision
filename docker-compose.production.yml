@@ -1,0 +1,279 @@
+# 🚀 Nextvision Production Docker Compose
+# Architecture enterprise-grade avec haute disponibilité
+
+version: '3.8'
+
+services:
+  # ===============================================
+  # 🌍 APPLICATION SERVICES
+  # ===============================================
+  
+  nextvision-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: nextvision-api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - API_KEYS=${API_KEYS}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - WORKERS=8
+    volumes:
+      - ./logs:/app/logs
+      - /tmp:/tmp
+    depends_on:
+      - postgres
+      - redis
+      - nginx
+    networks:
+      - nextvision-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+  
+  # ===============================================
+  # 🔴 REDIS CLUSTER (CACHE)
+  # ===============================================
+  
+  redis:
+    image: redis:7.2-alpine
+    container_name: nextvision-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    networks:
+      - nextvision-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+  
+  # ===============================================
+  # 🗄️ POSTGRESQL DATABASE
+  # ===============================================
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: nextvision-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=nextvision_prod
+      - POSTGRES_USER=nextvision
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - nextvision-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nextvision -d nextvision_prod"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+  
+  # ===============================================
+  # 🌐 NGINX LOAD BALANCER
+  # ===============================================
+  
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nextvision-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx-sites:/etc/nginx/sites-available
+      - ./ssl:/etc/nginx/ssl
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - nextvision-api
+    networks:
+      - nextvision-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  
+  # ===============================================
+  # 📊 MONITORING STACK
+  # ===============================================
+  
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: nextvision-prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - nextvision-network
+    depends_on:
+      - nextvision-api
+  
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: nextvision-grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - nextvision-network
+    depends_on:
+      - prometheus
+  
+  # ===============================================
+  # 📝 LOG AGGREGATION
+  # ===============================================
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: nextvision-elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - nextvision-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+  
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.0
+    container_name: nextvision-logstash
+    restart: always
+    volumes:
+      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logs:/logs
+    depends_on:
+      - elasticsearch
+    networks:
+      - nextvision-network
+  
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.0
+    container_name: nextvision-kibana
+    restart: always
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - nextvision-network
+
+# ===============================================
+# 💾 VOLUMES PERSISTANTS
+# ===============================================
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  elasticsearch-data:
+    driver: local
+
+# ===============================================
+# 🌐 NETWORK CONFIGURATION
+# ===============================================
+
+networks:
+  nextvision-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ===============================================
+# 🚀 DEPLOYMENT COMMANDS
+# ===============================================
+
+# Production deployment:
+# 1. Create .env file with secrets
+# 2. docker-compose -f docker-compose.production.yml up -d
+# 3. Monitor: docker-compose -f docker-compose.production.yml logs -f
+# 4. Health: curl http://localhost/api/v1/health
+
+# Scaling:
+# docker-compose -f docker-compose.production.yml up -d --scale nextvision-api=3
+
+# Backup:
+# docker exec nextvision-postgres pg_dump -U nextvision nextvision_prod > backup.sql
+# docker exec nextvision-redis redis-cli BGSAVE
+
+# Monitoring URLs:
+# - API: http://localhost/docs
+# - Grafana: http://localhost:3000 (admin/password)
+# - Prometheus: http://localhost:9090
+# - Kibana: http://localhost:5601
