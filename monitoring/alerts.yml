@@ -1,0 +1,138 @@
+# === NEXTVISION ALERTING RULES ===
+# Production alerting for critical issues
+
+groups:
+  - name: nextvision.rules
+    rules:
+      
+      # === API HEALTH ALERTS ===
+      - alert: NextvisionAPIDown
+        expr: up{job="nextvision-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nextvision API is down"
+          description: "Nextvision API has been down for more than 1 minute."
+      
+      - alert: NextvisionHighErrorRate
+        expr: rate(nextvision_api_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors per second for more than 2 minutes."
+      
+      - alert: NextvisionSlowResponses
+        expr: histogram_quantile(0.95, rate(nextvision_api_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow API responses"
+          description: "95th percentile response time is {{ $value }}s for more than 5 minutes."
+      
+      # === SYSTEM RESOURCE ALERTS ===
+      - alert: HighCPUUsage
+        expr: nextvision_system_cpu_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% for more than 5 minutes."
+      
+      - alert: HighMemoryUsage
+        expr: nextvision_system_memory_usage_percent > 90
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% for more than 3 minutes."
+      
+      - alert: DiskSpaceLow
+        expr: nextvision_system_disk_usage_percent > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space low"
+          description: "Disk usage is {{ $value }}% for more than 10 minutes."
+      
+      # === CACHE ALERTS ===
+      - alert: RedisCacheDown
+        expr: up{job="redis-exporter"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis cache has been down for more than 2 minutes."
+      
+      - alert: LowCacheHitRate
+        expr: nextvision_cache_hit_rate < 70
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value }}% for more than 10 minutes."
+      
+      # === DATABASE ALERTS ===
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL has been down for more than 1 minute."
+      
+      - alert: DatabaseSlowQueries
+        expr: rate(pg_stat_database_tup_fetched[5m]) / rate(pg_stat_database_tup_returned[5m]) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database slow queries detected"
+          description: "Database query efficiency is low for more than 5 minutes."
+      
+      # === BATCH PROCESSING ALERTS ===
+      - alert: BatchProcessingBacklog
+        expr: nextvision_batch_queue_size > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Batch processing backlog"
+          description: "Batch queue size is {{ $value }} for more than 5 minutes."
+      
+      - alert: LowBatchThroughput
+        expr: nextvision_batch_jobs_per_second < 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low batch processing throughput"
+          description: "Batch throughput is {{ $value }} jobs/sec for more than 10 minutes."
+      
+      # === EXTERNAL SERVICES ALERTS ===
+      - alert: GoogleMapsAPIErrors
+        expr: rate(nextvision_external_api_calls_total{service="google_maps",status="error"}[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Google Maps API errors"
+          description: "Google Maps API error rate is {{ $value }} for more than 3 minutes."
+      
+      - alert: ExternalServiceTimeout
+        expr: histogram_quantile(0.95, rate(nextvision_external_api_duration_seconds_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "External service timeouts"
+          description: "95th percentile external API response time is {{ $value }}s."

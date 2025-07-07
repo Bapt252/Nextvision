@@ -1,0 +1,193 @@
+# === NEXTVISION PRODUCTION REQUIREMENTS ===
+# Enterprise-grade dependencies with pinned versions for production stability
+
+# === CORE FRAMEWORK ===
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+gunicorn==21.2.0
+pydantic==2.5.0
+
+# === ASYNC & HTTP ===
+aiohttp==3.9.1
+httpx==0.25.2
+requests==2.31.0
+python-multipart==0.0.6
+
+# === CACHE & REDIS ===
+redis==5.0.1
+aioredis==2.0.1
+
+# === DATABASE ===
+asynpg==0.29.0
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.23
+alembic==1.13.1
+
+# === CONFIGURATION & ENVIRONMENT ===
+python-dotenv==1.0.0
+pyyaml==6.0.1
+toml==0.10.2
+
+# === DATA PROCESSING ===
+dataclasses-json==0.6.3
+orjson==3.9.10
+numpy==1.24.4
+pandas==2.1.4
+
+# === GEOSPATIAL & MAPS ===
+geopy==2.4.1
+shapely==2.0.2
+
+# === MONITORING & METRICS ===
+prometheus-client==0.19.0
+psutil==5.9.6
+
+# === LOGGING ===
+structlog==23.2.0
+colorama==0.4.6
+
+# === TESTING ===
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-mock==3.12.0
+pytest-cov==4.1.0
+pytest-benchmark==4.0.0
+locust==2.17.0  # Pour tests de charge
+
+# === SECURITY ===
+cryptography==41.0.8
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# === ASYNC UTILITIES ===
+asyncio-throttle==1.0.2
+aiofiles==23.2.1
+
+# === DEVELOPMENT TOOLS ===
+black==23.11.0
+isort==5.12.0
+mypy==1.7.1
+flake8==6.1.0
+bandit==1.7.5  # Security linting
+
+# === PRODUCTION MONITORING ===
+sentry-sdk[fastapi]==1.38.0
+elastic-apm==6.19.0
+datadog==0.49.1
+
+# === SERIALIZATION ===
+pickle-mixin==1.0.2
+marshmallow==3.20.1
+
+# === CONCURRENCY ===
+concurrent-futures==3.1.1
+
+# === VALIDATION ===
+cerberus==1.3.5
+jsonschema==4.20.0
+
+# === UTILITIES ===
+click==8.1.7
+rich==13.7.0  # Pour CLI enrichi
+tqdm==4.66.1  # Progress bars
+
+# === PRODUCTION WEB SERVER ===
+# Alternative à Gunicorn si nécessaire
+# hypercorn==0.14.4
+
+# === BACKUP & STORAGE ===
+boto3==1.34.0  # AWS S3 pour backups
+minio==7.2.0   # MinIO pour stockage objet
+
+# === HEALTH CHECKS ADVANCED ===
+healthcheck==1.3.3
+
+# === RATE LIMITING ADVANCED ===
+slowapi==0.1.9
+
+# === ADDITIONAL PRODUCTION TOOLS ===
+supervisor==4.2.5  # Process management
+filelock==3.13.1   # File locking
+timeout-decorator==0.5.0
+
+# === COMPATIBILITY ===
+typing-extensions==4.8.0
+
+# === PRODUCTION OPTIMIZATIONS ===
+orjson==3.9.10     # Faster JSON
+ujson==5.8.0       # Alternative fast JSON
+Cython==3.0.6      # Pour optimisations si nécessaire
+
+# === CONTAINER SUPPORT ===
+# Pas de dépendances spécifiques, mais importantes pour Docker
+# signal==1.0.0    # Gestion signaux (built-in Python)
+
+# === NETWORKING TOOLS ===
+dnspython==2.4.2   # DNS resolution
+requests-oauthlib==1.3.1  # OAuth si nécessaire
+
+# === DOCUMENTATION GENERATION ===
+sphinx==7.2.6      # Documentation
+sphinx-rtd-theme==1.3.0
+
+# === LINTING & QUALITY ===
+pylint==3.0.3
+pycodestyle==2.11.1
+pydocstyle==6.3.0
+
+# === VERSION PINNING NOTES ===
+# Toutes les versions sont épinglées pour garantir la reproductibilité
+# en production. Mettre à jour avec prudence et tester complètement.
+# 
+# Pour mettre à jour:
+# 1. Tester en environnement de staging
+# 2. Exécuter la suite de tests complète
+# 3. Valider les tests de stress
+# 4. Déployer graduellement
+
+# === OPTIONAL EXTENSIONS ===
+# Décommenter selon les besoins
+
+# Message Queues
+# celery==5.3.4
+# redis-py-cluster==2.1.3
+
+# Advanced Caching
+# python-memcached==1.62
+# pylibmc==1.6.3
+
+# Machine Learning (si nécessaire pour matching)
+# scikit-learn==1.3.2
+# joblib==1.3.2
+
+# Image Processing (si avatars/logos)
+# Pillow==10.1.0
+
+# Excel/CSV Processing avancé
+# openpyxl==3.1.2
+# xlsxwriter==3.1.9
+
+# Advanced Crypto
+# pyotp==2.9.0
+# qrcode==7.4.2
+
+# Internationalization
+# babel==2.13.1
+
+# Advanced HTTP Client
+# httpcore==1.0.2
+# h2==4.1.0
+
+# Development Only (ne pas inclure en production)
+# jupyter==1.0.0
+# ipython==8.17.2
+# memory-profiler==0.61.0
+
+# === SECURITY NOTES ===
+# Toutes les dépendances doivent être scannées pour vulnérabilités
+# Utiliser: pip-audit, safety, ou snyk
+# 
+# Commandes de vérification:
+# pip-audit
+# safety check
+# bandit -r nextvision/
