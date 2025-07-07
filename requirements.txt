@@ -12,3 +12,57 @@ python-dotenv>=1.0.0
 # === Additional Utils ===
 asyncio>=3.4.3
 typing-extensions>=4.8.0
+
+# === GOOGLE MAPS INTELLIGENCE (Prompt 2) ===
+# API & HTTP Client
+aiohttp>=3.9.0
+httpx>=0.25.0
+
+# Cache & Performance
+aioredis>=2.0.1
+redis>=5.0.0
+pickle-mixin>=1.0.2
+
+# Data Processing
+dataclasses-json>=0.6.1
+orjson>=3.9.9
+
+# Geospatial & Math
+geopy>=2.4.0
+shapely>=2.0.2
+numpy>=1.24.0
+
+# Async & Concurrency
+asyncio-throttle>=1.0.2
+aiofiles>=23.2.1
+
+# Testing (Prompt 2)
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-mock>=3.12.0
+pytest-cov>=4.1.0
+
+# Monitoring & Logging
+structlog>=23.2.0
+prometheus-client>=0.19.0
+
+# Development & Debug
+ipython>=8.17.2
+black>=23.11.0
+isort>=5.12.0
+mypy>=1.7.1
+
+# Security
+cryptography>=41.0.7
+python-jose[cryptography]>=3.3.0
+
+# Configuration Management
+pyyaml>=6.0.1
+toml>=0.10.2
+
+# === Optional Production Dependencies ===
+# Uncomment for production deployment
+# gunicorn>=21.2.0
+# supervisor>=4.2.5
+# sentry-sdk[fastapi]>=1.38.0
+# elastic-apm>=6.19.0
