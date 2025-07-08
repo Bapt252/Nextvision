@@ -124,7 +124,7 @@ class TransportFilteringEngine:
         job_addresses: List[str],
         strict_mode: bool = True,
         performance_mode: bool = True
-    ) -> FilteringResult:
+    ) -> "FilteringResult":  # 🔧 FIX: String annotation
         """🎯 PRE-FILTERING principal: exclut jobs incompatibles"""
         
         start_time = time.time()
