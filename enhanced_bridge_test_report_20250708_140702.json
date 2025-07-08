@@ -1,0 +1,116 @@
+{
+  "test_suite_summary": {
+    "total_execution_time_sec": 0.03,
+    "total_tests_run": 7,
+    "successful_tests": 2,
+    "success_rate_percent": 28.57,
+    "timestamp": "2025-07-08T14:07:02.659435"
+  },
+  "detailed_results": {
+    "health_checks": {
+      "standard": {
+        "status": "✅ OK",
+        "enhanced_bridge": true,
+        "auto_fix": true
+      },
+      "enhanced": {
+        "status": "✅ OK",
+        "stats": {
+          "enhanced_bridge_stats": {
+            "total_conversions": 0,
+            "successful_conversions": 0,
+            "success_rate_percent": 0.0,
+            "auto_fixes_applied": 0,
+            "validation_errors": 1,
+            "avg_processing_time_ms": 0.0,
+            "cache_hits": 0,
+            "cache_hit_rate_percent": 0.0,
+            "batch_processed": 0
+          },
+          "cache_stats": {
+            "cache_size": 0,
+            "cache_enabled": true
+          },
+          "config": {
+            "enable_auto_fix": true,
+            "enable_cache": true,
+            "enable_batch_processing": true,
+            "max_batch_size": 100,
+            "validation_strict_mode": false,
+            "retry_failed_conversions": true,
+            "max_retries": 3
+          },
+          "uptime_hours": 0.0070164911111111105
+        },
+        "features": {
+          "auto_fix_intelligence": true,
+          "performance_caching": true,
+          "batch_processing": true,
+          "retry_logic": true
+        }
+      }
+    },
+    "enhanced_conversions": [
+      {
+        "test_name": "candidat_1_marie_dupont",
+        "status": "❌ Error 500",
+        "error": "{\"detail\":\"Erreur conversion Enhanced: name 'time' is not defined\"}"
+      },
+      {
+        "test_name": "candidat_2_jean_martin",
+        "status": "❌ Error 500",
+        "error": "{\"detail\":\"Erreur conversion Enhanced: name 'time' is not defined\"}"
+      }
+    ],
+    "direct_matches": [
+      {
+        "test_name": "comptable_match_enhanced",
+        "status": "❌ Error 500",
+        "error": "{\"detail\":\"Erreur pipeline Enhanced: name 'time' is not defined\"}"
+      }
+    ],
+    "batch_tests": [
+      {
+        "test_name": "batch_enhanced_processing",
+        "status": "✅ Success",
+        "processing_time_ms": 3.5719871520996094,
+        "total_processed": 4,
+        "success_rate": 0.0,
+        "throughput": 3120.7619047619046
+      }
+    ],
+    "performance_metrics": {},
+    "auto_fix_validations": [],
+    "error_resilience": [
+      {
+        "test_name": "empty_data",
+        "status": "✅ Handled",
+        "response_code": 200,
+        "graceful_handling": true
+      },
+      {
+        "test_name": "malformed_email",
+        "status": "❌ Unexpected 500",
+        "response_code": 500,
+        "graceful_handling": false
+      },
+      {
+        "test_name": "missing_required_fields",
+        "status": "❌ Unexpected 500",
+        "response_code": 500,
+        "graceful_handling": false
+      }
+    ]
+  },
+  "recommendations": [
+    "Renforcer gestion d'erreurs pour cas edge"
+  ],
+  "next_steps": [
+    "Intégrer Enhanced Bridge dans interface Commitment-",
+    "Créer composants React pour workflow complet",
+    "Tester avec vraies données (69 CVs + 34 FDPs)",
+    "Déployer en environnement de staging",
+    "Former utilisateurs sur nouvelles fonctionnalités",
+    "Monitoring production avec métriques Enhanced"
+  ]
+}
