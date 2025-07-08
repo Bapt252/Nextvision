@@ -1,0 +1,910 @@
+{
+  "files_discovered": {
+    "cvs": [
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Mohamed_Ouadhane.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/AGBASSE Teddy_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Rania Fokeladeh.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Issac HOUNKPATIN.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_DARMON_Charlotte.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BELTRANDO Alexandra_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/PIERRE Lucie_CV (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_KIEFFER.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Vincent_Lecocq_Controleur_de_gestion_Jan25.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/MAKOENA Claudette_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/28649daffa7db9dbc1c911ffd1c5cb294e425917.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Natandia Madina_ONADJA.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BUI Chan_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Francya_DENIS_dispo_en_juillet_2025.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DA SILVA christine manuelle_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DA SILVA christine.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/JOHNKENNADY Julien_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/OUBAIR Ikram_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DOROTHÉE LIM.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Rania_Amada.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/2023_-_CV_Beneteau_V1.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BOUGRIANE ABDELLAH_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Vincent_Lecocq_Controleur_de_gestion_Jan25 (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/LOFIGUE Mariam_CV (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Nadia.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_G.SREI_-_ContrA_leur_de_Gestion_ExpA_rimentA_.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Caroline_COTTART.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_-_Cedric_Laville_Comptable_GA_nA_ral.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/e5f021608b17063f35e415ec14fb6a2a798a1981.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Gulden SAHIN (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Magali_RAINGEVAL_gp.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/cv jessica rios FAF TEXTILE.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/fdp.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/FANDI Hajar_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/HUBERT PATRICE_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cnadidature de fama.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/LOTI Rue_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Douglas Eux CV 2.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/PETIT JEAN-FRANCOIS_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CVFr_Nelly_TANDA_2025.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Nasra Moussa.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/f870ece2e1dd13bf982b394e2f10068ed443fc00.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_ISABELLE_2024.pdf.242998532.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/TADRARTI Yassine_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/ULMANN Serge_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Mehdi Bakhti.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/REBECCA KALINSKY.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/REVERDY Edwige_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BEYE Pape_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Yoann_CAP_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/TADRARTI Yassine_CV[45].pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BOCHET Elena_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Comptable_gA_nA_ral_S.Boudir.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Tadjidine Halidi.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/62a44112d3188a6bae684089dfd71cfd85ec48bd.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/MBUYU TSHIDIBI Charlotte_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Move MOZA KAMBI.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/SALVAT Hugo_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_lucrece_herady.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Stefania CARDO.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Bcom HR - Candidature de Sam.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Gulden SAHIN.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/N'DIAYE Khadiatou_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DEMIRASLAN Murvet_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/FASI Joseph_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV Naminata TOURE 01 25.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_2024-07-27_SONIA_TADJADIT.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/VILLARD Valentin_CV.pdf"
+    ],
+    "fdps": [
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Général-91-Etampes.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Comptable Unique ACA (1).docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR- Opportunité Comptable.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/MDV - comptable Sage 1000 (2) 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Fiche de Poste Compta G Interim.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/CR - Chargée de reporting 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR-Comptable Général-Unique.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/CR-  Comptable Confirmé 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - FICHE DE POSTE – Technicien IT - IT Specialist - Paris 16.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiches de Poste Comptable G 8.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Attache de Ventes & Dev - Copie.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR- Comptable confirmé(e).docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Assistant(e) Administratif(ve) et Comptable.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Controleur de Gestion 2025 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Comptable Général - FMC.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Fiche de Poste Gestionnaire Paie et ADP - CI ORTF.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Unique Reuil-Malmaison.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste COMPTA AUX.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Job Desk Poste  Hospitality Manager  Œuvrant.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste - Comptable France - Reporting & Budget.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Interim Gestionnaire de Paie.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Ass Juridique.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste — Contrôleur Facturation (H-F) (Interim 9mois).docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/CR - Comptable Technique Chargé(e) de Portfeuille 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Chargée de Recouvrement-Comptable Client.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Unique 93 Montreuil.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Gestionnaire de Paie et ADP Confirmée.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR  - Comptable Général Paris 2.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste Assistant Facturation.pdf",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste Responsable Comptable -  Fi.pdf"
+    ]
+  },
+  "parsing_simulated": {
+    "cvs": [
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/Cv_Mohamed_Ouadhane.pdf",
+        "file_name": "Cv_Mohamed_Ouadhane.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat1",
+            "lastName": "Test",
+            "email": "candidat1.test@email.com",
+            "phone": "+33 6 20 30 40 50"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 2
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 1",
+              "company": "Entreprise 1",
+              "duration": "1 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.85
+        },
+        "parsing_confidence": 0.85
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/AGBASSE Teddy_CV.pdf",
+        "file_name": "AGBASSE Teddy_CV.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat2",
+            "lastName": "Test",
+            "email": "candidat2.test@email.com",
+            "phone": "+33 6 21 31 41 51"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 3
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 2",
+              "company": "Entreprise 2",
+              "duration": "1 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.9
+        },
+        "parsing_confidence": 0.9
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/Rania Fokeladeh.pdf",
+        "file_name": "Rania Fokeladeh.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat3",
+            "lastName": "Test",
+            "email": "candidat3.test@email.com",
+            "phone": "+33 6 22 32 42 52"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 4
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 3",
+              "company": "Entreprise 3",
+              "duration": "2 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.95
+        },
+        "parsing_confidence": 0.95
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/Issac HOUNKPATIN.pdf",
+        "file_name": "Issac HOUNKPATIN.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat4",
+            "lastName": "Test",
+            "email": "candidat4.test@email.com",
+            "phone": "+33 6 23 33 43 53"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 5
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 4",
+              "company": "Entreprise 4",
+              "duration": "2 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.85
+        },
+        "parsing_confidence": 0.85
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/CV_DARMON_Charlotte.pdf",
+        "file_name": "CV_DARMON_Charlotte.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat5",
+            "lastName": "Test",
+            "email": "candidat5.test@email.com",
+            "phone": "+33 6 24 34 44 54"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 6
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 5",
+              "company": "Entreprise 5",
+              "duration": "3 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.9
+        },
+        "parsing_confidence": 0.9
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/BELTRANDO Alexandra_CV.pdf",
+        "file_name": "BELTRANDO Alexandra_CV.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat6",
+            "lastName": "Test",
+            "email": "candidat6.test@email.com",
+            "phone": "+33 6 25 35 45 55"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 7
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 6",
+              "company": "Entreprise 6",
+              "duration": "3 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.95
+        },
+        "parsing_confidence": 0.95
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/PIERRE Lucie_CV (1).pdf",
+        "file_name": "PIERRE Lucie_CV (1).pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat7",
+            "lastName": "Test",
+            "email": "candidat7.test@email.com",
+            "phone": "+33 6 26 36 46 56"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 8
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 7",
+              "company": "Entreprise 7",
+              "duration": "4 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.85
+        },
+        "parsing_confidence": 0.85
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/CV_KIEFFER.pdf",
+        "file_name": "CV_KIEFFER.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat8",
+            "lastName": "Test",
+            "email": "candidat8.test@email.com",
+            "phone": "+33 6 27 37 47 57"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 9
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 8",
+              "company": "Entreprise 8",
+              "duration": "4 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.9
+        },
+        "parsing_confidence": 0.9
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/CV_Vincent_Lecocq_Controleur_de_gestion_Jan25.pdf",
+        "file_name": "CV_Vincent_Lecocq_Controleur_de_gestion_Jan25.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat9",
+            "lastName": "Test",
+            "email": "candidat9.test@email.com",
+            "phone": "+33 6 28 38 48 58"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 10
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 9",
+              "company": "Entreprise 9",
+              "duration": "5 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.95
+        },
+        "parsing_confidence": 0.95
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/CV TEST/MAKOENA Claudette_CV.pdf",
+        "file_name": "MAKOENA Claudette_CV.pdf",
+        "parsed_data": {
+          "personal_info": {
+            "firstName": "Candidat10",
+            "lastName": "Test",
+            "email": "candidat10.test@email.com",
+            "phone": "+33 6 29 39 49 59"
+          },
+          "skills": [
+            "Communication",
+            "Microsoft Office",
+            "Gestion de projet"
+          ],
+          "softwares": [
+            "Excel",
+            "Word",
+            "Outlook"
+          ],
+          "languages": {
+            "Français": "Natif",
+            "Anglais": "Courant"
+          },
+          "experience": {
+            "total_years": 11
+          },
+          "work_experience": [
+            {
+              "position": "Poste Senior 10",
+              "company": "Entreprise 10",
+              "duration": "5 ans",
+              "skills_acquired": [
+                "Communication",
+                "Microsoft Office"
+              ]
+            }
+          ],
+          "parsing_confidence": 0.85
+        },
+        "parsing_confidence": 0.85
+      }
+    ],
+    "fdps": [
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+        "file_name": "Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 8ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 1",
+            "Responsabilité 1",
+            "Objectif 1"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.8
+        },
+        "parsing_confidence": 0.8
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+        "file_name": "Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 9ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 2",
+            "Responsabilité 2",
+            "Objectif 2"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.8500000000000001
+        },
+        "parsing_confidence": 0.8500000000000001
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+        "file_name": "Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+        "parsed_data": {
+          "titre": "Poste 3 H/F",
+          "localisation": "Paris 10ème",
+          "contrat": "CDI",
+          "salaire": "34K à 41K annuels",
+          "competences_requises": [
+            "Compétence 1",
+            "Compétence 2",
+            "Compétence 3"
+          ],
+          "experience_requise": "4 ans - 7 ans",
+          "missions": [
+            "Mission principale 3",
+            "Responsabilité 3",
+            "Objectif 3"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Poste 3 H/F...",
+          "parsing_confidence": 0.9
+        },
+        "parsing_confidence": 0.9
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Général-91-Etampes.docx",
+        "file_name": "Bcom HR - Fiche de Poste Comptable Général-91-Etampes.docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 11ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 4",
+            "Responsabilité 4",
+            "Objectif 4"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.9500000000000001
+        },
+        "parsing_confidence": 0.9500000000000001
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Comptable Unique ACA (1).docx",
+        "file_name": "Comptable Unique ACA (1).docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 12ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 5",
+            "Responsabilité 5",
+            "Objectif 5"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.8
+        },
+        "parsing_confidence": 0.8
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR- Opportunité Comptable.docx",
+        "file_name": "Bcom HR- Opportunité Comptable.docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 13ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 6",
+            "Responsabilité 6",
+            "Objectif 6"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.8500000000000001
+        },
+        "parsing_confidence": 0.8500000000000001
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/MDV - comptable Sage 1000 (2) 1.docx",
+        "file_name": "MDV - comptable Sage 1000 (2) 1.docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 14ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 7",
+            "Responsabilité 7",
+            "Objectif 7"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.9
+        },
+        "parsing_confidence": 0.9
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Fiche de Poste Compta G Interim.docx",
+        "file_name": "Fiche de Poste Compta G Interim.docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 15ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 8",
+            "Responsabilité 8",
+            "Objectif 8"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.9500000000000001
+        },
+        "parsing_confidence": 0.9500000000000001
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/CR - Chargée de reporting 1.docx",
+        "file_name": "CR - Chargée de reporting 1.docx",
+        "parsed_data": {
+          "titre": "Poste 9 H/F",
+          "localisation": "Paris 16ème",
+          "contrat": "CDI",
+          "salaire": "46K à 59K annuels",
+          "competences_requises": [
+            "Compétence 1",
+            "Compétence 2",
+            "Compétence 3"
+          ],
+          "experience_requise": "5 ans - 5 ans",
+          "missions": [
+            "Mission principale 9",
+            "Responsabilité 9",
+            "Objectif 9"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Poste 9 H/F...",
+          "parsing_confidence": 0.8
+        },
+        "parsing_confidence": 0.8
+      },
+      {
+        "file_path": "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR-Comptable Général-Unique.docx",
+        "file_name": "Bcom HR-Comptable Général-Unique.docx",
+        "parsed_data": {
+          "titre": "Comptable Senior H/F",
+          "localisation": "Paris 17ème",
+          "contrat": "CDI",
+          "salaire": "38K à 45K annuels",
+          "competences_requises": [
+            "Maîtrise CEGID",
+            "Comptabilité générale",
+            "Fiscalité"
+          ],
+          "experience_requise": "5 ans - 8 ans",
+          "missions": [
+            "Mission principale 10",
+            "Responsabilité 10",
+            "Objectif 10"
+          ],
+          "avantages": [
+            "Tickets restaurant",
+            "Mutuelle",
+            "RTT"
+          ],
+          "badges_auto_rempli": [
+            "Auto-rempli"
+          ],
+          "fiche_poste_originale": "Fiche de poste détaillée pour Comptable Senior H/F...",
+          "parsing_confidence": 0.8500000000000001
+        },
+        "parsing_confidence": 0.8500000000000001
+      }
+    ]
+  },
+  "enhanced_conversions": {
+    "cvs": [
+      {
+        "file_name": "Cv_Mohamed_Ouadhane.pdf",
+        "status": "✅ Success",
+        "processing_time_ms": 7.707834243774414,
+        "auto_fixes": 0,
+        "conversion_success": true
+      },
+      {
+        "file_name": "AGBASSE Teddy_CV.pdf",
+        "status": "✅ Success",
+        "processing_time_ms": 1.1878013610839844,
+        "auto_fixes": 0,
+        "conversion_success": true
+      },
+      {
+        "file_name": "Rania Fokeladeh.pdf",
+        "status": "✅ Success",
+        "processing_time_ms": 1.0602474212646484,
+        "auto_fixes": 0,
+        "conversion_success": true
+      },
+      {
+        "file_name": "Issac HOUNKPATIN.pdf",
+        "status": "✅ Success",
+        "processing_time_ms": 1.300811767578125,
+        "auto_fixes": 0,
+        "conversion_success": true
+      },
+      {
+        "file_name": "CV_DARMON_Charlotte.pdf",
+        "status": "✅ Success",
+        "processing_time_ms": 1.203298568725586,
+        "auto_fixes": 0,
+        "conversion_success": true
+      }
+    ],
+    "fdps": []
+  },
+  "performance_summary": {
+    "total_execution_time_sec": 0.05,
+    "files_discovered": {
+      "cvs": 69,
+      "fdps": 34,
+      "total": 103
+    },
+    "conversions_enhanced": {
+      "cvs_successful": 5,
+      "total_successful": 5
+    }
+  },
+  "errors": []
+}

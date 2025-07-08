@@ -16,7 +16,6 @@ from typing import Dict, List, Optional, Union, Any, Tuple
 from enum import Enum
 import json
 
-
 # ================================
 # ENUMS - Nouveaux types V3.0
 # ================================
@@ -30,15 +29,12 @@ class ListeningReasonType(Enum):
     PERSPECTIVES = "perspectives"
     AUTRE = "autre"
 
-
 class ContractType(Enum):
-    """Types de contrats préférés"""
+    """Types de contrats français (questionnaire)"""
     CDI = "cdi"
     CDD = "cdd"
     FREELANCE = "freelance"
-    STAGE = "stage"
     INTERIM = "interim"
-
 
 class WorkModalityType(Enum):
     """Modalités de travail"""
@@ -46,7 +42,6 @@ class WorkModalityType(Enum):
     HYBRID = "hybrid"
     ON_SITE = "on_site"
     FLEXIBLE = "flexible"
-
 
 class MotivationType(Enum):
     """Types de motivations professionnelles"""
@@ -59,14 +54,12 @@ class MotivationType(Enum):
     INNOVATION = "innovation"
     EQUILIBRE_VIE = "equilibre_vie"
 
-
 class CandidateStatus(Enum):
     """Statut du candidat"""
     EN_POSTE = "en_poste"
     DEMANDEUR_EMPLOI = "demandeur_emploi"
     ETUDIANT = "etudiant"
     FREELANCE = "freelance"
-
 
 # ================================
 # MODÈLES V2.0 PRÉSERVÉS
@@ -82,7 +75,6 @@ class SemanticProfile:
     experience_description: str = ""
     weight: float = 0.25  # Ajusté de 35% à 25%
 
-
 @dataclass
 class SalaryProfile:
     """Profil salarial - V2.0 préservé avec poids ajusté"""
@@ -93,7 +85,6 @@ class SalaryProfile:
     salary_negotiable: bool = True
     weight: float = 0.20  # Ajusté de 25% à 20%
 
-
 @dataclass
 class ExperienceProfile:
     """Profil expérience - V2.0 préservé avec poids ajusté"""
@@ -102,7 +93,6 @@ class ExperienceProfile:
     seniority_level: str = "junior"  # junior, medior, senior, expert
     required_min_years: int = 0
     weight: float = 0.15  # Ajusté de 25% à 15%
-
 
 @dataclass
 class LocationProfile:
@@ -113,7 +103,6 @@ class LocationProfile:
     accepts_relocation: bool = False
     commute_time_max: int = 60  # minutes
     weight: float = 0.10  # Ajusté de 15% à 10%
-
 
 # ================================
 # NOUVEAUX MODÈLES V3.0
@@ -127,7 +116,6 @@ class ProfessionalMotivationsProfile:
     motivation_priorities: List[MotivationType] = field(default_factory=list)
     weight: float = 0.08
 
-
 @dataclass
 class SectorCompatibilityProfile:
     """Compatibilité sectorielle - Nouveau V3.0"""
@@ -138,7 +126,6 @@ class SectorCompatibilityProfile:
     sector_transition_openness: int = 3  # 1-5 scale
     weight: float = 0.06
 
-
 @dataclass
 class ContractFlexibilityProfile:
     """Flexibilité contractuelle - Nouveau V3.0"""
@@ -148,7 +135,6 @@ class ContractFlexibilityProfile:
     trial_period_acceptance: bool = True
     weight: float = 0.05
 
-
 @dataclass
 class TimingCompatibilityProfile:
     """Compatibilité timing - Nouveau V3.0"""
@@ -157,7 +143,6 @@ class TimingCompatibilityProfile:
     recruitment_urgency: int = 3  # 1-5 scale (1=urgent, 5=can wait)
     flexibility_start_date: int = 2  # weeks flexibility
     weight: float = 0.04
-
 
 @dataclass
 class WorkModalityProfile:
@@ -170,7 +155,6 @@ class WorkModalityProfile:
     modality_flexibility: int = 3  # 1-5 scale
     weight: float = 0.04
 
-
 @dataclass
 class SalaryProgressionProfile:
     """Progression salariale - Nouveau V3.0"""
@@ -181,7 +165,6 @@ class SalaryProgressionProfile:
     position_salary_evolution: Dict[str, float] = field(default_factory=dict)  # year: salary
     weight: float = 0.03
 
-
 @dataclass
 class ListeningReasonProfile:
     """Raison d'écoute - COMPOSANT CLEF V3.0"""
@@ -190,7 +173,6 @@ class ListeningReasonProfile:
     reason_intensity: int = 3  # 1-5 scale
     motivation_description: str = ""
     weight: float = 0.03  # Poids direct faible mais impact systémique énorme
-
 
 @dataclass
 class CandidateStatusProfile:
@@ -201,7 +183,6 @@ class CandidateStatusProfile:
     career_transition_phase: bool = False
     recruitment_constraints: List[str] = field(default_factory=list)
     weight: float = 0.02
-
 
 # ================================
 # PONDÉRATION ADAPTATIVE V3.0
@@ -292,7 +273,6 @@ class AdaptiveWeightingConfig:
                 }
             }
 
-
 # ================================
 # MODÈLE GLOBAL V3.0
 # ================================
@@ -342,7 +322,6 @@ class ExtendedMatchingProfile:
         
         return {key: value / total for key, value in weights.items()}
 
-
 @dataclass
 class MatchingScore:
     """Score de matching V3.0 avec détail par composant"""
@@ -361,7 +340,6 @@ class MatchingScore:
             "adaptive_reason": self.adaptive_reason.value if self.adaptive_reason else None,
             "confidence_level": self.confidence_level
         }
-
 
 # ================================
 # UTILITAIRES DE CONVERSION V2.0
@@ -386,7 +364,6 @@ def convert_v2_to_v3_profile(v2_data: Dict[str, Any]) -> ExtendedMatchingProfile
     
     return profile
 
-
 def get_component_list() -> List[str]:
     """Retourne la liste des 12 composants V3.0"""
     return [
@@ -395,7 +372,6 @@ def get_component_list() -> List[str]:
         "timing_compatibility", "work_modality", "salary_progression",
         "listening_reason", "candidate_status"
     ]
-
 
 # ================================
 # VALIDATION ET TESTS
@@ -423,7 +399,6 @@ def validate_extended_profile(profile: ExtendedMatchingProfile) -> Tuple[bool, L
     
     return len(errors) == 0, errors
 
-
 if __name__ == "__main__":
     # Test de base
     profile = ExtendedMatchingProfile()
@@ -443,3 +418,88 @@ if __name__ == "__main__":
     if errors:
         for error in errors:
             print(f"  - {error}")
+
+
+class ContractFlexibilityScorer:
+    """🎯 Scorer avancé flexibilité contractuelle V3.0"""
+    
+    def score_contract_match(self, candidate_prefs: List[str], company_offer: str, 
+                           exclusive_search: bool = False) -> Dict[str, float]:
+        """
+        Score matching contrats avec gestion cas exclusifs
+        
+        Args:
+            candidate_prefs: Classement préférences candidat ["cdi", "freelance", ...]
+            company_offer: Offre entreprise "cdi"
+            exclusive_search: True si candidat ne veut QUE ce type
+        """
+        
+        if exclusive_search:
+            # Candidat recherche EXCLUSIVEMENT un type
+            if company_offer in candidate_prefs:
+                return {
+                    "score": 1.0,
+                    "match_type": "perfect_exclusive",
+                    "confidence": 0.95,
+                    "reason": f"Candidat recherche exclusivement {company_offer.upper()}"
+                }
+            else:
+                return {
+                    "score": 0.0,
+                    "match_type": "incompatible",
+                    "confidence": 0.95,
+                    "reason": f"Candidat refuse {company_offer.upper()}"
+                }
+        
+        else:
+            # Classement normal avec dégressivité
+            if company_offer in candidate_prefs:
+                rank = candidate_prefs.index(company_offer) + 1
+                base_score = max(0, 1.0 - (rank - 1) * 0.25)
+                
+                # Bonus si contrat préféré
+                bonus = 0.1 if rank == 1 else 0
+                final_score = min(1.0, base_score + bonus)
+                
+                return {
+                    "score": final_score,
+                    "match_type": "ranked_preference",
+                    "rank": rank,
+                    "total_options": len(candidate_prefs),
+                    "confidence": 0.8,
+                    "reason": f"{company_offer.upper()} est rang {rank}/{len(candidate_prefs)}"
+                }
+            else:
+                return {
+                    "score": 0.2,  # Score minimal pour contrat non listé
+                    "match_type": "not_preferred",
+                    "confidence": 0.3,
+                    "reason": f"{company_offer.upper()} pas dans préférences"
+                }
+
+    def detect_exclusive_search(self, candidate_data: Dict) -> Tuple[bool, List[str]]:
+        """Détecte si candidat recherche exclusivement certains contrats"""
+        
+        # Indicateurs recherche exclusive
+        exclusive_indicators = {
+            "only_cdi": ["stabilité", "sécurité", "évolution", "long terme"],
+            "only_freelance": ["liberté", "indépendance", "missions courtes", "tarif jour"],
+            "only_interim": ["flexibilité", "découverte", "missions variées"],
+            "only_cdd": ["projet défini", "durée limitée", "pas engagement"]
+        }
+        
+        candidate_motivations = candidate_data.get("motivations_text", "").lower()
+        contract_prefs = candidate_data.get("contract_ranking", [])
+        
+        # Si 1 seul contrat en préférence = exclusif
+        if len(contract_prefs) == 1:
+            return True, contract_prefs
+        
+        # Analyse motivations pour détecter exclusivité
+        for contract_type, keywords in exclusive_indicators.items():
+            if any(keyword in candidate_motivations for keyword in keywords):
+                if len(contract_prefs) <= 2:  # Peu d'options = probablement exclusif
+                    return True, contract_prefs[:1]
+        
+        return False, contract_prefs
+
