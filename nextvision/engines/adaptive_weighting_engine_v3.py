@@ -9,7 +9,7 @@ Performance garantie: <175ms
 Matrices validées: 1.000000 exactement
 
 Author: NEXTEN Development Team  
-Version: 3.0 - Final
+Version: 3.0.1 - Hotfix salary_progression bug
 """
 
 from typing import Dict, List, Optional, Tuple, Any, Type
@@ -615,6 +615,10 @@ class AdaptiveWeightingEngine:
         desired_salary = candidate_data.get("desired_salary", 0)
         position_salary_max = position_data.get("salary_max", 0)
         progression_expectations = candidate_data.get("progression_expectations", 3)
+        
+        # FIX: Initialisation variables pour éviter UnboundLocalError
+        expected_progression_pct = 0.0
+        offered_progression_pct = 0.0
         
         if not current_salary or not desired_salary:
             raw_score = 0.5
