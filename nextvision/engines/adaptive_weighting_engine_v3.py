@@ -9,7 +9,7 @@ Performance garantie: <175ms
 Matrices validées: 1.000000 exactement
 
 Author: NEXTEN Development Team  
-Version: 3.0.1 - Hotfix salary_progression bug
+Version: 3.0.2 - Fix salary_progression bug candidats freelance/sans salaire
 """
 
 from typing import Dict, List, Optional, Tuple, Any, Type
@@ -608,36 +608,74 @@ class AdaptiveWeightingEngine:
         )
     
     def _score_salary_progression(self, candidate_data: Dict, position_data: Dict, weight: float) -> ComponentScore:
-        """Score progression salariale (3% base → adaptatif)"""
+        """
+        Score progression salariale (3% base → adaptatif)
+        FIX: Gestion correcte candidats freelance/sans salaire actuel
+        """
         start_time = time.time()
         
         current_salary = candidate_data.get("current_salary", 0)
         desired_salary = candidate_data.get("desired_salary", 0)
         position_salary_max = position_data.get("salary_max", 0)
         progression_expectations = candidate_data.get("progression_expectations", 3)
+        employment_status = candidate_data.get("employment_status", "en_poste")
         
-        # FIX: Initialisation variables pour éviter UnboundLocalError
+        # Initialisation variables pour détails (TOUJOURS défini)
         expected_progression_pct = 0.0
         offered_progression_pct = 0.0
+        score_explanation = "no_current_salary"
         
-        if not current_salary or not desired_salary:
-            raw_score = 0.5
-        else:
-            # Calcul progression offerte vs attendue
-            expected_progression_pct = (desired_salary - current_salary) / current_salary * 100
-            offered_progression_pct = (position_salary_max - current_salary) / current_salary * 100 if position_salary_max > current_salary else 0
-            
-            if offered_progression_pct >= expected_progression_pct:
-                raw_score = 1.0  # Progression suffisante
-            elif offered_progression_pct > 0:
-                ratio = offered_progression_pct / expected_progression_pct
-                raw_score = max(0.4, ratio)  # Progression partielle
+        # Cas 1: Candidat SANS salaire actuel (freelance, demandeur d'emploi, etc.)
+        if not current_salary or current_salary == 0:
+            if desired_salary and position_salary_max:
+                # Score basé sur alignement salaire désiré / fourchette proposée
+                if desired_salary <= position_salary_max:
+                    if desired_salary >= position_data.get("salary_min", 0):
+                        raw_score = 0.8  # Bon alignement
+                        score_explanation = "desired_in_range"
+                    else:
+                        # Sous minimum mais acceptable
+                        raw_score = 0.6
+                        score_explanation = "desired_below_min"
+                else:
+                    # Au-dessus maximum
+                    over_ratio = (desired_salary - position_salary_max) / position_salary_max
+                    raw_score = max(0.3, 0.8 - over_ratio)
+                    score_explanation = "desired_above_max"
+                
+                # Bonus si recherche urgente (demandeur d'emploi)
+                if employment_status == "demandeur_emploi":
+                    raw_score = min(1.0, raw_score + 0.1)
+                    score_explanation += "_unemployed_bonus"
             else:
-                raw_score = 0.2  # Pas de progression
-            
-            # Bonus ambitions modérées
-            if progression_expectations <= 3 and expected_progression_pct <= 15:
-                raw_score = min(1.0, raw_score + 0.1)
+                raw_score = 0.5  # Score neutre si données manquantes
+                score_explanation = "missing_salary_data"
+        
+        # Cas 2: Candidat AVEC salaire actuel (calcul progression classique)
+        else:
+            if desired_salary and position_salary_max:
+                # Calcul progressions
+                expected_progression_pct = (desired_salary - current_salary) / current_salary * 100
+                offered_progression_pct = (position_salary_max - current_salary) / current_salary * 100 if position_salary_max > current_salary else 0
+                
+                if offered_progression_pct >= expected_progression_pct:
+                    raw_score = 1.0  # Progression suffisante
+                    score_explanation = "progression_met"
+                elif offered_progression_pct > 0:
+                    ratio = offered_progression_pct / expected_progression_pct
+                    raw_score = max(0.4, ratio)  # Progression partielle
+                    score_explanation = "progression_partial"
+                else:
+                    raw_score = 0.2  # Pas de progression
+                    score_explanation = "no_progression"
+                
+                # Bonus ambitions modérées
+                if progression_expectations <= 3 and expected_progression_pct <= 15:
+                    raw_score = min(1.0, raw_score + 0.1)
+                    score_explanation += "_moderate_expectations"
+            else:
+                raw_score = 0.5  # Score neutre
+                score_explanation = "missing_progression_data"
         
         processing_time_ms = (time.time() - start_time) * 1000
         base_weight = BASE_WEIGHTS_V3["salary_progression"]
@@ -652,7 +690,13 @@ class AdaptiveWeightingEngine:
             boost_applied=boost_applied,
             quality=MatchQuality.EXCELLENT if raw_score > 0.8 else MatchQuality.GOOD if raw_score > 0.6 else MatchQuality.ACCEPTABLE,
             confidence=0.8,
-            details={"expected_progression_pct": expected_progression_pct, "offered_progression_pct": offered_progression_pct},
+            details={
+                "expected_progression_pct": expected_progression_pct,
+                "offered_progression_pct": offered_progression_pct,
+                "current_salary": current_salary,
+                "employment_status": employment_status,
+                "score_explanation": score_explanation
+            },
             processing_time_ms=processing_time_ms
         )
     
@@ -855,7 +899,7 @@ def test_adaptive_weighting_engine():
     }
     
     # Test matching avec raison REMUNERATION_FAIBLE
-    print("\\n💰 TEST RAISON: REMUNERATION_FAIBLE")
+    print("\n💰 TEST RAISON: REMUNERATION_FAIBLE")
     result = engine.calculate_adaptive_matching_score(
         candidate_data, 
         position_data, 
@@ -869,16 +913,16 @@ def test_adaptive_weighting_engine():
     
     # Vérification boost salary
     salary_component = next(cs for cs in result.component_scores if cs.name == "salary")
-    print(f"\\nBoost salary: +{salary_component.boost_applied:.1f}% (poids: {salary_component.weight:.2f})")
+    print(f"\nBoost salary: +{salary_component.boost_applied:.1f}% (poids: {salary_component.weight:.2f})")
     
     # Test performance
-    print(f"\\n⚡ PERFORMANCE")
+    print(f"\n⚡ PERFORMANCE")
     perf_report = engine.get_performance_report()
     print(f"Temps moyen: {perf_report['avg_processing_time_ms']}ms")
     print(f"Target <175ms: {'✅' if perf_report['performance_ok'] else '❌'}")
     print(f"Matrices validées: {'✅' if perf_report['matrices_validation'] else '❌'}")
     
-    print("\\n🎯 ENGINE V3.0 FONCTIONNEL - NEXTVISION 100% TERMINÉ")
+    print("\n🎯 ENGINE V3.0 FONCTIONNEL - NEXTVISION 100% TERMINÉ")
 
 
 if __name__ == "__main__":
