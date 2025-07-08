@@ -42,27 +42,27 @@ class AdaptiveWeightingEngine:
     """🎯 Moteur de pondération adaptative bidirectionnelle"""
     
     def __init__(self):
-        # Configuration poids par défaut (4 composants business)
+        # Configuration poids par défaut (4 composants business) - CORRIGÉ
         self.default_weights = ComponentWeights(
             semantique=0.35,  # 35% - Correspondance CV ↔ Fiche de poste
             salaire=0.25,     # 25% - Budget entreprise vs attentes candidat
-            experience=0.20,  # 20% - Années d'expérience requises
+            experience=0.25,  # 25% - Années d'expérience requises (CORRIGÉ de 0.20 à 0.25)
             localisation=0.15 # 15% - Impact géographique
         )
         
-        # Adaptations candidat selon raison d'écoute
+        # Adaptations candidat selon raison d'écoute - CORRIGÉ pour totaliser 1.0
         self.candidat_adaptations = {
             RaisonEcouteCandidat.REMUNERATION_TROP_FAIBLE: {
                 "salaire": 0.35,      # +10% priorité salaire
                 "semantique": 0.30,   # -5% sémantique
-                "experience": 0.20,   # maintenu
+                "experience": 0.20,   # -5% expérience
                 "localisation": 0.15, # maintenu
                 "reasoning": "Priorité accordée à l'amélioration salariale"
             },
             RaisonEcouteCandidat.POSTE_NE_COINCIDE_PAS: {
                 "semantique": 0.45,   # +10% priorité sémantique
                 "salaire": 0.20,      # -5% salaire
-                "experience": 0.20,   # maintenu
+                "experience": 0.20,   # -5% expérience
                 "localisation": 0.15, # maintenu
                 "reasoning": "Focus sur l'adéquation des compétences et du poste"
             },
@@ -70,20 +70,20 @@ class AdaptiveWeightingEngine:
                 "localisation": 0.25, # +10% priorité localisation
                 "semantique": 0.30,   # -5% sémantique
                 "salaire": 0.25,      # maintenu
-                "experience": 0.20,   # maintenu
+                "experience": 0.20,   # -5% expérience
                 "reasoning": "Priorité à la proximité géographique"
             },
             RaisonEcouteCandidat.MANQUE_FLEXIBILITE: {
                 "semantique": 0.30,   # -5% sémantique
                 "salaire": 0.30,      # +5% salaire (compensation)
-                "experience": 0.20,   # maintenu
+                "experience": 0.20,   # -5% expérience
                 "localisation": 0.20, # +5% localisation (remote)
                 "reasoning": "Recherche d'un meilleur équilibre vie pro/perso"
             },
             RaisonEcouteCandidat.MANQUE_PERSPECTIVES: {
                 "semantique": 0.40,   # +5% sémantique (match poste)
                 "salaire": 0.30,      # +5% salaire (évolution)
-                "experience": 0.15,   # -5% expérience
+                "experience": 0.15,   # -10% expérience
                 "localisation": 0.15, # maintenu
                 "reasoning": "Focus sur les opportunités de développement"
             }
