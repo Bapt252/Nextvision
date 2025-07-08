@@ -18,7 +18,7 @@ import json
 import re
 import logging
 import asyncio
-import time
+import time  # 🔧 FIX: Import time manquant
 from typing import Dict, List, Optional, Union, Any, Tuple
 from datetime import datetime
 from dataclasses import dataclass, asdict
