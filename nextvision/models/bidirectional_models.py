@@ -3,7 +3,7 @@
 
 Architecture révolutionnaire pour matching candidat ↔ entreprise avec :
 - Pondération adaptative bidirectionnelle
-- 4 composants business prioritaires (Sémantique 35%, Salaire 25%, Expérience 20%, Localisation 15%)
+- 4 composants business prioritaires (Sémantique 35%, Salaire 25%, Expérience 25%, Localisation 15%)
 - Intégration ChatGPT Commitment- existant
 - Support questionnaires candidat (4 parties) + entreprise (5 étapes)
 
@@ -11,7 +11,7 @@ Author: NEXTEN Team
 Version: 2.0.0 - Bidirectional Matching
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, model_validator
 from typing import Dict, List, Optional, Union, Literal
 from enum import Enum
 from datetime import datetime
@@ -191,16 +191,16 @@ class ComponentWeights(BaseModel):
     """Poids des 4 composants business prioritaires"""
     semantique: float = Field(default=0.35, ge=0.0, le=1.0)  # 35% - Correspondance CV ↔ Fiche de poste
     salaire: float = Field(default=0.25, ge=0.0, le=1.0)     # 25% - Budget entreprise vs attentes candidat  
-    experience: float = Field(default=0.20, ge=0.0, le=1.0)  # 20% - Années d'expérience requises
+    experience: float = Field(default=0.25, ge=0.0, le=1.0)  # 25% - Années d'expérience requises (corrigé de 0.20 à 0.25)
     localisation: float = Field(default=0.15, ge=0.0, le=1.0) # 15% - Impact géographique (Google Maps Intelligence)
     
-    @validator('*')
-    def weights_sum_to_one(cls, v, values):
+    @model_validator(mode='after')
+    def weights_sum_to_one(self):
         """Validation que la somme des poids = 1.0"""
-        total = sum([v] + list(values.values()))
+        total = self.semantique + self.salaire + self.experience + self.localisation
         if abs(total - 1.0) > 0.01:  # Tolérance 1%
             raise ValueError(f"La somme des poids doit être égale à 1.0, actuellement: {total}")
-        return v
+        return self
 
 class AdaptiveWeightingConfig(BaseModel):
     """Configuration pondération adaptative bidirectionnelle"""
