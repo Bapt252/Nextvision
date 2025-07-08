@@ -1,601 +1,445 @@
 """
-🚀 Nextvision v3.0 - Extended Matching Models pour 12 Composants
+Nextvision v3.0 - Extended Matching Models
+===========================================
 
-Extension révolutionnaire des modèles bidirectionnels V2.0 :
-- HÉRITAGE COMPLET : 100% compatibilité avec bidirectional_models.py V2.0
-- EXTENSION PROGRESSIVE : De 4 à 12 composants de matching
-- EXPLOITATION QUESTIONNAIRES : 95% des données utilisées (vs 15% V2.0)
-- PONDÉRATION ADAPTATIVE : Selon raison d'écoute candidat étendue
+Modèles étendus pour le système de matching bidirectionnel V3.0
+- Extension de 4 à 12 composants de matching
+- Pondération adaptative selon raison d'écoute
+- Compatibilité totale avec V2.0 (héritage préservé)
 
-Composants V3.0 (12 total) :
-┌─ V2.0 PRÉSERVÉS (4) ────────────────────────────────────┐
-│ 1. Sémantique (25%)     │ 3. Expérience (15%)           │
-│ 2. Salaire (20%)        │ 4. Localisation (10%)         │
-└─────────────────────────────────────────────────────────┘
-┌─ V3.0 NOUVEAUX (8) ─────────────────────────────────────┐
-│ 5. Motivations (8%)     │ 9. Modalités Travail (4%)     │
-│ 6. Secteurs (6%)        │ 10. Progression Salar. (3%)   │
-│ 7. Contrats (5%)        │ 11. Raison Écoute (3%) 🧠     │
-│ 8. Timing (4%)          │ 12. Situation (2%)            │
-└─────────────────────────────────────────────────────────┘
-
-Author: NEXTEN Team
-Version: 3.0.0 - Extended Bidirectional Matching
+Author: NEXTEN Development Team
+Version: 3.0
 """
 
-from pydantic import BaseModel, Field, model_validator
-from typing import Dict, List, Optional, Union, Literal, Any
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Union, Any, Tuple
 from enum import Enum
-from datetime import datetime
 import json
 
-# 🔄 IMPORT COMPLET V2.0 - HÉRITAGE PRÉSERVÉ
-from nextvision.models.bidirectional_models import (
-    BiDirectionalCandidateProfile, BiDirectionalCompanyProfile,
-    BiDirectionalMatchingRequest, BiDirectionalMatchingResponse,
-    ComponentWeights, AdaptiveWeightingConfig, MatchingComponentScores,
-    RaisonEcouteCandidat, UrgenceRecrutement, NiveauExperience, TypeContrat,
-    PersonalInfoBidirectional, CompetencesProfessionnelles, AttentesCandidat,
-    MotivationsCandidat, ExperienceProfessionnelle, InformationsEntreprise,
-    DescriptionPoste, ExigencesPoste, ConditionsTravail, CriteresRecrutement
-)
 
-# === ENUMS ÉTENDUS V3.0 ===
+# ================================
+# ENUMS - Nouveaux types V3.0
+# ================================
 
-class RaisonEcouteEtendue(str, Enum):
-    """🆕 Raisons d'écoute candidat étendues pour pondération adaptative V3.0"""
-    # V2.0 PRÉSERVÉES
-    REMUNERATION_TROP_FAIBLE = "Rémunération trop faible"
-    POSTE_NE_COINCIDE_PAS = "Poste ne coïncide pas avec poste proposé"
-    POSTE_TROP_LOIN = "Poste trop loin de mon domicile"
-    MANQUE_FLEXIBILITE = "Manque de flexibilité"
-    MANQUE_PERSPECTIVES = "Manque de perspectives d'évolution"
-    
-    # 🆕 V3.0 NOUVELLES (issues questionnaire étape 4)
-    PROBLEMES_MANAGEMENT = "Problèmes de management"
-    CONDITIONS_TRAVAIL = "Conditions de travail"
-    MISSIONS_PEU_INTERESSANTES = "Missions peu intéressantes"
-    AUTRE_MOTIVATION = "Autre motivation spécifiée"
+class ListeningReasonType(Enum):
+    """Types de raisons d'écoute pour pondération adaptative"""
+    REMUNERATION_FAIBLE = "remuneration_faible"
+    POSTE_INADEQUAT = "poste_inadequat" 
+    LOCALISATION = "localisation"
+    FLEXIBILITE = "flexibilite"
+    PERSPECTIVES = "perspectives"
+    AUTRE = "autre"
 
-class MotivationProfessionnelle(str, Enum):
-    """🆕 Motivations professionnelles candidat (questionnaire étape 3)"""
-    EVOLUTION = "Perspectives d'évolution"
-    SALAIRE = "Augmentation salariale"
-    FLEXIBILITE = "Flexibilité"
-    AUTRE = "Autre motivation"
 
-class SecteurActivite(str, Enum):
-    """🆕 Secteurs d'activité pour compatibilité sectorielle"""
-    TECH = "Technologies de l'information"
-    FINANCE = "Finance et banque"
-    SANTE = "Santé et médical"
-    EDUCATION = "Education et formation"
-    COMMERCE = "Commerce et retail"
-    INDUSTRIE = "Industrie et manufacture"
-    ENERGIE = "Energie et environnement"
-    TRANSPORT = "Transport et logistique"
-    CONSTRUCTION = "Immobilier et construction"
-    MEDIA = "Médias et communication"
-    LUXE = "Luxe et mode"
-    AGRICULTURE = "Agriculture et agroalimentaire"
-    SERVICES = "Services aux entreprises"
-    CULTURE = "Culture et divertissement"
-    SPORT = "Sport et loisirs"
+class ContractType(Enum):
+    """Types de contrats préférés"""
+    CDI = "cdi"
+    CDD = "cdd"
+    FREELANCE = "freelance"
+    STAGE = "stage"
+    INTERIM = "interim"
 
-class TypeTransport(str, Enum):
-    """🆕 Types de transport candidat"""
-    TRANSPORTS_COMMUN = "Transports en commun"
-    VEHICULE_PERSONNEL = "Véhicule personnel"
-    VELO = "Vélo"
-    MARCHE = "À pied"
 
-class PreferenceBureau(str, Enum):
-    """🆕 Préférences environnement bureau"""
-    OPEN_SPACE = "Open Space"
-    BUREAU_FERME = "Bureau fermé"
-    SANS_PREFERENCE = "Sans préférence"
+class WorkModalityType(Enum):
+    """Modalités de travail"""
+    FULL_REMOTE = "full_remote"
+    HYBRID = "hybrid"
+    ON_SITE = "on_site"
+    FLEXIBLE = "flexible"
 
-class SituationActuelle(str, Enum):
-    """🆕 Situation actuelle candidat (questionnaire étape 4)"""
-    EN_POSTE = "En poste"
-    ETUDIANT = "Étudiant"
-    DEMANDEUR_EMPLOI = "Demandeur d'emploi"
-    FREELANCE = "Freelance/Consultant"
-    RECONVERSION = "En reconversion"
 
-class DelaiDisponibilite(str, Enum):
-    """🆕 Délais de disponibilité candidat"""
-    IMMEDIAT = "Immédiatement"
-    UN_MOIS = "Dans 1 mois"
-    DEUX_MOIS = "Dans 2 mois"
-    TROIS_MOIS = "Dans 3 mois"
+class MotivationType(Enum):
+    """Types de motivations professionnelles"""
+    CHALLENGE_TECHNIQUE = "challenge_technique"
+    EVOLUTION_CARRIERE = "evolution_carriere"
+    AUTONOMIE = "autonomie"
+    IMPACT_BUSINESS = "impact_business"
+    APPRENTISSAGE = "apprentissage"
+    LEADERSHIP = "leadership"
+    INNOVATION = "innovation"
+    EQUILIBRE_VIE = "equilibre_vie"
 
-class UrgenceRecrutementEtendue(str, Enum):
-    """🆕 Urgence recrutement entreprise étendue"""
-    CRITIQUE = "Critique (< 2 semaines)"
-    URGENT = "Urgent (< 1 mois)"
-    NORMAL = "Normal (1-3 mois)"
-    LONG_TERME = "Long terme (> 3 mois)"
-    FLEXIBLE = "Flexible selon profil"
 
-# === MODÈLES QUESTIONNAIRES V3.0 ===
+class CandidateStatus(Enum):
+    """Statut du candidat"""
+    EN_POSTE = "en_poste"
+    DEMANDEUR_EMPLOI = "demandeur_emploi"
+    ETUDIANT = "etudiant"
+    FREELANCE = "freelance"
 
-class TransportPreferences(BaseModel):
-    """🆕 Préférences transport et mobilité candidat"""
-    methods: List[TypeTransport] = []
-    travel_times: Dict[str, int] = {}  # {"transports_commun": 30, "vehicule": 25}
-    max_distance_km: Optional[int] = 50
-    remote_acceptable: bool = False
 
-class MotivationsExtended(BaseModel):
-    """🆕 Motivations professionnelles étendues candidat"""
-    ranking: List[MotivationProfessionnelle] = []  # Classement par priorité
-    autre_motivation_text: Optional[str] = None
-    raison_ecoute_primaire: RaisonEcouteEtendue
-    raisons_ecoute_multiples: List[RaisonEcouteEtendue] = []
-    aspirations_texte: Optional[str] = None
+# ================================
+# MODÈLES V2.0 PRÉSERVÉS
+# ================================
 
-class SecteursPreferences(BaseModel):
-    """🆕 Préférences sectorielles candidat"""
-    secteurs_preferes: List[SecteurActivite] = []
-    secteurs_redhibitoires: List[SecteurActivite] = []
-    ouverture_autres_secteurs: bool = True
+@dataclass
+class SemanticProfile:
+    """Profil sémantique - V2.0 préservé avec poids ajusté"""
+    skills: List[str] = field(default_factory=list)
+    technologies: List[str] = field(default_factory=list)
+    domains: List[str] = field(default_factory=list)
+    keywords: List[str] = field(default_factory=list)
+    experience_description: str = ""
+    weight: float = 0.25  # Ajusté de 35% à 25%
 
-class ContratsPreferences(BaseModel):
-    """🆕 Préférences contractuelles candidat"""
-    ranking: List[TypeContrat] = []  # Classement par préférence
-    flexibilite_contractuelle: float = 0.5  # 0-1 scale
 
-class TimingDisponibilite(BaseModel):
-    """🆕 Timing et disponibilité candidat"""
-    delai_souhaite: DelaiDisponibilite
-    situation_actuelle: SituationActuelle
-    salaire_actuel_min: Optional[int] = None
-    salaire_actuel_max: Optional[int] = None
-    peut_gerer_preavis: bool = True
-    duree_preavis_max: Optional[int] = None  # en mois
+@dataclass
+class SalaryProfile:
+    """Profil salarial - V2.0 préservé avec poids ajusté"""
+    current_salary: Optional[float] = None
+    desired_salary: Optional[float] = None
+    salary_min: Optional[float] = None
+    salary_max: Optional[float] = None
+    salary_negotiable: bool = True
+    weight: float = 0.20  # Ajusté de 25% à 20%
 
-class ModalitesTravail(BaseModel):
-    """🆕 Modalités de travail souhaitées"""
-    preference_bureau: PreferenceBureau
-    remote_souhaite: bool = False
-    hybride_acceptable: bool = True
-    horaires_flexibles_souhaites: bool = False
 
-# === MODÈLES CANDIDAT V3.0 ÉTENDUS ===
+@dataclass
+class ExperienceProfile:
+    """Profil expérience - V2.0 préservé avec poids ajusté"""
+    years_total: int = 0
+    years_domain_specific: int = 0
+    seniority_level: str = "junior"  # junior, medior, senior, expert
+    required_min_years: int = 0
+    weight: float = 0.15  # Ajusté de 25% à 15%
 
-class ExtendedCandidateProfileV3(BiDirectionalCandidateProfile):
-    """🚀 Profil candidat V3.0 avec exploitation complète des questionnaires"""
-    
-    # 🔄 HÉRITAGE COMPLET V2.0
-    # Tous les champs V2.0 sont automatiquement présents
-    
-    # 🆕 EXTENSIONS V3.0 - Nouvelles données questionnaires
-    transport_preferences: TransportPreferences = Field(default_factory=TransportPreferences)
-    motivations_extended: MotivationsExtended = Field(default_factory=MotivationsExtended)
-    secteurs_preferences: SecteursPreferences = Field(default_factory=SecteursPreferences)
-    contrats_preferences: ContratsPreferences = Field(default_factory=ContratsPreferences)
-    timing_disponibilite: TimingDisponibilite = Field(default_factory=TimingDisponibilite)
-    modalites_travail: ModalitesTravail = Field(default_factory=ModalitesTravail)
-    
-    # Métadonnées V3.0
-    questionnaire_completion_rate: float = Field(default=0.0, ge=0.0, le=1.0)
-    v3_extraction_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
-    v3_extracted_at: datetime = Field(default_factory=datetime.now)
 
-# === MODÈLES ENTREPRISE V3.0 ÉTENDUS ===
+@dataclass
+class LocationProfile:
+    """Profil localisation - V2.0 préservé avec poids ajusté"""
+    candidate_location: str = ""
+    position_location: str = ""
+    max_distance_km: int = 50
+    accepts_relocation: bool = False
+    commute_time_max: int = 60  # minutes
+    weight: float = 0.10  # Ajusté de 15% à 10%
 
-class RecrutementEtendu(BaseModel):
-    """🆕 Informations recrutement entreprise étendues"""
-    urgence: UrgenceRecrutementEtendue = UrgenceRecrutementEtendue.NORMAL
-    delais_acceptables: List[str] = []  # ["immediat", "2semaines", "1mois"]
-    peut_gerer_preavis: bool = True
-    duree_preavis_max: Optional[int] = None  # en mois
-    contexte: Optional[str] = None  # "creation", "remplacement", "croissance"
-    nombre_postes: int = 1
 
-class ModalitesEntreprise(BaseModel):
-    """🆕 Modalités de travail proposées par l'entreprise"""
-    remote_possible: bool = False
-    remote_pourcentage: Optional[int] = None  # % de remote possible
-    horaires_flexibles: bool = False
-    environnement_bureau: Optional[PreferenceBureau] = None
+# ================================
+# NOUVEAUX MODÈLES V3.0
+# ================================
 
-class CriteresFlexibilite(BaseModel):
-    """🆕 Critères et flexibilités entreprise"""
-    flexibilite_contractuelle: float = 0.5  # 0-1 scale
-    flexibilite_salariale: float = 0.2  # marge de négociation
-    flexibilite_experience: float = 0.3  # tolérance sur expérience
-    criteres_eliminatoires: List[str] = []
-    criteres_souhaites: List[str] = []
+@dataclass
+class ProfessionalMotivationsProfile:
+    """Motivations professionnelles - Nouveau V3.0"""
+    candidate_motivations: Dict[MotivationType, int] = field(default_factory=dict)  # 1-5 ranking
+    position_motivations_alignment: Dict[MotivationType, int] = field(default_factory=dict)
+    motivation_priorities: List[MotivationType] = field(default_factory=list)
+    weight: float = 0.08
 
-class ExtendedCompanyProfileV3(BiDirectionalCompanyProfile):
-    """🚀 Profil entreprise V3.0 avec besoins détaillés"""
-    
-    # 🔄 HÉRITAGE COMPLET V2.0
-    # Tous les champs V2.0 sont automatiquement présents
-    
-    # 🆕 EXTENSIONS V3.0
-    recrutement_etendu: RecrutementEtendu = Field(default_factory=RecrutementEtendu)
-    modalites_entreprise: ModalitesEntreprise = Field(default_factory=ModalitesEntreprise)
-    criteres_flexibilite: CriteresFlexibilite = Field(default_factory=CriteresFlexibilite)
-    
-    # Solutions aux problématiques candidats
-    solutions_management: List[str] = []  # Solutions problèmes management
-    solutions_conditions_travail: List[str] = []  # Conditions de travail
-    solutions_missions: List[str] = []  # Amélioration missions
-    
-    # Métadonnées V3.0
-    questionnaire_completion_rate: float = Field(default=0.0, ge=0.0, le=1.0)
-    v3_extraction_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
 
-# === COMPOSANTS DE SCORING V3.0 ===
+@dataclass
+class SectorCompatibilityProfile:
+    """Compatibilité sectorielle - Nouveau V3.0"""
+    preferred_sectors: List[str] = field(default_factory=list)
+    avoided_sectors: List[str] = field(default_factory=list)
+    current_sector: str = ""
+    position_sector: str = ""
+    sector_transition_openness: int = 3  # 1-5 scale
+    weight: float = 0.06
 
-class ExtendedComponentWeights(BaseModel):
-    """🆕 Poids des 12 composants V3.0 avec préservation V2.0"""
-    
-    # 🔄 COMPOSANTS V2.0 PRÉSERVÉS (poids ajustés)
-    semantique: float = Field(default=0.25, ge=0.0, le=1.0)
-    salaire: float = Field(default=0.20, ge=0.0, le=1.0)
-    experience: float = Field(default=0.15, ge=0.0, le=1.0)
-    localisation: float = Field(default=0.10, ge=0.0, le=1.0)
-    
-    # 🆕 NOUVEAUX COMPOSANTS V3.0
-    motivations: float = Field(default=0.08, ge=0.0, le=1.0)
-    secteurs: float = Field(default=0.06, ge=0.0, le=1.0)
-    contrats: float = Field(default=0.05, ge=0.0, le=1.0)
-    timing: float = Field(default=0.04, ge=0.0, le=1.0)
-    modalites_travail: float = Field(default=0.04, ge=0.0, le=1.0)
-    progression_salariale: float = Field(default=0.03, ge=0.0, le=1.0)
-    raison_ecoute: float = Field(default=0.03, ge=0.0, le=1.0)  # 🧠 CERVEAU ADAPTATIF
-    situation: float = Field(default=0.02, ge=0.0, le=1.0)
-    
-    @model_validator(mode='after')
-    def weights_sum_to_one(self):
-        """Validation que la somme des 12 poids = 1.0"""
-        total = (
-            self.semantique + self.salaire + self.experience + self.localisation +
-            self.motivations + self.secteurs + self.contrats + self.timing +
-            self.modalites_travail + self.progression_salariale + 
-            self.raison_ecoute + self.situation
-        )
-        if abs(total - 1.0) > 0.01:  # Tolérance 1%
-            raise ValueError(f"Somme des 12 poids doit être 1.0, actuellement: {total:.3f}")
-        return self
 
-class ExtendedComponentScores(BaseModel):
-    """🆕 Scores détaillés des 12 composants V3.0"""
-    
-    # 🔄 SCORES V2.0 PRÉSERVÉS
-    semantique_score: float = Field(ge=0.0, le=1.0)
-    semantique_details: Dict = Field(default_factory=dict)
-    
-    salaire_score: float = Field(ge=0.0, le=1.0)
-    salaire_details: Dict = Field(default_factory=dict)
-    
-    experience_score: float = Field(ge=0.0, le=1.0)
-    experience_details: Dict = Field(default_factory=dict)
-    
-    localisation_score: float = Field(ge=0.0, le=1.0)
-    localisation_details: Dict = Field(default_factory=dict)
-    
-    # 🆕 NOUVEAUX SCORES V3.0
-    motivations_score: float = Field(ge=0.0, le=1.0)
-    motivations_details: Dict = Field(default_factory=dict)
-    
-    secteurs_score: float = Field(ge=0.0, le=1.0)
-    secteurs_details: Dict = Field(default_factory=dict)
-    
-    contrats_score: float = Field(ge=0.0, le=1.0)
-    contrats_details: Dict = Field(default_factory=dict)
-    
-    timing_score: float = Field(ge=0.0, le=1.0)
-    timing_details: Dict = Field(default_factory=dict)
-    
-    modalites_travail_score: float = Field(ge=0.0, le=1.0)
-    modalites_travail_details: Dict = Field(default_factory=dict)
-    
-    progression_salariale_score: float = Field(ge=0.0, le=1.0)
-    progression_salariale_details: Dict = Field(default_factory=dict)
-    
-    raison_ecoute_score: float = Field(ge=0.0, le=1.0)  # 🧠 CERVEAU ADAPTATIF
-    raison_ecoute_details: Dict = Field(default_factory=dict)
-    
-    situation_score: float = Field(ge=0.0, le=1.0)
-    situation_details: Dict = Field(default_factory=dict)
+@dataclass
+class ContractFlexibilityProfile:
+    """Flexibilité contractuelle - Nouveau V3.0"""
+    contract_preferences: Dict[ContractType, int] = field(default_factory=dict)  # 1-5 ranking
+    position_contract_type: ContractType = ContractType.CDI
+    contract_duration_flexibility: bool = True
+    trial_period_acceptance: bool = True
+    weight: float = 0.05
 
-class AdaptiveWeightingConfigV3(BaseModel):
-    """🆕 Configuration pondération adaptative V3.0 avec 12 composants"""
-    
-    candidat_weights: ExtendedComponentWeights
-    entreprise_weights: ExtendedComponentWeights
-    
-    # Raison d'écoute étendue
-    raison_candidat: RaisonEcouteEtendue
-    urgence_entreprise: UrgenceRecrutementEtendue
-    
-    # Justifications pondération
-    reasoning_candidat: str
-    reasoning_entreprise: str
-    
-    # 🧠 MATRICE ADAPTATIVE - Influence raison écoute sur autres composants
-    adaptation_matrix: Dict[str, float] = Field(default_factory=dict)
-    adaptation_confidence: float = Field(default=0.8, ge=0.0, le=1.0)
 
-# === REQUÊTES ET RÉPONSES V3.0 ===
+@dataclass
+class TimingCompatibilityProfile:
+    """Compatibilité timing - Nouveau V3.0"""
+    availability_date: str = ""  # ISO format
+    notice_period_weeks: int = 0
+    recruitment_urgency: int = 3  # 1-5 scale (1=urgent, 5=can wait)
+    flexibility_start_date: int = 2  # weeks flexibility
+    weight: float = 0.04
 
-class ExtendedMatchingRequestV3(BaseModel):
-    """🚀 Requête de matching V3.0 avec 12 composants"""
-    
-    candidat: ExtendedCandidateProfileV3
-    entreprise: ExtendedCompanyProfileV3
-    
-    # Configuration matching V3.0
-    force_adaptive_weighting: bool = True
-    use_extended_components: bool = True  # 🆕 Utiliser les 12 composants
-    v2_fallback_enabled: bool = True  # 🛡️ Fallback V2.0 si erreur
-    
-    # Options avancées
-    questionnaire_boost: bool = True  # Boost si questionnaires complets
-    sector_filtering: bool = True  # Filtrage secteurs rédhibitoires
-    
-    # Métadonnées
-    matching_id: Optional[str] = None
-    timestamp: datetime = Field(default_factory=datetime.now)
-    requested_version: str = "3.0.0"
 
-class ExtendedMatchingResponseV3(BaseModel):
-    """📊 Réponse de matching V3.0 avec détails 12 composants"""
-    
-    # Résultats matching
-    matching_score: float = Field(ge=0.0, le=1.0)
-    confidence: float = Field(ge=0.0, le=1.0)
-    compatibility: Literal["excellent", "very_good", "good", "average", "poor", "incompatible"]
-    
-    # Scores détaillés 12 composants
-    extended_component_scores: ExtendedComponentScores
-    
-    # Pondération adaptative appliquée
-    adaptive_weighting_v3: AdaptiveWeightingConfigV3
-    
-    # Analyse questionnaires
-    questionnaire_analysis: Dict[str, Any] = Field(default_factory=dict)
-    sector_compatibility_analysis: Dict[str, Any] = Field(default_factory=dict)
-    
-    # Recommandations V3.0
-    recommandations_candidat: List[str] = []
-    recommandations_entreprise: List[str] = []
-    points_forts_matching: List[str] = []
-    points_amelioration: List[str] = []
-    
-    # Insights avancés
-    raison_ecoute_analysis: Dict[str, Any] = Field(default_factory=dict)
-    motivation_compatibility: Dict[str, Any] = Field(default_factory=dict)
-    progression_opportunities: List[str] = []
-    
-    # Performance et métadonnées
-    processing_time_ms: float
-    version_used: str = "3.0.0"
-    v2_fallback_used: bool = False
-    questionnaire_completion_impact: float = 0.0  # Boost lié aux questionnaires
-    timestamp: datetime = Field(default_factory=datetime.now)
+@dataclass
+class WorkModalityProfile:
+    """Modalités de travail - Nouveau V3.0"""
+    preferred_modality: WorkModalityType = WorkModalityType.HYBRID
+    remote_days_per_week: int = 2
+    office_days_per_week: int = 3
+    commute_tolerance: int = 45  # minutes
+    position_modality: WorkModalityType = WorkModalityType.HYBRID
+    modality_flexibility: int = 3  # 1-5 scale
+    weight: float = 0.04
 
-# === MATRICE PONDÉRATION ADAPTATIVE V3.0 ===
 
-ADAPTIVE_WEIGHTING_MATRIX_V3 = {
-    # 🧠 MATRICE SELON RAISON D'ÉCOUTE CANDIDAT
-    
-    RaisonEcouteEtendue.REMUNERATION_TROP_FAIBLE: ExtendedComponentWeights(
-        semantique=0.20, salaire=0.35, experience=0.10, localisation=0.10,
-        motivations=0.05, secteurs=0.06, contrats=0.05, timing=0.04,
-        modalites_travail=0.04, progression_salariale=0.05, raison_ecoute=0.03, situation=0.02
-    ),
-    
-    RaisonEcouteEtendue.POSTE_NE_COINCIDE_PAS: ExtendedComponentWeights(
-        semantique=0.35, salaire=0.15, experience=0.20, localisation=0.10,
-        motivations=0.08, secteurs=0.10, contrats=0.05, timing=0.04,
-        modalites_travail=0.04, progression_salariale=0.03, raison_ecoute=0.03, situation=0.02
-    ),
-    
-    RaisonEcouteEtendue.POSTE_TROP_LOIN: ExtendedComponentWeights(
-        semantique=0.25, salaire=0.20, experience=0.15, localisation=0.25,
-        motivations=0.08, secteurs=0.06, contrats=0.05, timing=0.04,
-        modalites_travail=0.06, progression_salariale=0.03, raison_ecoute=0.03, situation=0.02
-    ),
-    
-    RaisonEcouteEtendue.MANQUE_FLEXIBILITE: ExtendedComponentWeights(
-        semantique=0.25, salaire=0.15, experience=0.15, localisation=0.10,
-        motivations=0.12, secteurs=0.06, contrats=0.10, timing=0.06,
-        modalites_travail=0.08, progression_salariale=0.03, raison_ecoute=0.06, situation=0.04
-    ),
-    
-    RaisonEcouteEtendue.MANQUE_PERSPECTIVES: ExtendedComponentWeights(
-        semantique=0.30, salaire=0.25, experience=0.25, localisation=0.05,
-        motivations=0.15, secteurs=0.06, contrats=0.05, timing=0.04,
-        modalites_travail=0.04, progression_salariale=0.10, raison_ecoute=0.03, situation=0.02
-    ),
-    
-    RaisonEcouteEtendue.PROBLEMES_MANAGEMENT: ExtendedComponentWeights(
-        semantique=0.25, salaire=0.20, experience=0.15, localisation=0.10,
-        motivations=0.15, secteurs=0.06, contrats=0.05, timing=0.04,
-        modalites_travail=0.06, progression_salariale=0.03, raison_ecoute=0.08, situation=0.03
-    ),
-    
-    RaisonEcouteEtendue.CONDITIONS_TRAVAIL: ExtendedComponentWeights(
-        semantique=0.25, salaire=0.20, experience=0.15, localisation=0.08,
-        motivations=0.10, secteurs=0.06, contrats=0.08, timing=0.04,
-        modalites_travail=0.10, progression_salariale=0.03, raison_ecoute=0.08, situation=0.03
-    ),
-    
-    RaisonEcouteEtendue.MISSIONS_PEU_INTERESSANTES: ExtendedComponentWeights(
-        semantique=0.40, salaire=0.15, experience=0.15, localisation=0.10,
-        motivations=0.15, secteurs=0.08, contrats=0.05, timing=0.04,
-        modalites_travail=0.04, progression_salariale=0.03, raison_ecoute=0.06, situation=0.02
-    )
-}
+@dataclass
+class SalaryProgressionProfile:
+    """Progression salariale - Nouveau V3.0"""
+    current_salary: Optional[float] = None
+    desired_salary: Optional[float] = None
+    salary_gap_percentage: float = 0.0
+    progression_expectations: int = 3  # 1-5 scale
+    position_salary_evolution: Dict[str, float] = field(default_factory=dict)  # year: salary
+    weight: float = 0.03
 
-# === FONCTIONS UTILITAIRES V3.0 ===
 
-def get_adaptive_weights_v3(raison_ecoute: RaisonEcouteEtendue, 
-                           urgence: UrgenceRecrutementEtendue) -> ExtendedComponentWeights:
-    """🧠 Obtient les poids adaptatifs selon raison d'écoute candidat"""
-    
-    base_weights = ADAPTIVE_WEIGHTING_MATRIX_V3.get(
-        raison_ecoute, 
-        ExtendedComponentWeights()  # Poids par défaut
-    )
-    
-    # Ajustement selon urgence entreprise
-    if urgence == UrgenceRecrutementEtendue.CRITIQUE:
-        # Boost timing et situation pour urgence critique
-        weights_dict = base_weights.dict()
-        weights_dict['timing'] = min(0.08, weights_dict['timing'] * 1.5)
-        weights_dict['situation'] = min(0.04, weights_dict['situation'] * 1.5)
-        # Réajustement pour maintenir total = 1.0
-        total = sum(weights_dict.values())
-        for key in weights_dict:
-            weights_dict[key] = weights_dict[key] / total
-        return ExtendedComponentWeights(**weights_dict)
-    
-    return base_weights
+@dataclass
+class ListeningReasonProfile:
+    """Raison d'écoute - COMPOSANT CLEF V3.0"""
+    primary_reason: ListeningReasonType = ListeningReasonType.AUTRE
+    secondary_reasons: List[ListeningReasonType] = field(default_factory=list)
+    reason_intensity: int = 3  # 1-5 scale
+    motivation_description: str = ""
+    weight: float = 0.03  # Poids direct faible mais impact systémique énorme
 
-def analyze_questionnaire_completion(candidat: ExtendedCandidateProfileV3, 
-                                   entreprise: ExtendedCompanyProfileV3) -> Dict[str, float]:
-    """📊 Analyse du taux de completion des questionnaires"""
-    
-    candidat_completion = 0.0
-    entreprise_completion = 0.0
-    
-    # Analyse candidat
-    candidat_fields = [
-        len(candidat.transport_preferences.methods) > 0,
-        len(candidat.motivations_extended.ranking) > 0,
-        len(candidat.secteurs_preferences.secteurs_preferes) > 0,
-        len(candidat.contrats_preferences.ranking) > 0,
-        candidat.timing_disponibilite.delai_souhaite is not None,
-        candidat.modalites_travail.preference_bureau is not None
-    ]
-    candidat_completion = sum(candidat_fields) / len(candidat_fields)
-    
-    # Analyse entreprise  
-    entreprise_fields = [
-        candidat.entreprise.secteur is not None,
-        len(entreprise.recrutement_etendu.delais_acceptables) > 0,
-        entreprise.modalites_entreprise.remote_possible is not None,
-        len(entreprise.criteres_flexibilite.criteres_eliminatoires) >= 0,
-        entreprise.recrutement_etendu.urgence is not None
-    ]
-    entreprise_completion = sum(entreprise_fields) / len(entreprise_fields)
-    
-    return {
-        'candidat_completion': candidat_completion,
-        'entreprise_completion': entreprise_completion,
-        'overall_completion': (candidat_completion + entreprise_completion) / 2,
-        'questionnaire_boost': min(0.15, (candidat_completion + entreprise_completion) / 2 * 0.15)
-    }
 
-def validate_v3_compatibility(candidat: ExtendedCandidateProfileV3, 
-                            entreprise: ExtendedCompanyProfileV3) -> Dict[str, Any]:
-    """🛡️ Validation compatibilité V3.0 avec fallback V2.0"""
+@dataclass
+class CandidateStatusProfile:
+    """Profil situation candidat - Nouveau V3.0"""
+    current_status: CandidateStatus = CandidateStatus.EN_POSTE
+    job_search_urgency: int = 3  # 1-5 scale
+    employment_stability: int = 3  # 1-5 scale
+    career_transition_phase: bool = False
+    recruitment_constraints: List[str] = field(default_factory=list)
+    weight: float = 0.02
+
+
+# ================================
+# PONDÉRATION ADAPTATIVE V3.0
+# ================================
+
+@dataclass
+class AdaptiveWeightingConfig:
+    """Configuration des pondérations adaptatives selon raison d'écoute"""
+    base_weights: Dict[str, float] = field(default_factory=dict)
+    adaptive_boosts: Dict[ListeningReasonType, Dict[str, float]] = field(default_factory=dict)
     
-    validation_result = {
-        'v3_compatible': True,
-        'fallback_required': False,
-        'missing_v3_data': [],
-        'validation_score': 1.0
-    }
-    
-    # Vérification données essentielles V3.0
-    if not candidat.motivations_extended.raison_ecoute_primaire:
-        validation_result['missing_v3_data'].append('raison_ecoute_primaire')
+    def __post_init__(self):
+        """Initialise les pondérations par défaut"""
+        if not self.base_weights:
+            self.base_weights = {
+                "semantic": 0.25,
+                "salary": 0.20,
+                "experience": 0.15,
+                "location": 0.10,
+                "motivations": 0.08,
+                "sector_compatibility": 0.06,
+                "contract_flexibility": 0.05,
+                "timing_compatibility": 0.04,
+                "work_modality": 0.04,
+                "salary_progression": 0.03,
+                "listening_reason": 0.03,
+                "candidate_status": 0.02
+            }
         
-    if not candidat.secteurs_preferences.secteurs_preferes:
-        validation_result['missing_v3_data'].append('secteurs_preferes')
-        
-    if not entreprise.entreprise.secteur:
-        validation_result['missing_v3_data'].append('entreprise_secteur')
-    
-    # Score de validation
-    validation_result['validation_score'] = max(0.3, 
-        1.0 - (len(validation_result['missing_v3_data']) * 0.2))
-    
-    # Décision fallback
-    if len(validation_result['missing_v3_data']) > 3:
-        validation_result['fallback_required'] = True
-        validation_result['v3_compatible'] = False
-    
-    return validation_result
+        if not self.adaptive_boosts:
+            self.adaptive_boosts = {
+                ListeningReasonType.REMUNERATION_FAIBLE: {
+                    "salary": 0.35,  # Boost majeur
+                    "salary_progression": 0.05,
+                    "semantic": 0.20,  # Réduit
+                    "motivations": 0.05,
+                    "experience": 0.12,
+                    "location": 0.08,
+                    "sector_compatibility": 0.05,
+                    "contract_flexibility": 0.04,
+                    "timing_compatibility": 0.03,
+                    "work_modality": 0.03
+                },
+                ListeningReasonType.POSTE_INADEQUAT: {
+                    "semantic": 0.35,  # Boost majeur
+                    "sector_compatibility": 0.10,  # Boost secondaire
+                    "motivations": 0.12,
+                    "salary": 0.15,
+                    "experience": 0.12,
+                    "location": 0.08,
+                    "contract_flexibility": 0.04,
+                    "timing_compatibility": 0.03,
+                    "work_modality": 0.03,
+                    "salary_progression": 0.03
+                },
+                ListeningReasonType.LOCALISATION: {
+                    "location": 0.25,  # Boost majeur
+                    "work_modality": 0.06,  # Boost secondaire
+                    "semantic": 0.20,
+                    "salary": 0.18,
+                    "motivations": 0.08,
+                    "experience": 0.12,
+                    "sector_compatibility": 0.05,
+                    "contract_flexibility": 0.03,
+                    "timing_compatibility": 0.03
+                },
+                ListeningReasonType.FLEXIBILITE: {
+                    "work_modality": 0.08,  # Boost majeur
+                    "contract_flexibility": 0.10,  # Boost secondaire
+                    "timing_compatibility": 0.06,
+                    "semantic": 0.22,
+                    "salary": 0.18,
+                    "location": 0.12,
+                    "motivations": 0.10,
+                    "experience": 0.12,
+                    "sector_compatibility": 0.05
+                },
+                ListeningReasonType.PERSPECTIVES: {
+                    "experience": 0.25,  # Boost majeur
+                    "motivations": 0.15,  # Boost secondaire
+                    "semantic": 0.20,
+                    "salary": 0.15,
+                    "sector_compatibility": 0.08,
+                    "location": 0.08,
+                    "salary_progression": 0.04,
+                    "contract_flexibility": 0.03,
+                    "timing_compatibility": 0.02
+                }
+            }
 
-# === EXEMPLES ET TESTS V3.0 ===
+
+# ================================
+# MODÈLE GLOBAL V3.0
+# ================================
+
+@dataclass
+class ExtendedMatchingProfile:
+    """Profil complet de matching V3.0 - 12 composants"""
+    
+    # V2.0 Préservés (poids ajustés)
+    semantic: SemanticProfile = field(default_factory=SemanticProfile)
+    salary: SalaryProfile = field(default_factory=SalaryProfile)
+    experience: ExperienceProfile = field(default_factory=ExperienceProfile)
+    location: LocationProfile = field(default_factory=LocationProfile)
+    
+    # V3.0 Nouveaux
+    motivations: ProfessionalMotivationsProfile = field(default_factory=ProfessionalMotivationsProfile)
+    sector_compatibility: SectorCompatibilityProfile = field(default_factory=SectorCompatibilityProfile)
+    contract_flexibility: ContractFlexibilityProfile = field(default_factory=ContractFlexibilityProfile)
+    timing_compatibility: TimingCompatibilityProfile = field(default_factory=TimingCompatibilityProfile)
+    work_modality: WorkModalityProfile = field(default_factory=WorkModalityProfile)
+    salary_progression: SalaryProgressionProfile = field(default_factory=SalaryProgressionProfile)
+    listening_reason: ListeningReasonProfile = field(default_factory=ListeningReasonProfile)
+    candidate_status: CandidateStatusProfile = field(default_factory=CandidateStatusProfile)
+    
+    # Configuration pondération adaptative
+    weighting_config: AdaptiveWeightingConfig = field(default_factory=AdaptiveWeightingConfig)
+    
+    def get_adaptive_weights(self) -> Dict[str, float]:
+        """Calcule les pondérations adaptatives selon la raison d'écoute"""
+        primary_reason = self.listening_reason.primary_reason
+        
+        if primary_reason in self.weighting_config.adaptive_boosts:
+            return self.weighting_config.adaptive_boosts[primary_reason].copy()
+        
+        return self.weighting_config.base_weights.copy()
+    
+    def validate_weights_sum(self, weights: Dict[str, float]) -> bool:
+        """Valide que la somme des poids est proche de 1.0"""
+        total = sum(weights.values())
+        return 0.98 <= total <= 1.02
+    
+    def normalize_weights(self, weights: Dict[str, float]) -> Dict[str, float]:
+        """Normalise les poids pour que leur somme soit exactement 1.0"""
+        total = sum(weights.values())
+        if total == 0:
+            return weights
+        
+        return {key: value / total for key, value in weights.items()}
+
+
+@dataclass
+class MatchingScore:
+    """Score de matching V3.0 avec détail par composant"""
+    total_score: float = 0.0
+    component_scores: Dict[str, float] = field(default_factory=dict)
+    component_weights: Dict[str, float] = field(default_factory=dict)
+    adaptive_reason: Optional[ListeningReasonType] = None
+    confidence_level: float = 0.0
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Sérialisation pour API/logs"""
+        return {
+            "total_score": self.total_score,
+            "component_scores": self.component_scores,
+            "component_weights": self.component_weights,
+            "adaptive_reason": self.adaptive_reason.value if self.adaptive_reason else None,
+            "confidence_level": self.confidence_level
+        }
+
+
+# ================================
+# UTILITAIRES DE CONVERSION V2.0
+# ================================
+
+def convert_v2_to_v3_profile(v2_data: Dict[str, Any]) -> ExtendedMatchingProfile:
+    """Convertit un profil V2.0 vers V3.0 (rétrocompatibilité)"""
+    profile = ExtendedMatchingProfile()
+    
+    # Mapping V2.0 → V3.0
+    if "semantic" in v2_data:
+        profile.semantic = SemanticProfile(**v2_data["semantic"])
+    
+    if "salary" in v2_data:
+        profile.salary = SalaryProfile(**v2_data["salary"])
+    
+    if "experience" in v2_data:
+        profile.experience = ExperienceProfile(**v2_data["experience"])
+    
+    if "location" in v2_data:
+        profile.location = LocationProfile(**v2_data["location"])
+    
+    return profile
+
+
+def get_component_list() -> List[str]:
+    """Retourne la liste des 12 composants V3.0"""
+    return [
+        "semantic", "salary", "experience", "location",
+        "motivations", "sector_compatibility", "contract_flexibility",
+        "timing_compatibility", "work_modality", "salary_progression",
+        "listening_reason", "candidate_status"
+    ]
+
+
+# ================================
+# VALIDATION ET TESTS
+# ================================
+
+def validate_extended_profile(profile: ExtendedMatchingProfile) -> Tuple[bool, List[str]]:
+    """Valide la cohérence d'un profil étendu V3.0"""
+    errors = []
+    
+    # Validation pondérations
+    weights = profile.get_adaptive_weights()
+    if not profile.validate_weights_sum(weights):
+        errors.append(f"Somme des poids incorrecte: {sum(weights.values())}")
+    
+    # Validation composants obligatoires
+    required_components = get_component_list()
+    for component in required_components:
+        if not hasattr(profile, component):
+            errors.append(f"Composant manquant: {component}")
+    
+    # Validation logique métier
+    if profile.salary.desired_salary and profile.salary.current_salary:
+        if profile.salary.desired_salary < profile.salary.current_salary:
+            errors.append("Salaire désiré inférieur au salaire actuel")
+    
+    return len(errors) == 0, errors
+
 
 if __name__ == "__main__":
-    print("🚀 NEXTVISION V3.0 - Extended Matching Models")
-    print("=" * 60)
-    
-    # Test création candidat V3.0 étendu
-    candidat_v3 = ExtendedCandidateProfileV3(
-        # 🔄 Données V2.0 (héritées automatiquement)
-        personal_info=PersonalInfoBidirectional(
-            firstName="Alice",
-            lastName="Martin",
-            email="alice.martin@email.com"
-        ),
-        experience_globale=NiveauExperience.CONFIRME,
-        competences=CompetencesProfessionnelles(
-            competences_techniques=["Python", "Machine Learning"],
-            logiciels_maitrise=["TensorFlow", "Jupyter"]
-        ),
-        attentes=AttentesCandidat(
-            salaire_min=50000,
-            salaire_max=65000,
-            localisation_preferee="Paris"
-        ),
-        motivations=MotivationsCandidat(
-            raison_ecoute=RaisonEcouteCandidat.REMUNERATION_TROP_FAIBLE,
-            motivations_principales=["Évolution salariale"]
-        ),
-        
-        # 🆕 Extensions V3.0
-        transport_preferences=TransportPreferences(
-            methods=[TypeTransport.TRANSPORTS_COMMUN, TypeTransport.VELO],
-            travel_times={"transports_commun": 45, "velo": 30}
-        ),
-        motivations_extended=MotivationsExtended(
-            ranking=[MotivationProfessionnelle.SALAIRE, MotivationProfessionnelle.EVOLUTION],
-            raison_ecoute_primaire=RaisonEcouteEtendue.REMUNERATION_TROP_FAIBLE
-        ),
-        secteurs_preferences=SecteursPreferences(
-            secteurs_preferes=[SecteurActivite.TECH, SecteurActivite.FINANCE],
-            secteurs_redhibitoires=[SecteurActivite.AGRICULTURE]
-        ),
-        contrats_preferences=ContratsPreferences(
-            ranking=[TypeContrat.CDI, TypeContrat.FREELANCE]
-        ),
-        timing_disponibilite=TimingDisponibilite(
-            delai_souhaite=DelaiDisponibilite.UN_MOIS,
-            situation_actuelle=SituationActuelle.EN_POSTE,
-            salaire_actuel_min=42000,
-            salaire_actuel_max=45000
-        ),
-        modalites_travail=ModalitesTravail(
-            preference_bureau=PreferenceBureau.SANS_PREFERENCE,
-            remote_souhaite=True
-        )
-    )
-    
-    print(f"✅ Candidat V3.0 créé: {candidat_v3.personal_info.firstName}")
-    print(f"🔄 Hérite V2.0: {candidat_v3.experience_globale}")
-    print(f"🆕 Extension V3.0: {candidat_v3.motivations_extended.raison_ecoute_primaire}")
-    print(f"🎯 Secteurs préférés: {len(candidat_v3.secteurs_preferences.secteurs_preferes)}")
+    # Test de base
+    profile = ExtendedMatchingProfile()
     
     # Test pondération adaptative
-    weights = get_adaptive_weights_v3(
-        RaisonEcouteEtendue.REMUNERATION_TROP_FAIBLE,
-        UrgenceRecrutementEtendue.NORMAL
-    )
-    print(f"💡 Poids adaptatifs calculés - Salaire: {weights.salaire:.2f}")
+    profile.listening_reason.primary_reason = ListeningReasonType.REMUNERATION_FAIBLE
+    adaptive_weights = profile.get_adaptive_weights()
     
-    print("\n✅ Tests Extended Matching Models V3.0 réussis!")
-    print("🔄 Héritage V2.0: 100% préservé")
-    print("🆕 Extensions V3.0: 8 nouveaux composants")
-    print("🧠 Pondération adaptative: Fonctionnelle")
+    print("=== NEXTVISION V3.0 - Test Modèles ===")
+    print(f"Composants V3.0: {len(get_component_list())}")
+    print(f"Raison d'écoute: {profile.listening_reason.primary_reason.value}")
+    print(f"Poids adaptatifs: {adaptive_weights}")
+    print(f"Boost salary: {adaptive_weights.get('salary', 0) * 100:.1f}%")
+    
+    is_valid, errors = validate_extended_profile(profile)
+    print(f"Validation: {'✅ OK' if is_valid else '❌ Erreurs'}")
+    if errors:
+        for error in errors:
+            print(f"  - {error}")
