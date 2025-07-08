@@ -14,6 +14,7 @@ Version: 2.0.0 - ChatGPT Integration
 import json
 import re
 import logging
+import time  # 🔧 FIX: Import time manquant pour time.time()
 from typing import Dict, List, Optional, Union, Any
 from datetime import datetime
 from dataclasses import dataclass
@@ -480,12 +481,12 @@ class CommitmentNextvisionBridge:
     def convert_candidat_from_commitment(self, parser_output: Dict,
                                        questionnaire_data: Optional[Dict] = None) -> BiDirectionalCandidateProfile:
         """🔄 Conversion candidat Enhanced Parser → Bidirectionnel"""
-        start_time = time.time()
+        start_time = time.time()  # ✅ time maintenant importé
         
         try:
             candidat = self.candidat_adapter.convert_to_bidirectional(parser_output, questionnaire_data)
             
-            processing_time = time.time() - start_time
+            processing_time = time.time() - start_time  # ✅ time maintenant importé
             self.stats["candidats_converted"] += 1
             self.stats["total_processing_time"] += processing_time
             
@@ -500,12 +501,12 @@ class CommitmentNextvisionBridge:
     def convert_entreprise_from_commitment(self, chatgpt_output: Dict,
                                          questionnaire_data: Optional[Dict] = None) -> BiDirectionalCompanyProfile:
         """🔄 Conversion entreprise ChatGPT → Bidirectionnel"""
-        start_time = time.time()
+        start_time = time.time()  # ✅ time maintenant importé
         
         try:
             entreprise = self.entreprise_adapter.convert_to_bidirectional(chatgpt_output, questionnaire_data)
             
-            processing_time = time.time() - start_time
+            processing_time = time.time() - start_time  # ✅ time maintenant importé
             self.stats["entreprises_converted"] += 1
             self.stats["total_processing_time"] += processing_time
             

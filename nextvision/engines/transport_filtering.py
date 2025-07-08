@@ -7,6 +7,8 @@ Version: 2.0.0 - Google Maps Intelligence
 Performance: 1000 jobs < 2s, gain CPU 20-40%
 """
 
+from __future__ import annotations  # 🔧 FIX: Annotations différées pour éviter NameError
+
 import asyncio
 import logging
 from typing import Dict, List, Tuple, Optional
@@ -122,7 +124,7 @@ class TransportFilteringEngine:
         job_addresses: List[str],
         strict_mode: bool = True,
         performance_mode: bool = True
-    ) -> FilteringResult:
+    ) -> "FilteringResult":  # 🔧 FIX: String annotation
         """🎯 PRE-FILTERING principal: exclut jobs incompatibles"""
         
         start_time = time.time()

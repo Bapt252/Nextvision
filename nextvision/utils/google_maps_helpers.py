@@ -15,12 +15,22 @@ from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from functools import wraps
-import aioredis
 import pickle
 
 from ..models.transport_models import GeocodeResult, TransportRoute, TravelMode
 
 logger = logging.getLogger(__name__)
+
+# 🔧 Gestion compatibilité aioredis avec Python 3.13
+AIOREDIS_AVAILABLE = False
+try:
+    import aioredis
+    AIOREDIS_AVAILABLE = True
+    logger.info("✅ aioredis disponible - cache Redis activé")
+except ImportError as e:
+    logger.warning(f"⚠️ aioredis non disponible: {e} - cache mémoire uniquement")
+except Exception as e:
+    logger.warning(f"⚠️ Erreur import aioredis (probablement Python 3.13): {e} - cache mémoire uniquement")
 
 @dataclass
 class CacheStats:
@@ -43,15 +53,15 @@ class GoogleMapsCache:
     """💾 Cache intelligent multi-niveau pour Google Maps"""
     
     def __init__(self, redis_url: Optional[str] = None, enable_memory: bool = True):
-        self.redis_url = redis_url
+        self.redis_url = redis_url if AIOREDIS_AVAILABLE else None
         self.enable_memory = enable_memory
         
         # Cache mémoire (Level 1)
         self._memory_cache: Dict[str, Tuple[Any, datetime]] = {}
         self._memory_cache_stats = CacheStats()
         
-        # Cache Redis (Level 2) 
-        self._redis_pool: Optional[aioredis.Redis] = None
+        # Cache Redis (Level 2) - seulement si aioredis disponible
+        self._redis_pool: Optional[Any] = None
         self._redis_cache_stats = CacheStats()
         
         # Configuration
@@ -62,10 +72,13 @@ class GoogleMapsCache:
         # Métriques
         self.total_requests = 0
         self.cache_operations = 0
+        
+        if not AIOREDIS_AVAILABLE and redis_url:
+            logger.info("🔄 Redis demandé mais aioredis indisponible - mode mémoire uniquement")
     
     async def initialize(self):
         """🚀 Initialise connections cache"""
-        if self.redis_url:
+        if self.redis_url and AIOREDIS_AVAILABLE:
             try:
                 self._redis_pool = aioredis.from_url(
                     self.redis_url,
@@ -74,10 +87,12 @@ class GoogleMapsCache:
                 )
                 # Test connection
                 await self._redis_pool.ping()
-                logger.info(f"Cache Redis connecté: {self.redis_url}")
+                logger.info(f"✅ Cache Redis connecté: {self.redis_url}")
             except Exception as e:
-                logger.warning(f"Échec connexion Redis: {e} - cache mémoire uniquement")
+                logger.warning(f"⚠️ Échec connexion Redis: {e} - cache mémoire uniquement")
                 self._redis_pool = None
+        else:
+            logger.info("💾 Cache mémoire uniquement (Redis désactivé)")
     
     async def get(self, key: str) -> Optional[Any]:
         """📤 Récupère valeur depuis cache multi-niveau"""
@@ -88,13 +103,13 @@ class GoogleMapsCache:
             memory_result = self._get_from_memory(key)
             if memory_result is not None:
                 self._memory_cache_stats.hits += 1
-                logger.debug(f"Cache hit mémoire: {key}")
+                logger.debug(f"💾 Cache hit mémoire: {key}")
                 return memory_result
             else:
                 self._memory_cache_stats.misses += 1
         
-        # Level 2: Redis
-        if self._redis_pool:
+        # Level 2: Redis (seulement si disponible)
+        if self._redis_pool and AIOREDIS_AVAILABLE:
             redis_result = await self._get_from_redis(key)
             if redis_result is not None:
                 self._redis_cache_stats.hits += 1
@@ -103,7 +118,7 @@ class GoogleMapsCache:
                 if self.enable_memory:
                     self._set_in_memory(key, redis_result)
                 
-                logger.debug(f"Cache hit Redis: {key}")
+                logger.debug(f"🔴 Cache hit Redis: {key}")
                 return redis_result
             else:
                 self._redis_cache_stats.misses += 1
@@ -118,8 +133,8 @@ class GoogleMapsCache:
         if self.enable_memory:
             self._set_in_memory(key, value)
         
-        # Level 2: Redis
-        if self._redis_pool:
+        # Level 2: Redis (seulement si disponible)
+        if self._redis_pool and AIOREDIS_AVAILABLE:
             await self._set_in_redis(key, value, ttl_seconds or self.redis_ttl_seconds)
     
     def _get_from_memory(self, key: str) -> Optional[Any]:
@@ -155,17 +170,23 @@ class GoogleMapsCache:
     
     async def _get_from_redis(self, key: str) -> Optional[Any]:
         """📤 Récupère depuis Redis"""
+        if not AIOREDIS_AVAILABLE:
+            return None
+            
         try:
             data = await self._redis_pool.get(f"nextvision:gmaps:{key}")
             if data:
                 return pickle.loads(data)
         except Exception as e:
-            logger.error(f"Erreur lecture Redis {key}: {e}")
+            logger.error(f"❌ Erreur lecture Redis {key}: {e}")
         
         return None
     
     async def _set_in_redis(self, key: str, value: Any, ttl_seconds: int):
         """📥 Stocke dans Redis"""
+        if not AIOREDIS_AVAILABLE:
+            return
+            
         try:
             serialized = pickle.dumps(value)
             await self._redis_pool.setex(
@@ -174,7 +195,7 @@ class GoogleMapsCache:
                 serialized
             )
         except Exception as e:
-            logger.error(f"Erreur écriture Redis {key}: {e}")
+            logger.error(f"❌ Erreur écriture Redis {key}: {e}")
     
     async def clear(self):
         """🧹 Vide cache"""
@@ -182,13 +203,13 @@ class GoogleMapsCache:
             self._memory_cache.clear()
             self._memory_cache_stats = CacheStats()
         
-        if self._redis_pool:
+        if self._redis_pool and AIOREDIS_AVAILABLE:
             try:
                 keys = await self._redis_pool.keys("nextvision:gmaps:*")
                 if keys:
                     await self._redis_pool.delete(*keys)
             except Exception as e:
-                logger.error(f"Erreur clear Redis: {e}")
+                logger.error(f"❌ Erreur clear Redis: {e}")
     
     def get_stats(self) -> Dict:
         """📊 Statistiques cache"""
@@ -197,7 +218,9 @@ class GoogleMapsCache:
             "redis": asdict(self._redis_cache_stats),
             "total_requests": self.total_requests,
             "cache_operations": self.cache_operations,
-            "overall_hit_rate": self._calculate_overall_hit_rate()
+            "overall_hit_rate": self._calculate_overall_hit_rate(),
+            "redis_available": AIOREDIS_AVAILABLE,
+            "redis_enabled": self._redis_pool is not None
         }
     
     def _calculate_overall_hit_rate(self) -> float:
@@ -420,7 +443,8 @@ class PerformanceMonitor:
             "cache_hit_rate_percent": self.cache_hit_rate * 100,
             "error_rate_percent": self.error_rate * 100,
             "uptime_hours": self.uptime_hours,
-            "requests_per_hour": self.metrics["api_calls"] / max(self.uptime_hours, 0.1)
+            "requests_per_hour": self.metrics["api_calls"] / max(self.uptime_hours, 0.1),
+            "aioredis_available": AIOREDIS_AVAILABLE
         }
 
 def async_retry(max_retries: int = 3, backoff_factor: float = 2.0):
@@ -443,7 +467,7 @@ def async_retry(max_retries: int = 3, backoff_factor: float = 2.0):
                     # Backoff exponentiel
                     delay = backoff_factor ** attempt
                     logger.warning(
-                        f"Retry {attempt + 1}/{max_retries} pour {func.__name__} "
+                        f"🔄 Retry {attempt + 1}/{max_retries} pour {func.__name__} "
                         f"dans {delay}s: {e}"
                     )
                     await asyncio.sleep(delay)
@@ -462,11 +486,11 @@ def timing_decorator(func):
         try:
             result = await func(*args, **kwargs)
             duration = time.time() - start_time
-            logger.debug(f"{func.__name__} terminé en {duration:.3f}s")
+            logger.debug(f"⚡ {func.__name__} terminé en {duration:.3f}s")
             return result
         except Exception as e:
             duration = time.time() - start_time
-            logger.error(f"{func.__name__} échoué après {duration:.3f}s: {e}")
+            logger.error(f"❌ {func.__name__} échoué après {duration:.3f}s: {e}")
             raise
     
     return wrapper
@@ -484,10 +508,12 @@ async def get_cache() -> GoogleMapsCache:
         config = get_google_maps_config()
         
         _global_cache = GoogleMapsCache(
-            redis_url=config.redis_url if config.enable_redis_cache else None,
+            redis_url=config.redis_url if (config.enable_redis_cache and AIOREDIS_AVAILABLE) else None,
             enable_memory=config.enable_memory_cache
         )
         await _global_cache.initialize()
+        
+        logger.info(f"💾 Cache initialisé - Mémoire: {config.enable_memory_cache}, Redis: {AIOREDIS_AVAILABLE and config.enable_redis_cache}")
     
     return _global_cache
 
