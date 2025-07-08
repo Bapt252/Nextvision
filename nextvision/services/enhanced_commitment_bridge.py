@@ -115,7 +115,7 @@ class AutoFixEngine:
             'email': r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
             'phone': r'^(\+33|0)[1-9](\d{8}|\s\d{2}\s\d{2}\s\d{2}\s\d{2})$',
             'salary_range': (15000, 200000),  # Fourchette raisonnable
-            'name': r'^[a-zA-ZÀ-ÿ\s\-\'\.]{2,50}$'
+            'name': r'^[a-zA-ZÀ-ÿ\s\-\'\.]{{2,50}}$'
         }
     
     def auto_fix_candidat_data(self, data: Dict) -> Tuple[Dict, BridgeValidationResult]:
