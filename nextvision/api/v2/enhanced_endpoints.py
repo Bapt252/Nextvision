@@ -1,12 +1,80 @@
-# Import de l'Enhanced Bridge après ligne 24
+"""
+🔧 Nextvision v2.0 - Enhanced Endpoints avec Auto-Fix Intelligence
+
+Endpoints API révolutionnaires pour Enhanced Bridge avec auto-fix intelligent,
+validation robuste et performance optimisée.
+
+Author: NEXTEN Team
+Version: 2.0.0 - Enhanced Bridge Integration
+"""
+
+import json
+import logging
+import asyncio
+import time
+from typing import Dict, List, Optional, Union, Any
+from datetime import datetime
+
+from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+# Import modèles et services Nextvision
+from nextvision.models.bidirectional_models import (
+    BiDirectionalCandidateProfile, BiDirectionalCompanyProfile,
+    BiDirectionalMatchingRequest, BiDirectionalMatchingResponse
+)
+
+from nextvision.services.bidirectional_matcher import BiDirectionalMatcher
+from nextvision.api.v2.bidirectional_endpoints import get_bidirectional_matcher
+
+# Import Enhanced Bridge
 from nextvision.services.enhanced_commitment_bridge import (
     EnhancedCommitmentBridge, EnhancedBridgeFactory, BridgePerformanceMetrics
 )
 
-# Ajout après ligne 54 (après commitment_bridge = ...)
+# Configuration logging
+logger = logging.getLogger(__name__)
+
+# === ROUTER CONFIGURATION ===
+router_v2 = APIRouter(
+    prefix="/api/v2",
+    tags=["🔧 Enhanced Bridge v2.0"],
+    responses={
+        404: {"description": "Not found"},
+        500: {"description": "Internal server error"}
+    }
+)
+
+# === ENHANCED BRIDGE INSTANCE ===
 enhanced_bridge = EnhancedBridgeFactory.create_production_bridge()
 
-# Nouveau endpoint après les endpoints existants (vers ligne 400)
+# === PYDANTIC MODELS ===
+
+class CommitmentConversionRequest(BaseModel):
+    """Request pour conversion Commitment- Enhanced"""
+    candidat_data: Optional[Dict] = None
+    entreprise_data: Optional[Dict] = None
+    candidat_questionnaire: Optional[Dict] = None
+    entreprise_questionnaire: Optional[Dict] = None
+
+class EnhancedBatchRequest(BaseModel):
+    """Request pour batch processing Enhanced"""
+    candidats_data: List[Dict] = []
+    entreprises_data: List[Dict] = []
+    enable_parallel: bool = True
+    enable_auto_fix: bool = True
+
+class EnhancedConfigRequest(BaseModel):
+    """Request pour mise à jour configuration Enhanced"""
+    enable_auto_fix: Optional[bool] = None
+    enable_cache: Optional[bool] = None
+    enable_batch_processing: Optional[bool] = None
+    validation_strict_mode: Optional[bool] = None
+    retry_failed_conversions: Optional[bool] = None
+    max_batch_size: Optional[int] = None
+
+# === ENHANCED ENDPOINTS ===
 
 @router_v2.post("/conversion/commitment/enhanced",
                 summary="🔧 Conversion Enhanced avec Auto-Fix")
@@ -193,11 +261,7 @@ async def convert_and_match_enhanced_direct(
 
 @router_v2.post("/conversion/commitment/enhanced/batch",
                 summary="📦 Batch Enhanced avec Auto-Fix")
-async def batch_convert_enhanced(
-    candidats_data: List[Dict] = [],
-    entreprises_data: List[Dict] = [],
-    enable_parallel: bool = True
-):
+async def batch_convert_enhanced(request: EnhancedBatchRequest):
     """
     📦 **Batch Enhanced Processing** : Auto-fix en lot avec optimisations
     
@@ -209,13 +273,13 @@ async def batch_convert_enhanced(
     - **Limites de sécurité** : Protection contre la surcharge
     """
     try:
-        if not candidats_data and not entreprises_data:
+        if not request.candidats_data and not request.entreprises_data:
             raise HTTPException(
                 status_code=400,
                 detail="Au moins une liste (candidats ou entreprises) doit être fournie"
             )
         
-        total_items = len(candidats_data) + len(entreprises_data)
+        total_items = len(request.candidats_data) + len(request.entreprises_data)
         if total_items > enhanced_bridge.config['max_batch_size']:
             raise HTTPException(
                 status_code=400,
@@ -230,19 +294,19 @@ async def batch_convert_enhanced(
             "processing_time_ms": 0
         }
         
-        logger.info(f"📦 Batch Enhanced: {len(candidats_data)} candidats + {len(entreprises_data)} entreprises")
+        logger.info(f"📦 Batch Enhanced: {len(request.candidats_data)} candidats + {len(request.entreprises_data)} entreprises")
         
         # Traitement candidats
-        if candidats_data:
+        if request.candidats_data:
             candidats_results = await enhanced_bridge.convert_batch_enhanced(
-                candidats_data, data_type='candidat'
+                request.candidats_data, data_type='candidat'
             )
             results["candidats"] = candidats_results
         
         # Traitement entreprises
-        if entreprises_data:
+        if request.entreprises_data:
             entreprises_results = await enhanced_bridge.convert_batch_enhanced(
-                entreprises_data, data_type='entreprise'
+                request.entreprises_data, data_type='entreprise'
             )
             results["entreprises"] = entreprises_results
         
@@ -324,7 +388,7 @@ async def get_enhanced_bridge_stats():
 
 @router_v2.post("/conversion/commitment/enhanced/config",
                 summary="⚙️ Configuration Enhanced Bridge")
-async def update_enhanced_bridge_config(config_updates: Dict[str, Any]):
+async def update_enhanced_bridge_config(request: EnhancedConfigRequest):
     """
     ⚙️ **Configuration Enhanced Bridge** : Mise à jour des paramètres
     
@@ -337,17 +401,13 @@ async def update_enhanced_bridge_config(config_updates: Dict[str, Any]):
     - `max_batch_size` : Taille maximum des lots (défaut: 50)
     """
     try:
-        # Validation des paramètres
-        valid_config_keys = [
-            'enable_auto_fix', 'enable_cache', 'enable_batch_processing',
-            'validation_strict_mode', 'retry_failed_conversions', 'max_batch_size'
-        ]
+        # Conversion du modèle en dict, en excluant les valeurs None
+        config_updates = {k: v for k, v in request.dict().items() if v is not None}
         
-        invalid_keys = [key for key in config_updates.keys() if key not in valid_config_keys]
-        if invalid_keys:
+        if not config_updates:
             raise HTTPException(
                 status_code=400,
-                detail=f"Paramètres de configuration invalides: {invalid_keys}"
+                detail="Aucune configuration à mettre à jour"
             )
         
         # Sauvegarde config actuelle
@@ -406,3 +466,75 @@ async def clear_enhanced_bridge_cache():
             status_code=500,
             detail=f"Erreur vidage cache Enhanced: {str(e)}"
         )
+
+# === HEALTH CHECK ENHANCED ===
+
+@router_v2.get("/conversion/commitment/enhanced/health",
+               summary="❤️ Health Check Enhanced Bridge")
+async def enhanced_bridge_health():
+    """
+    ❤️ **Health Check Enhanced Bridge** : Statut détaillé
+    
+    Vérification complète de la santé du Enhanced Bridge v2.0
+    """
+    try:
+        stats = enhanced_bridge.get_enhanced_stats()
+        
+        # Test rapide de fonctionnalité
+        test_data = {
+            "personal_info": {
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@example.com"
+            },
+            "skills": ["Python", "FastAPI"],
+            "parsing_confidence": 0.95
+        }
+        
+        # Test conversion rapide
+        test_start = time.time()
+        try:
+            test_candidat, test_metrics = await enhanced_bridge.convert_candidat_enhanced(
+                test_data, enable_auto_fix=False
+            )
+            test_success = True
+            test_time = (time.time() - test_start) * 1000
+        except Exception as test_error:
+            test_success = False
+            test_time = 0
+            logger.warning(f"Test conversion échoué: {test_error}")
+        
+        health_status = "healthy" if test_success else "degraded"
+        
+        return {
+            "status": health_status,
+            "service": "Enhanced Bridge v2.0",
+            "version": "2.0.0",
+            "timestamp": datetime.now().isoformat(),
+            "features": {
+                "auto_fix_intelligence": enhanced_bridge.config['enable_auto_fix'],
+                "performance_caching": enhanced_bridge.config['enable_cache'],
+                "batch_processing": enhanced_bridge.config['enable_batch_processing'],
+                "retry_logic": enhanced_bridge.config['retry_failed_conversions']
+            },
+            "performance_test": {
+                "conversion_test": test_success,
+                "test_time_ms": round(test_time, 2)
+            },
+            "stats_summary": {
+                "total_conversions": stats["enhanced_bridge_stats"]["total_conversions"],
+                "success_rate": stats["enhanced_bridge_stats"]["success_rate_percent"],
+                "auto_fixes_applied": stats["enhanced_bridge_stats"]["auto_fixes_applied"],
+                "cache_hit_rate": stats["enhanced_bridge_stats"]["cache_hit_rate_percent"]
+            },
+            "uptime_hours": stats["uptime_hours"]
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur health check Enhanced: {e}")
+        return {
+            "status": "unhealthy",
+            "service": "Enhanced Bridge v2.0",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }

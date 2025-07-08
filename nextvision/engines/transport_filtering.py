@@ -19,6 +19,83 @@ from ..models.questionnaire_advanced import QuestionnaireComplet
 
 logger = logging.getLogger(__name__)
 
+# === FILTERING RESULT CLASS (DÉFINIE EN PREMIER) ===
+
+class FilteringResult:
+    """📊 Résultat du pré-filtrage transport"""
+    
+    def __init__(
+        self,
+        original_job_count: int,
+        compatible_jobs: List[str],
+        incompatible_jobs: List[str],
+        exclusion_reasons: Dict[str, str],
+        filtering_time_seconds: float,
+        exclusion_rate_percent: float,
+        performance_gain_percent: float,
+        error_message: Optional[str] = None
+    ):
+        self.original_job_count = original_job_count
+        self.compatible_jobs = compatible_jobs
+        self.incompatible_jobs = incompatible_jobs
+        self.exclusion_reasons = exclusion_reasons
+        self.filtering_time_seconds = filtering_time_seconds
+        self.exclusion_rate_percent = exclusion_rate_percent
+        self.performance_gain_percent = performance_gain_percent
+        self.error_message = error_message
+        
+        # Métriques dérivées
+        self.compatible_job_count = len(compatible_jobs)
+        self.incompatible_job_count = len(incompatible_jobs)
+        self.jobs_per_second = original_job_count / max(filtering_time_seconds, 0.001)
+    
+    @property
+    def is_success(self) -> bool:
+        """Succès si pas d'erreur et performance acceptable"""
+        return (
+            self.error_message is None and 
+            self.filtering_time_seconds < 30 and  # Moins de 30s
+            self.jobs_per_second > 10  # Au moins 10 jobs/s
+        )
+    
+    @property
+    def performance_rating(self) -> str:
+        """Rating performance: EXCELLENT, BON, MOYEN, FAIBLE"""
+        if self.jobs_per_second > 50:
+            return "EXCELLENT"
+        elif self.jobs_per_second > 25:
+            return "BON"
+        elif self.jobs_per_second > 10:
+            return "MOYEN"
+        else:
+            return "FAIBLE"
+    
+    def to_dict(self) -> Dict:
+        """Conversion en dictionnaire pour API"""
+        return {
+            "original_job_count": self.original_job_count,
+            "compatible_job_count": self.compatible_job_count,
+            "incompatible_job_count": self.incompatible_job_count,
+            "exclusion_rate_percent": self.exclusion_rate_percent,
+            "filtering_time_seconds": self.filtering_time_seconds,
+            "performance_gain_percent": self.performance_gain_percent,
+            "jobs_per_second": self.jobs_per_second,
+            "performance_rating": self.performance_rating,
+            "is_success": self.is_success,
+            "error_message": self.error_message,
+            "top_exclusion_reasons": self._get_top_exclusion_reasons()
+        }
+    
+    def _get_top_exclusion_reasons(self, top_n: int = 3) -> Dict[str, int]:
+        """Top N raisons d'exclusion"""
+        reason_counts = {}
+        for reason in self.exclusion_reasons.values():
+            reason_counts[reason] = reason_counts.get(reason, 0) + 1
+        
+        return dict(sorted(reason_counts.items(), key=lambda x: x[1], reverse=True)[:top_n])
+
+# === TRANSPORT FILTERING ENGINE ===
+
 class TransportFilteringEngine:
     """🚫 Engine de pré-filtrage transport avec performance optimisée"""
     
@@ -251,7 +328,7 @@ class TransportFilteringEngine:
         original_jobs: List[str],
         filtering_results: Dict[str, TransportCompatibility],
         start_time: float
-    ) -> 'FilteringResult':
+    ) -> FilteringResult:
         """📊 Crée résultat filtrage avec métriques"""
         
         compatible_jobs = []
@@ -338,7 +415,7 @@ class TransportFilteringEngine:
         combined = "_".join(key_parts)
         return hashlib.md5(combined.encode()).hexdigest()[:8]
     
-    def _log_filtering_summary(self, result: 'FilteringResult'):
+    def _log_filtering_summary(self, result: FilteringResult):
         """📝 Log résumé filtrage"""
         
         logger.info(
@@ -377,76 +454,3 @@ class TransportFilteringEngine:
             "total_filtering_time_seconds": self.total_filtering_time,
             "cache_patterns_count": len(self._exclusion_patterns_cache)
         }
-
-class FilteringResult:
-    """📊 Résultat du pré-filtrage transport"""
-    
-    def __init__(
-        self,
-        original_job_count: int,
-        compatible_jobs: List[str],
-        incompatible_jobs: List[str],
-        exclusion_reasons: Dict[str, str],
-        filtering_time_seconds: float,
-        exclusion_rate_percent: float,
-        performance_gain_percent: float,
-        error_message: Optional[str] = None
-    ):
-        self.original_job_count = original_job_count
-        self.compatible_jobs = compatible_jobs
-        self.incompatible_jobs = incompatible_jobs
-        self.exclusion_reasons = exclusion_reasons
-        self.filtering_time_seconds = filtering_time_seconds
-        self.exclusion_rate_percent = exclusion_rate_percent
-        self.performance_gain_percent = performance_gain_percent
-        self.error_message = error_message
-        
-        # Métriques dérivées
-        self.compatible_job_count = len(compatible_jobs)
-        self.incompatible_job_count = len(incompatible_jobs)
-        self.jobs_per_second = original_job_count / max(filtering_time_seconds, 0.001)
-    
-    @property
-    def is_success(self) -> bool:
-        """Succès si pas d'erreur et performance acceptable"""
-        return (
-            self.error_message is None and 
-            self.filtering_time_seconds < 30 and  # Moins de 30s
-            self.jobs_per_second > 10  # Au moins 10 jobs/s
-        )
-    
-    @property
-    def performance_rating(self) -> str:
-        """Rating performance: EXCELLENT, BON, MOYEN, FAIBLE"""
-        if self.jobs_per_second > 50:
-            return "EXCELLENT"
-        elif self.jobs_per_second > 25:
-            return "BON"
-        elif self.jobs_per_second > 10:
-            return "MOYEN"
-        else:
-            return "FAIBLE"
-    
-    def to_dict(self) -> Dict:
-        """Conversion en dictionnaire pour API"""
-        return {
-            "original_job_count": self.original_job_count,
-            "compatible_job_count": self.compatible_job_count,
-            "incompatible_job_count": self.incompatible_job_count,
-            "exclusion_rate_percent": self.exclusion_rate_percent,
-            "filtering_time_seconds": self.filtering_time_seconds,
-            "performance_gain_percent": self.performance_gain_percent,
-            "jobs_per_second": self.jobs_per_second,
-            "performance_rating": self.performance_rating,
-            "is_success": self.is_success,
-            "error_message": self.error_message,
-            "top_exclusion_reasons": self._get_top_exclusion_reasons()
-        }
-    
-    def _get_top_exclusion_reasons(self, top_n: int = 3) -> Dict[str, int]:
-        """Top N raisons d'exclusion"""
-        reason_counts = {}
-        for reason in self.exclusion_reasons.values():
-            reason_counts[reason] = reason_counts.get(reason, 0) + 1
-        
-        return dict(sorted(reason_counts.items(), key=lambda x: x[1], reverse=True)[:top_n])
