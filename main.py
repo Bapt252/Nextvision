@@ -3,7 +3,7 @@
 Algorithme de matching IA adaptatif pour NEXTEN + Bridge Commitment- + Transport Intelligence
 
 Author: NEXTEN Team
-Version: 2.0.0 - Google Maps Intelligence
+Version: 2.0.0 - Google Maps Intelligence + REAL COMMITMENT BRIDGE
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Query
@@ -19,8 +19,12 @@ import os
 import shutil
 import json
 
-# Import du service bridge
-from nextvision.services.commitment_bridge import CommitmentNextvisionBridge, BridgeRequest, BridgeConfig
+# Import du service bridge RÉEL
+from nextvision.services.commitment_bridge import (
+    CommitmentNextvisionBridge,
+    BridgeRequest,
+    BridgeConfig
+)
 
 # === GOOGLE MAPS INTELLIGENCE IMPORTS (Prompt 2) ===
 from nextvision.services.google_maps_service import GoogleMapsService
@@ -58,15 +62,11 @@ transport_calculator = TransportCalculator(google_maps_service)
 transport_filtering_engine = TransportFilteringEngine(transport_calculator)
 location_scoring_engine = LocationScoringEngine(transport_calculator)
 
-# Initialize Bridge
+# Initialize REAL Bridge
 try:
-    bridge_config = BridgeConfig(
-        commitment_api_base_url="http://localhost:3000",  # Commitment Parser API
-        timeout_seconds=30,
-        max_retries=3
-    )
+    bridge_config = BridgeConfig()
     commitment_bridge = CommitmentNextvisionBridge(bridge_config)
-    logger.info("✅ Commitment Bridge initialized successfully")
+    logger.info("✅ REAL Commitment Bridge initialized successfully")
 except Exception as e:
     logger.warning(f"⚠️ Commitment Bridge initialization failed: {e}")
     commitment_bridge = None
@@ -413,18 +413,18 @@ async def match_candidate(candidate_id: str, request: MatchingRequest):
 @app.get("/api/v1/integration/health", tags=["Integration"])
 async def integration_health():
     """❤️ Health Check Bridge Integration"""
-    return {
-        "status": "healthy",
-        "service": "Nextvision Bridge",
-        "version": "2.0.0",
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "bridge_status": "operational",
-        "features": {
-            "commitment_parser": True,
-            "enhanced_bridge": True,
-            "transport_intelligence": True
+    if commitment_bridge:
+        health_status = commitment_bridge.get_health_status()
+        return health_status
+    else:
+        return {
+            "status": "unavailable",
+            "service": "Nextvision Bridge",
+            "version": "2.0.0",
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "bridge_status": "not_initialized",
+            "error": "Commitment Bridge not available"
         }
-    }
 
 @app.get("/api/v2/maps/health", tags=["Google Maps"])
 async def google_maps_health():
@@ -442,147 +442,160 @@ async def google_maps_health():
         }
     }
 
-# === NOUVEAUX ENDPOINTS POUR LES TESTS ===
+# === ENDPOINTS RÉELS AVEC COMMITMENT BRIDGE ===
 
-@app.post("/api/v2/conversion/commitment/enhanced", tags=["🤖 CV Parsing"])
-async def parse_cv_enhanced(
+@app.post("/api/v2/conversion/commitment/enhanced", tags=["🤖 CV Parsing - REAL"])
+async def parse_cv_enhanced_real(
     file: UploadFile = File(...),
     candidat_questionnaire: str = Form(...)
 ):
-    """🤖 Parse CV avec Commitment-Enhanced Parser v4.0"""
+    """🤖 Parse CV avec VRAI Commitment-Enhanced Parser v4.0"""
     start_time = time.time()
     
+    if not commitment_bridge:
+        raise HTTPException(status_code=503, detail="Commitment Bridge non disponible")
+    
     try:
-        logger.info(f"🤖 Parsing CV: {file.filename}")
+        logger.info(f"🤖 REAL CV Parsing: {file.filename}")
         
-        # Simulation du parsing (remplacera le vrai bridge plus tard)
+        # Parse du questionnaire
         questionnaire_data = json.loads(candidat_questionnaire)
+        pourquoi_ecoute = questionnaire_data.get('raison_ecoute', 'Recherche nouveau défi')
         
         # Lecture du fichier
         file_content = await file.read()
-        file_size = len(file_content)
         
-        # Simulation de résultats de parsing
-        mock_cv_data = {
-            "candidat_id": f"cv_{int(time.time())}",
-            "personal_info": {
-                "nom": "Candidat",
-                "prenom": "Test",
-                "email": "test@example.com",
-                "telephone": "+33123456789"
-            },
-            "competences": [
-                "Python", "JavaScript", "React", "FastAPI", 
-                "Machine Learning", "Data Analysis"
-            ],
-            "experience": {
-                "annees_experience": 5,
-                "postes_precedents": [
-                    {
-                        "titre": "Développeur Senior",
-                        "entreprise": "TechCorp",
-                        "duree": "2 ans"
+        # Utilisation du VRAI bridge
+        async with commitment_bridge as bridge:
+            # Détecter les services Commitment-
+            job_available, cv_available = await bridge.detect_commitment_services()
+            
+            if not cv_available:
+                raise HTTPException(status_code=503, detail="Service CV Parser Commitment- non disponible")
+            
+            # Parse RÉEL du CV
+            cv_data = await bridge.parse_cv_with_commitment(file_content)
+            
+            processing_time = round((time.time() - start_time) * 1000, 2)
+            
+            logger.info(f"✅ CV RÉEL parsé en {processing_time}ms")
+            
+            return {
+                "status": "success",
+                "message": "CV parsé avec VRAI Commitment-Enhanced Parser",
+                "file_info": {
+                    "filename": file.filename,
+                    "size_bytes": len(file_content),
+                    "content_type": file.content_type
+                },
+                "parsing_result": {
+                    "candidat_id": f"real_cv_{int(time.time())}",
+                    "personal_info": {
+                        "nom": cv_data.name.split()[-1] if cv_data.name else "",
+                        "prenom": cv_data.name.split()[0] if cv_data.name else "",
+                        "email": cv_data.email,
+                        "telephone": cv_data.phone
+                    },
+                    "competences": cv_data.skills,
+                    "experience": {
+                        "annees_experience": cv_data.years_of_experience,
+                        "postes_precedents": cv_data.job_titles
+                    },
+                    "formation": cv_data.education,
+                    "entreprises": cv_data.companies,
+                    "langues": cv_data.languages,
+                    "certifications": cv_data.certifications,
+                    "localisation": cv_data.location,
+                    "objectif": cv_data.objective,
+                    "resume": cv_data.summary
+                },
+                "metadata": {
+                    "processing_time_ms": processing_time,
+                    "parser_version": "REAL Commitment-Enhanced Parser v4.0",
+                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "bridge_services": {
+                        "cv_parser_available": cv_available,
+                        "job_parser_available": job_available
                     }
-                ]
-            },
-            "formation": {
-                "niveau": "Master",
-                "domaine": "Informatique",
-                "ecole": "École d'Ingénieurs"
-            },
-            "preferences": questionnaire_data
-        }
-        
-        processing_time = round((time.time() - start_time) * 1000, 2)
-        
-        logger.info(f"✅ CV parsé en {processing_time}ms")
-        
-        return {
-            "status": "success",
-            "message": "CV parsé avec succès",
-            "file_info": {
-                "filename": file.filename,
-                "size_bytes": file_size,
-                "content_type": file.content_type
-            },
-            "parsing_result": mock_cv_data,
-            "metadata": {
-                "processing_time_ms": processing_time,
-                "parser_version": "Enhanced Bridge v4.0",
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")
+                }
             }
-        }
         
     except Exception as e:
-        logger.error(f"❌ Erreur parsing CV: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erreur parsing: {str(e)}")
+        logger.error(f"❌ Erreur REAL CV parsing: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur parsing réel: {str(e)}")
 
-@app.post("/api/v2/jobs/parse", tags=["🧠 FDP Parsing"])
-async def parse_fdp(
+@app.post("/api/v2/jobs/parse", tags=["🧠 FDP Parsing - REAL"])
+async def parse_fdp_real(
     file: UploadFile = File(...),
     additional_context: str = Form(...)
 ):
-    """🧠 Parse FDP avec ChatGPT"""
+    """🧠 Parse FDP avec VRAI Commitment- Job Parser"""
     start_time = time.time()
     
+    if not commitment_bridge:
+        raise HTTPException(status_code=503, detail="Commitment Bridge non disponible")
+    
     try:
-        logger.info(f"🧠 Parsing FDP: {file.filename}")
+        logger.info(f"🧠 REAL FDP Parsing: {file.filename}")
         
-        # Simulation du parsing
+        # Parse du contexte
         context_data = json.loads(additional_context)
         
         # Lecture du fichier
         file_content = await file.read()
-        file_size = len(file_content)
         
-        # Simulation de résultats de parsing
-        mock_job_data = {
-            "job_id": f"job_{int(time.time())}",
-            "titre_poste": "Développeur Full Stack",
-            "entreprise": context_data.get("company_name", "Entreprise Test"),
-            "localisation": context_data.get("location", "Paris"),
-            "type_contrat": context_data.get("contract_type", "CDI"),
-            "description": "Poste de développeur full stack pour projet innovant",
-            "competences_requises": [
-                "React", "Node.js", "Python", "PostgreSQL",
-                "Docker", "Kubernetes"
-            ],
-            "experience_requise": "3-5 ans",
-            "salaire": {
-                "min": 45000,
-                "max": 65000,
-                "devise": "EUR"
-            },
-            "avantages": [
-                "Télétravail partiel",
-                "Formation continue",
-                "Tickets restaurant"
-            ]
-        }
-        
-        processing_time = round((time.time() - start_time) * 1000, 2)
-        
-        logger.info(f"✅ FDP parsée en {processing_time}ms")
-        
-        return {
-            "status": "success",
-            "message": "FDP parsée avec succès",
-            "file_info": {
-                "filename": file.filename,
-                "size_bytes": file_size,
-                "content_type": file.content_type
-            },
-            "parsing_result": mock_job_data,
-            "metadata": {
-                "processing_time_ms": processing_time,
-                "parser_version": "ChatGPT v4.0",
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")
+        # Utilisation du VRAI bridge
+        async with commitment_bridge as bridge:
+            # Détecter les services Commitment-
+            job_available, cv_available = await bridge.detect_commitment_services()
+            
+            if not job_available:
+                raise HTTPException(status_code=503, detail="Service Job Parser Commitment- non disponible")
+            
+            # Parse RÉEL de la FDP
+            job_data = await bridge.parse_job_with_commitment(file_data=file_content)
+            
+            processing_time = round((time.time() - start_time) * 1000, 2)
+            
+            logger.info(f"✅ FDP RÉELLE parsée en {processing_time}ms")
+            
+            return {
+                "status": "success",
+                "message": "FDP parsée avec VRAI Commitment- Job Parser",
+                "file_info": {
+                    "filename": file.filename,
+                    "size_bytes": len(file_content),
+                    "content_type": file.content_type
+                },
+                "parsing_result": {
+                    "job_id": f"real_job_{int(time.time())}",
+                    "titre_poste": job_data.title,
+                    "entreprise": job_data.company,
+                    "localisation": job_data.location,
+                    "type_contrat": job_data.contract_type,
+                    "description": "Poste analysé par Commitment- Job Parser",
+                    "competences_requises": job_data.required_skills,
+                    "competences_preferees": job_data.preferred_skills,
+                    "responsabilites": job_data.responsibilities,
+                    "exigences": job_data.requirements,
+                    "avantages": job_data.benefits,
+                    "salaire": job_data.salary_range,
+                    "politique_remote": job_data.remote_policy
+                },
+                "metadata": {
+                    "processing_time_ms": processing_time,
+                    "parser_version": "REAL Commitment- Job Parser",
+                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "bridge_services": {
+                        "cv_parser_available": cv_available,
+                        "job_parser_available": job_available
+                    }
+                }
             }
-        }
         
     except Exception as e:
-        logger.error(f"❌ Erreur parsing FDP: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erreur parsing: {str(e)}")
+        logger.error(f"❌ Erreur REAL FDP parsing: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur parsing réel: {str(e)}")
 
 @app.post("/api/v2/transport/compatibility", tags=["🚗 Transport Intelligence"])
 async def check_transport_compatibility(request: TransportCompatibilityRequest):
@@ -673,9 +686,9 @@ if __name__ == "__main__":
     print("  • Performance: 1000 jobs < 2s")
     print("  • Cache Multi-niveau: ACTIF")
     print("")
-    print("🧪 Nouveaux endpoints de test:")
-    print("  • CV Parsing: /api/v2/conversion/commitment/enhanced")
-    print("  • FDP Parsing: /api/v2/jobs/parse")
+    print("🧪 Endpoints RÉELS avec Commitment-:")
+    print("  • CV Parsing RÉEL: /api/v2/conversion/commitment/enhanced")
+    print("  • FDP Parsing RÉEL: /api/v2/jobs/parse")
     print("  • Transport: /api/v2/transport/compatibility")
     print("")
     print("🔗 Révolution NEXTEN: Bridge + IA + Géospatial")
