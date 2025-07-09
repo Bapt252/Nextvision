@@ -94,6 +94,7 @@ app = FastAPI(
     * **CV Parser GPT** : Connexion directe aux services opérationnels  
     * **Workflow complet** : Parse → Filter → Match en une requête
     * **Architecture optimale** : Aucune duplication de code
+    
     """,
     version="2.0.0"
 )
