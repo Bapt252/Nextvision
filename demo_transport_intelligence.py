@@ -9,6 +9,7 @@ PROMPT 5 - Test du système révolutionné avec adresses réelles Paris
 import asyncio
 import os
 import logging
+import sys
 from typing import Dict, Any
 
 # Configuration logging
@@ -34,14 +35,41 @@ async def demo_transport_intelligence_v3():
         await demo_simulation_mode()
         return
     
+    print(f"✅ Clé API Google Maps détectée: {google_maps_api_key[:20]}...")
+    
     try:
-        # Import des services (vérification disponibilité)
+        # Ajout du répertoire courant au PYTHONPATH
+        sys.path.insert(0, '.')
+        sys.path.insert(0, './nextvision')
+        
         print("🔧 Initialisation services Transport Intelligence...")
         
-        # NOTE: Adaptez ces imports selon votre structure exacte
-        from nextvision.services.google_maps_service import GoogleMapsService
-        from nextvision.services.transport_calculator import TransportCalculator  
-        from nextvision.engines.transport_intelligence_engine import TransportIntelligenceEngine
+        # Imports corrigés selon la vraie structure du projet
+        try:
+            from nextvision.services.google_maps_service import GoogleMapsService
+            print("✅ GoogleMapsService importé")
+        except ImportError as e:
+            print(f"❌ Erreur import GoogleMapsService: {e}")
+            print("💡 Vérifiez que nextvision/services/google_maps_service.py existe")
+            await demo_simulation_mode()
+            return
+            
+        try:
+            from nextvision.services.transport_calculator import TransportCalculator
+            print("✅ TransportCalculator importé")
+        except ImportError as e:
+            print(f"❌ Erreur import TransportCalculator: {e}")
+            await demo_simulation_mode()
+            return
+            
+        try:
+            from nextvision.engines.transport_intelligence_engine import TransportIntelligenceEngine
+            print("✅ TransportIntelligenceEngine importé")
+        except ImportError as e:
+            print(f"❌ Erreur import TransportIntelligenceEngine: {e}")
+            print("📥 Module créé récemment - vérifiez que le fichier existe")
+            await demo_simulation_mode()
+            return
         
         # Initialisation
         google_maps_service = GoogleMapsService(api_key=google_maps_api_key)
@@ -61,8 +89,13 @@ async def demo_transport_intelligence_v3():
         await demo_paris_validation(engine)
         
     except ImportError as e:
-        print(f"❌ Erreur import: {e}")
-        print("💡 Vérifiez que tous les modules sont dans le PYTHONPATH")
+        print(f"❌ Erreur import modules: {e}")
+        print("🔧 Structure projet - vérifiez que ces fichiers existent:")
+        print("   nextvision/services/google_maps_service.py")
+        print("   nextvision/services/transport_calculator.py") 
+        print("   nextvision/engines/transport_intelligence_engine.py")
+        print("   nextvision/services/scorers_v3/location_transport_scorer_v3.py")
+        print()
         await demo_simulation_mode()
     except Exception as e:
         print(f"❌ Erreur initialisation: {e}")
@@ -187,6 +220,14 @@ async def demo_simulation_mode():
     print("   ✅ Cache intelligent + fallbacks")
     print("   ✅ Support nouvelles données questionnaire")
     print()
+    
+    print("🎯 LOGIQUE MÉTIER V3.0:")
+    print("   1. Nouvelles données: transport_methods + travel_times")
+    print("   2. Calcul temps réels Google Maps par mode")
+    print("   3. Comparaison temps acceptables vs temps réels")
+    print("   4. Score = moyenne pondérée + bonus flexibilité")
+    print("   5. Fallback intelligent si Google Maps indisponible")
+    print()
 
 async def demo_real_paris_scenario(engine):
     """🗺️ Test scénario réel Paris avec API Google Maps"""
@@ -207,6 +248,13 @@ async def demo_real_paris_scenario(engine):
         print(f"   Modes compatibles: {result['compatibility_analysis']['compatible_modes']}")
         print(f"   Meilleure option: {result['best_transport_option']['mode']}")
         print()
+        
+        # Affichage détails routes réelles
+        if "all_routes" in result and result["all_routes"]:
+            print("🗺️ ITINÉRAIRES RÉELS GOOGLE MAPS:")
+            for mode, route_info in result["all_routes"].items():
+                print(f"   {mode}: {route_info['duration_minutes']}min, {route_info['distance_km']}km")
+            print()
         
     except Exception as e:
         print(f"❌ Erreur test réel: {e}")
@@ -242,6 +290,11 @@ async def demo_batch_processing(engine):
         print("✅ Batch processing terminé:")
         for job_address, score_data in batch_results["scores"].items():
             print(f"   {job_address}: {score_data['final_score']:.3f}")
+        
+        print(f"\n📊 Statistiques batch:")
+        processing_stats = batch_results.get("processing_stats", {})
+        print(f"   Jobs traités: {processing_stats.get('successful_jobs', 0)}")
+        print(f"   Jobs échoués: {processing_stats.get('failed_jobs', 0)}")
         print()
         
     except Exception as e:
@@ -265,17 +318,53 @@ async def demo_paris_validation(engine):
         print(f"   Tests exécutés: {summary['total_tests']}")
         print(f"   Taux succès: {success_rate:.1f}%")
         print(f"   Score moyen: {summary['average_score']:.3f}")
+        
+        # Top 3 meilleurs résultats
+        if "test_scenarios" in test_results:
+            successful_tests = [t for t in test_results["test_scenarios"] if t["status"] == "SUCCESS"]
+            best_tests = sorted(successful_tests, key=lambda x: x["final_score"], reverse=True)[:3]
+            
+            print(f"\n🌟 Top 3 meilleurs scores:")
+            for i, test in enumerate(best_tests, 1):
+                print(f"   {i}. {test['scenario']}: {test['final_score']:.3f}")
+        
         print()
         
     except Exception as e:
         print(f"❌ Erreur validation: {e}")
         print()
 
+def check_project_structure():
+    """🔍 Vérification structure projet"""
+    
+    print("🔍 VÉRIFICATION STRUCTURE PROJET:")
+    
+    required_files = [
+        "nextvision/services/google_maps_service.py",
+        "nextvision/services/transport_calculator.py",
+        "nextvision/engines/transport_intelligence_engine.py",
+        "nextvision/services/scorers_v3/location_transport_scorer_v3.py",
+        "nextvision/tests/test_transport_intelligence_paris.py"
+    ]
+    
+    for file_path in required_files:
+        if os.path.exists(file_path):
+            print(f"   ✅ {file_path}")
+        else:
+            print(f"   ❌ {file_path} (manquant)")
+    
+    print()
+
 def main():
     """🎯 Point d'entrée principal"""
     
     try:
+        # Vérification structure
+        check_project_structure()
+        
+        # Lancement demo
         asyncio.run(demo_transport_intelligence_v3())
+        
     except KeyboardInterrupt:
         print("\n👋 Demo interrompue par l'utilisateur")
     except Exception as e:
@@ -283,6 +372,12 @@ def main():
     
     print("\n🎉 Fin de la démonstration Transport Intelligence V3.0")
     print("📋 Voir documentation: nextvision/docs/TRANSPORT_INTELLIGENCE_V3_DOCUMENTATION.md")
+    print()
+    print("💡 NEXT STEPS:")
+    print("   1. Vérifiez que tous les fichiers existent (voir vérification ci-dessus)")
+    print("   2. Si imports échouent, adaptez les chemins selon votre structure")
+    print("   3. Pour tests réels, assurez-vous que GOOGLE_MAPS_API_KEY est configuré")
+    print("   4. Le système est prêt pour intégration dans votre architecture !")
 
 if __name__ == "__main__":
     main()
