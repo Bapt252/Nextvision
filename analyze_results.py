@@ -4,7 +4,7 @@
 Analyse et affiche les résultats détaillés des tests Nextvision V3.0
 
 Author: Assistant  
-Version: 1.0
+Version: 1.1 - Fixed data structure handling
 """
 
 import json
@@ -44,6 +44,15 @@ def load_report(report_path: Path) -> Dict:
         print(f"{Colors.RED}❌ Erreur lecture rapport: {e}{Colors.END}")
         sys.exit(1)
 
+def safe_get(obj, *keys, default=None):
+    """Accès sécurisé aux clés imbriquées"""
+    for key in keys:
+        if isinstance(obj, dict):
+            obj = obj.get(key, default)
+        else:
+            return default
+    return obj
+
 def display_summary(data: Dict):
     """Affiche le résumé général"""
     summary = data.get('test_summary', {})
@@ -73,8 +82,28 @@ def display_cv_results(data: Dict):
     
     print(f"{Colors.BOLD}{Colors.BLUE}🤖 === RÉSULTATS PARSING CV ==={Colors.END}")
     
-    successful_cvs = [t for t in cv_tests if t.get('parsing_result', {}).get('success', False)]
-    failed_cvs = [t for t in cv_tests if not t.get('parsing_result', {}).get('success', False)]
+    if not cv_tests:
+        print(f"⚠️ Aucun test CV trouvé")
+        print()
+        return
+    
+    # Validation et conversion sécurisée
+    successful_cvs = []
+    failed_cvs = []
+    
+    for test in cv_tests:
+        if isinstance(test, dict):
+            parsing_result = test.get('parsing_result')
+            if isinstance(parsing_result, dict):
+                if parsing_result.get('success', False):
+                    successful_cvs.append(test)
+                else:
+                    failed_cvs.append(test)
+            else:
+                # Données non structurées comme attendu
+                failed_cvs.append(test)
+        else:
+            print(f"⚠️ Structure de données inattendue: {type(test)}")
     
     print(f"✅ CVs parsés avec succès : {Colors.GREEN}{len(successful_cvs)}{Colors.END}")
     print(f"❌ Échecs parsing CV : {Colors.RED}{len(failed_cvs)}{Colors.END}")
@@ -83,18 +112,17 @@ def display_cv_results(data: Dict):
     if successful_cvs:
         print(f"{Colors.BOLD}📋 Top 5 CVs analysés :{Colors.END}")
         for i, cv in enumerate(successful_cvs[:5]):
-            name = cv.get('file_name', 'Unknown')
-            size = cv.get('file_size', 0) / 1024  # KB
-            time_ms = cv.get('parsing_result', {}).get('processing_time', 0) * 1000
+            name = safe_get(cv, 'file_name', default='Unknown')
+            size = safe_get(cv, 'file_size', default=0) / 1024  # KB
+            time_ms = safe_get(cv, 'parsing_result', 'processing_time', default=0) * 1000
             print(f"  {i+1}. {name}")
             print(f"     📏 Taille: {size:.1f} KB | ⏱️ Temps: {time_ms:.1f}ms")
             
             # Détails du parsing si disponibles
-            details = cv.get('parsing_result', {}).get('details', {})
-            parsing_result = details.get('parsing_result', {})
+            parsing_result = safe_get(cv, 'parsing_result', 'details', 'parsing_result', default={})
             if parsing_result:
-                competences = parsing_result.get('competences', [])
-                exp = parsing_result.get('experience', {}).get('annees_experience', 0)
+                competences = safe_get(parsing_result, 'competences', default=[])
+                exp = safe_get(parsing_result, 'experience', 'annees_experience', default=0)
                 print(f"     💼 Expérience: {exp} ans | 🔧 Compétences: {len(competences)}")
         print()
 
@@ -104,8 +132,25 @@ def display_fdp_results(data: Dict):
     
     print(f"{Colors.BOLD}{Colors.MAGENTA}🧠 === RÉSULTATS PARSING FDP ==={Colors.END}")
     
-    successful_fdps = [t for t in fdp_tests if t.get('parsing_result', {}).get('success', False)]
-    failed_fdps = [t for t in fdp_tests if not t.get('parsing_result', {}).get('success', False)]
+    if not fdp_tests:
+        print(f"⚠️ Aucun test FDP trouvé")
+        print()
+        return
+    
+    # Validation et conversion sécurisée
+    successful_fdps = []
+    failed_fdps = []
+    
+    for test in fdp_tests:
+        if isinstance(test, dict):
+            parsing_result = test.get('parsing_result')
+            if isinstance(parsing_result, dict):
+                if parsing_result.get('success', False):
+                    successful_fdps.append(test)
+                else:
+                    failed_fdps.append(test)
+            else:
+                failed_fdps.append(test)
     
     print(f"✅ FDPs parsées avec succès : {Colors.GREEN}{len(successful_fdps)}{Colors.END}")
     print(f"❌ Échecs parsing FDP : {Colors.RED}{len(failed_fdps)}{Colors.END}")
@@ -114,21 +159,22 @@ def display_fdp_results(data: Dict):
     if successful_fdps:
         print(f"{Colors.BOLD}📋 Top 5 FDPs analysées :{Colors.END}")
         for i, fdp in enumerate(successful_fdps[:5]):
-            name = fdp.get('file_name', 'Unknown')
-            size = fdp.get('file_size', 0) / 1024  # KB
-            time_ms = fdp.get('parsing_result', {}).get('processing_time', 0) * 1000
+            name = safe_get(fdp, 'file_name', default='Unknown')
+            size = safe_get(fdp, 'file_size', default=0) / 1024  # KB
+            time_ms = safe_get(fdp, 'parsing_result', 'processing_time', default=0) * 1000
             print(f"  {i+1}. {name}")
             print(f"     📏 Taille: {size:.1f} KB | ⏱️ Temps: {time_ms:.1f}ms")
             
             # Détails du parsing si disponibles
-            details = fdp.get('parsing_result', {}).get('details', {})
-            parsing_result = details.get('parsing_result', {})
+            parsing_result = safe_get(fdp, 'parsing_result', 'details', 'parsing_result', default={})
             if parsing_result:
-                titre = parsing_result.get('titre_poste', 'N/A')
-                salaire = parsing_result.get('salaire', {})
+                titre = safe_get(parsing_result, 'titre_poste', default='N/A')
+                salaire = safe_get(parsing_result, 'salaire', default={})
                 print(f"     💼 Poste: {titre}")
                 if salaire:
-                    print(f"     💰 Salaire: {salaire.get('min', 0)}-{salaire.get('max', 0)} EUR")
+                    sal_min = safe_get(salaire, 'min', default=0)
+                    sal_max = safe_get(salaire, 'max', default=0)
+                    print(f"     💰 Salaire: {sal_min}-{sal_max} EUR")
         print()
 
 def display_matching_results(data: Dict):
@@ -137,7 +183,16 @@ def display_matching_results(data: Dict):
     
     print(f"{Colors.BOLD}{Colors.CYAN}🎯 === RÉSULTATS MATCHING ==={Colors.END}")
     
-    successful_matches = [t for t in matching_tests if t.get('success', False)]
+    if not matching_tests:
+        print(f"⚠️ Aucun test de matching trouvé")
+        print()
+        return
+    
+    # Validation sécurisée
+    successful_matches = []
+    for test in matching_tests:
+        if isinstance(test, dict) and test.get('success', False):
+            successful_matches.append(test)
     
     print(f"✅ Matchings réussis : {Colors.GREEN}{len(successful_matches)}{Colors.END}")
     print()
@@ -148,8 +203,7 @@ def display_matching_results(data: Dict):
         # Trier par score (si disponible dans les détails)
         scored_matches = []
         for match in successful_matches:
-            details = match.get('details', {})
-            score = details.get('matching_results', {}).get('total_score', 0)
+            score = safe_get(match, 'details', 'matching_results', 'total_score', default=0)
             scored_matches.append((match, score))
         
         scored_matches.sort(key=lambda x: x[1], reverse=True)
@@ -163,8 +217,7 @@ def display_matching_results(data: Dict):
             print(f"     ⏱️ Temps: {time_ms:.1f}ms")
             
             # Détails du matching
-            details = match.get('details', {})
-            matching_results = details.get('matching_results', {})
+            matching_results = safe_get(match, 'details', 'matching_results', default={})
             if matching_results:
                 confidence = matching_results.get('confidence', 0)
                 print(f"     📊 Confiance: {confidence:.2f}")
@@ -183,7 +236,16 @@ def display_transport_results(data: Dict):
     
     print(f"{Colors.BOLD}{Colors.GREEN}🚗 === TRANSPORT INTELLIGENCE ==={Colors.END}")
     
-    successful_transport = [t for t in transport_tests if t.get('success', False)]
+    if not transport_tests:
+        print(f"⚠️ Aucun test de transport trouvé")
+        print()
+        return
+    
+    # Validation sécurisée
+    successful_transport = []
+    for test in transport_tests:
+        if isinstance(test, dict) and test.get('success', False):
+            successful_transport.append(test)
     
     print(f"✅ Tests transport réussis : {Colors.GREEN}{len(successful_transport)}{Colors.END}")
     print()
@@ -199,8 +261,7 @@ def display_transport_results(data: Dict):
             print(f"⏱️ Temps: {time_ms:.1f}ms")
             
             # Détails du transport
-            details = test.get('details', {})
-            compatibility_result = details.get('compatibility_result', {})
+            compatibility_result = safe_get(test, 'details', 'compatibility_result', default={})
             if compatibility_result:
                 is_compatible = compatibility_result.get('is_compatible', False)
                 compat_score = compatibility_result.get('compatibility_score', 0)
@@ -216,11 +277,12 @@ def display_transport_results(data: Dict):
                 if transport_details:
                     print(f"📋 Détails par mode:")
                     for mode, mode_details in transport_details.items():
-                        time_min = mode_details.get('time_minutes', 0)
-                        cost = mode_details.get('cost_per_day', 0)
-                        compatible = mode_details.get('is_compatible', False)
-                        status = "✅" if compatible else "❌"
-                        print(f"   {status} {mode}: {time_min}min, {cost:.2f}€/jour")
+                        if isinstance(mode_details, dict):
+                            time_min = mode_details.get('time_minutes', 0)
+                            cost = mode_details.get('cost_per_day', 0)
+                            compatible = mode_details.get('is_compatible', False)
+                            status = "✅" if compatible else "❌"
+                            print(f"   {status} {mode}: {time_min}min, {cost:.2f}€/jour")
             print()
 
 def display_api_health(data: Dict):
@@ -235,9 +297,26 @@ def display_api_health(data: Dict):
         print(f"  • {service}: {status_color}{status_text}{Colors.END}")
     print()
 
+def display_raw_data_sample(data: Dict):
+    """Affiche un échantillon des données brutes pour debug"""
+    print(f"{Colors.BOLD}{Colors.YELLOW}🔍 === ÉCHANTILLON DONNÉES BRUTES ==={Colors.END}")
+    
+    test_results = data.get('test_results', {})
+    for category, tests in test_results.items():
+        if tests:
+            print(f"\n{category}: {len(tests)} éléments")
+            first_test = tests[0] if tests else None
+            if first_test:
+                print(f"Structure du premier élément: {type(first_test)}")
+                if isinstance(first_test, dict):
+                    print(f"Clés disponibles: {list(first_test.keys())}")
+                else:
+                    print(f"Valeur: {first_test}")
+    print()
+
 def main():
     """Point d'entrée principal"""
-    print(f"{Colors.BOLD}{Colors.MAGENTA}🎯 NEXTVISION RESULTS ANALYZER v1.0{Colors.END}")
+    print(f"{Colors.BOLD}{Colors.MAGENTA}🎯 NEXTVISION RESULTS ANALYZER v1.1{Colors.END}")
     print(f"{Colors.BLUE}Analyse des résultats de test Nextvision V3.0{Colors.END}")
     print()
     
@@ -253,6 +332,10 @@ def main():
     display_summary(data)
     display_file_discovery(data)
     display_api_health(data)
+    
+    # Debug: voir la structure des données
+    display_raw_data_sample(data)
+    
     display_cv_results(data)
     display_fdp_results(data)
     display_matching_results(data)
