@@ -33,7 +33,7 @@ def fix_manually():
     
     # Correction directe
     lines[0] = '"""'  # Remplacer ligne 1 par simple triple quotes
-    lines[1] = '🎯 Nextvision V3.0 - Questionnaire Parser V3.0'  # Titre du docstring
+    lines[1] = 'Nextvision V3.0 - Questionnaire Parser V3.0'  # Titre du docstring sans emoji
     
     print(f"🔧 Ligne 1 après: {repr(lines[0])}")
     print(f"🔧 Ligne 2 après: {repr(lines[1])}")
