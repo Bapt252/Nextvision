@@ -240,21 +240,22 @@ class NextvisionRealDataTester:
                 with open(cv_path, 'rb') as f:
                     file_content = f.read()
                 
-                # Préparer le upload
-                files = {
-                    'file': (cv_path.name, file_content, self._get_mime_type(cv_path))
-                }
+                # Préparer les données pour l'upload
+                form_data = aiohttp.FormData()
+                form_data.add_field('candidat_questionnaire', json.dumps({
+                    'raison_ecoute': 'Recherche nouveau défi',
+                    'salary_min': 35000,
+                    'salary_max': 55000,
+                    'preferred_location': 'Paris'
+                }))
+                form_data.add_field('file', file_content, 
+                                  filename=cv_path.name, 
+                                  content_type=self._get_mime_type(cv_path))
                 
                 # Test parsing via Enhanced Bridge
                 async with self.session.post(
                     f"{API_BASE_URL}/api/v2/conversion/commitment/enhanced",
-                    data={'candidat_questionnaire': json.dumps({
-                        'raison_ecoute': 'Recherche nouveau défi',
-                        'salary_min': 35000,
-                        'salary_max': 55000,
-                        'preferred_location': 'Paris'
-                    })},
-                    data=files
+                    data=form_data
                 ) as resp:
                     
                     processing_time = time.time() - start_time
@@ -335,20 +336,21 @@ class NextvisionRealDataTester:
                 with open(fdp_path, 'rb') as f:
                     file_content = f.read()
                 
-                # Préparer le upload
-                files = {
-                    'file': (fdp_path.name, file_content, self._get_mime_type(fdp_path))
-                }
+                # Préparer les données pour l'upload
+                form_data = aiohttp.FormData()
+                form_data.add_field('additional_context', json.dumps({
+                    'company_name': 'Test Company',
+                    'location': 'Paris',
+                    'contract_type': 'CDI'
+                }))
+                form_data.add_field('file', file_content, 
+                                  filename=fdp_path.name, 
+                                  content_type=self._get_mime_type(fdp_path))
                 
                 # Test parsing FDP
                 async with self.session.post(
                     f"{API_BASE_URL}/api/v2/jobs/parse",
-                    data={'additional_context': json.dumps({
-                        'company_name': 'Test Company',
-                        'location': 'Paris',
-                        'contract_type': 'CDI'
-                    })},
-                    data=files
+                    data=form_data
                 ) as resp:
                     
                     processing_time = time.time() - start_time
