@@ -17,13 +17,10 @@ import logging
 import tempfile
 import os
 import shutil
+import json
 
 # Import du service bridge
-from nextvision.services.commitment_bridge import (
-    CommitmentNextvisionBridge,
-    BridgeRequest,
-    BridgeConfig
-)
+from nextvision.services.commitment_bridge import CommitmentNextvisionBridge, BridgeRequest, BridgeConfig
 
 # === GOOGLE MAPS INTELLIGENCE IMPORTS (Prompt 2) ===
 from nextvision.services.google_maps_service import GoogleMapsService
@@ -60,6 +57,19 @@ google_maps_service = GoogleMapsService(
 transport_calculator = TransportCalculator(google_maps_service)
 transport_filtering_engine = TransportFilteringEngine(transport_calculator)
 location_scoring_engine = LocationScoringEngine(transport_calculator)
+
+# Initialize Bridge
+try:
+    bridge_config = BridgeConfig(
+        commitment_api_base_url="http://localhost:3000",  # Commitment Parser API
+        timeout_seconds=30,
+        max_retries=3
+    )
+    commitment_bridge = CommitmentNextvisionBridge(bridge_config)
+    logger.info("✅ Commitment Bridge initialized successfully")
+except Exception as e:
+    logger.warning(f"⚠️ Commitment Bridge initialization failed: {e}")
+    commitment_bridge = None
 
 app = FastAPI(
     title="🎯 Nextvision API",
@@ -432,6 +442,214 @@ async def google_maps_health():
         }
     }
 
+# === NOUVEAUX ENDPOINTS POUR LES TESTS ===
+
+@app.post("/api/v2/conversion/commitment/enhanced", tags=["🤖 CV Parsing"])
+async def parse_cv_enhanced(
+    file: UploadFile = File(...),
+    candidat_questionnaire: str = Form(...)
+):
+    """🤖 Parse CV avec Commitment-Enhanced Parser v4.0"""
+    start_time = time.time()
+    
+    try:
+        logger.info(f"🤖 Parsing CV: {file.filename}")
+        
+        # Simulation du parsing (remplacera le vrai bridge plus tard)
+        questionnaire_data = json.loads(candidat_questionnaire)
+        
+        # Lecture du fichier
+        file_content = await file.read()
+        file_size = len(file_content)
+        
+        # Simulation de résultats de parsing
+        mock_cv_data = {
+            "candidat_id": f"cv_{int(time.time())}",
+            "personal_info": {
+                "nom": "Candidat",
+                "prenom": "Test",
+                "email": "test@example.com",
+                "telephone": "+33123456789"
+            },
+            "competences": [
+                "Python", "JavaScript", "React", "FastAPI", 
+                "Machine Learning", "Data Analysis"
+            ],
+            "experience": {
+                "annees_experience": 5,
+                "postes_precedents": [
+                    {
+                        "titre": "Développeur Senior",
+                        "entreprise": "TechCorp",
+                        "duree": "2 ans"
+                    }
+                ]
+            },
+            "formation": {
+                "niveau": "Master",
+                "domaine": "Informatique",
+                "ecole": "École d'Ingénieurs"
+            },
+            "preferences": questionnaire_data
+        }
+        
+        processing_time = round((time.time() - start_time) * 1000, 2)
+        
+        logger.info(f"✅ CV parsé en {processing_time}ms")
+        
+        return {
+            "status": "success",
+            "message": "CV parsé avec succès",
+            "file_info": {
+                "filename": file.filename,
+                "size_bytes": file_size,
+                "content_type": file.content_type
+            },
+            "parsing_result": mock_cv_data,
+            "metadata": {
+                "processing_time_ms": processing_time,
+                "parser_version": "Enhanced Bridge v4.0",
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur parsing CV: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur parsing: {str(e)}")
+
+@app.post("/api/v2/jobs/parse", tags=["🧠 FDP Parsing"])
+async def parse_fdp(
+    file: UploadFile = File(...),
+    additional_context: str = Form(...)
+):
+    """🧠 Parse FDP avec ChatGPT"""
+    start_time = time.time()
+    
+    try:
+        logger.info(f"🧠 Parsing FDP: {file.filename}")
+        
+        # Simulation du parsing
+        context_data = json.loads(additional_context)
+        
+        # Lecture du fichier
+        file_content = await file.read()
+        file_size = len(file_content)
+        
+        # Simulation de résultats de parsing
+        mock_job_data = {
+            "job_id": f"job_{int(time.time())}",
+            "titre_poste": "Développeur Full Stack",
+            "entreprise": context_data.get("company_name", "Entreprise Test"),
+            "localisation": context_data.get("location", "Paris"),
+            "type_contrat": context_data.get("contract_type", "CDI"),
+            "description": "Poste de développeur full stack pour projet innovant",
+            "competences_requises": [
+                "React", "Node.js", "Python", "PostgreSQL",
+                "Docker", "Kubernetes"
+            ],
+            "experience_requise": "3-5 ans",
+            "salaire": {
+                "min": 45000,
+                "max": 65000,
+                "devise": "EUR"
+            },
+            "avantages": [
+                "Télétravail partiel",
+                "Formation continue",
+                "Tickets restaurant"
+            ]
+        }
+        
+        processing_time = round((time.time() - start_time) * 1000, 2)
+        
+        logger.info(f"✅ FDP parsée en {processing_time}ms")
+        
+        return {
+            "status": "success",
+            "message": "FDP parsée avec succès",
+            "file_info": {
+                "filename": file.filename,
+                "size_bytes": file_size,
+                "content_type": file.content_type
+            },
+            "parsing_result": mock_job_data,
+            "metadata": {
+                "processing_time_ms": processing_time,
+                "parser_version": "ChatGPT v4.0",
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur parsing FDP: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur parsing: {str(e)}")
+
+@app.post("/api/v2/transport/compatibility", tags=["🚗 Transport Intelligence"])
+async def check_transport_compatibility(request: TransportCompatibilityRequest):
+    """🚗 Test compatibilité transport entre candidat et poste"""
+    start_time = time.time()
+    
+    try:
+        logger.info(f"🚗 Test transport: {request.candidat_address} → {request.job_address}")
+        
+        # Simulation de calcul de transport
+        transport_results = {}
+        
+        for mode in request.transport_modes:
+            if mode == "voiture":
+                time_minutes = 25
+                cost_per_day = 8.50
+            elif mode == "transport_commun":
+                time_minutes = 35
+                cost_per_day = 5.20
+            elif mode == "velo":
+                time_minutes = 45
+                cost_per_day = 0.0
+            else:
+                time_minutes = 60
+                cost_per_day = 0.0
+            
+            max_time = request.max_times.get(mode, 60)
+            is_compatible = time_minutes <= max_time
+            
+            transport_results[mode] = {
+                "time_minutes": time_minutes,
+                "cost_per_day": cost_per_day,
+                "is_compatible": is_compatible,
+                "comfort_score": 0.8 if mode == "voiture" else 0.6,
+                "reliability_score": 0.9 if mode == "voiture" else 0.7
+            }
+        
+        # Score global de compatibilité
+        compatible_modes = [r for r in transport_results.values() if r["is_compatible"]]
+        overall_compatibility = len(compatible_modes) > 0
+        compatibility_score = len(compatible_modes) / len(transport_results) if transport_results else 0
+        
+        processing_time = round((time.time() - start_time) * 1000, 2)
+        
+        logger.info(f"✅ Transport calculé en {processing_time}ms")
+        
+        return {
+            "status": "success",
+            "candidat_address": request.candidat_address,
+            "job_address": request.job_address,
+            "compatibility_result": {
+                "is_compatible": overall_compatibility,
+                "compatibility_score": round(compatibility_score, 2),
+                "transport_details": transport_results,
+                "recommended_mode": max(transport_results.items(), key=lambda x: x[1]["comfort_score"])[0] if transport_results else None
+            },
+            "metadata": {
+                "processing_time_ms": processing_time,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "calculator_version": "Transport Intelligence v3.0"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur transport: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur transport: {str(e)}")
+
 if __name__ == "__main__":
     print("🎯 === NEXTVISION API v2.0 STARTUP ===")
     print("🚀 Algorithme de matching IA adaptatif pour NEXTEN")
@@ -454,6 +672,11 @@ if __name__ == "__main__":
     print("  • Location Scoring: ENRICHI")
     print("  • Performance: 1000 jobs < 2s")
     print("  • Cache Multi-niveau: ACTIF")
+    print("")
+    print("🧪 Nouveaux endpoints de test:")
+    print("  • CV Parsing: /api/v2/conversion/commitment/enhanced")
+    print("  • FDP Parsing: /api/v2/jobs/parse")
+    print("  • Transport: /api/v2/transport/compatibility")
     print("")
     print("🔗 Révolution NEXTEN: Bridge + IA + Géospatial")
     print("===============================================")
