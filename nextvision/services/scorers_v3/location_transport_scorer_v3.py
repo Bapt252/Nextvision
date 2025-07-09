@@ -16,9 +16,10 @@ from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, timedelta
 import hashlib
 
-from ..google_maps_service import GoogleMapsService
-from ..transport_calculator import TransportCalculator
-from ...models.transport_models import (
+# IMPORTS ABSOLUS (CORRIGÉS OPTION 1)
+from nextvision.services.google_maps_service import GoogleMapsService
+from nextvision.services.transport_calculator import TransportCalculator
+from nextvision.models.transport_models import (
     TravelMode, TransportRoute, GeocodeResult, 
     TransportCompatibility, LocationScore
 )
