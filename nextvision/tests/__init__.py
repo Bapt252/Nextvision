@@ -1,20 +1,9 @@
 """
-🧪 Nextvision - Test Suite
-Enterprise-grade testing with stress testing, load testing, and failover validation
+🧪 Nextvision V3.0 - Tests Package (PROMPT 5)
+Tests validation Transport Intelligence avec adresses réelles Paris
+
+Author: NEXTEN Team
+Version: 3.0.0 - Transport Intelligence Tests
 """
 
-from .stress_testing import (
-    StressTestSuite,
-    LoadTestScenario,
-    FailoverTestSuite,
-    PerformanceTestRunner,
-    TestMetrics
-)
-
-__all__ = [
-    "StressTestSuite",
-    "LoadTestScenario",
-    "FailoverTestSuite", 
-    "PerformanceTestRunner",
-    "TestMetrics"
-]
+__version__ = "3.0.0"
