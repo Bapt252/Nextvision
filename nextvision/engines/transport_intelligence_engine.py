@@ -16,9 +16,10 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 import json
 
-from ..google_maps_service import GoogleMapsService
-from ..transport_calculator import TransportCalculator
-from .scorers_v3.location_transport_scorer_v3 import LocationTransportScorerV3
+# IMPORTS ABSOLUS (CORRIGÉS OPTION 1)
+from nextvision.services.google_maps_service import GoogleMapsService
+from nextvision.services.transport_calculator import TransportCalculator
+from nextvision.services.scorers_v3.location_transport_scorer_v3 import LocationTransportScorerV3
 
 logger = logging.getLogger(__name__)
 
