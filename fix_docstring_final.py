@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🔧 Correction Finale - Docstring Line 2
-Corrige spécifiquement le problème '""","`' ligne 2
+Correction Finale - Docstring Line 2
+Corrige spécifiquement le problème de guillemets ligne 2
 
 Author: Assistant IA
 Version: Final Fix
@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 
 def fix_docstring_line_2():
-    """🔧 Corrige spécifiquement la ligne 2 du docstring"""
+    """Corrige spécifiquement la ligne 2 du docstring"""
     
     print("🔧 === CORRECTION FINALE LIGNE 2 DOCSTRING ===")
     
@@ -96,7 +96,7 @@ def fix_docstring_line_2():
         return False
 
 def ensure_proper_docstring(content: str) -> str:
-    """🔧 S'assure que le docstring est correctement formaté"""
+    """S'assure que le docstring est correctement formaté"""
     
     lines = content.split('\n')
     
@@ -133,7 +133,7 @@ def ensure_proper_docstring(content: str) -> str:
     return content
 
 def show_context_around_error(content: str, error_line: int):
-    """🔍 Affiche le contexte autour de l'erreur"""
+    """Affiche le contexte autour de l'erreur"""
     
     lines = content.split('\n')
     start = max(0, error_line - 3)
@@ -145,7 +145,7 @@ def show_context_around_error(content: str, error_line: int):
         print(f"{marker}{i+1:3d}: {repr(lines[i])}")
 
 def test_import_final():
-    """🧪 Test final de l'import"""
+    """Test final de l'import"""
     
     print("\n🧪 Test final import questionnaire_parser_v3...")
     
@@ -185,7 +185,7 @@ def test_import_final():
         return False
 
 def run_final_validation():
-    """🎯 Validation finale complète"""
+    """Validation finale complète"""
     
     print("\n🎯 === VALIDATION FINALE INTÉGRATION ===")
     
@@ -220,7 +220,7 @@ def run_final_validation():
         return False
 
 def main():
-    """🚀 Main"""
+    """Main"""
     
     print("🎯 Correction finale questionnaire_parser_v3.py")
     print("🔍 Problème: virgule après triple quotes ligne 2")
@@ -251,7 +251,7 @@ def main():
         print("\n📋 CORRECTION MANUELLE:")
         print("1. Ouvrir nextvision/adapters/questionnaire_parser_v3.py")
         print("2. Ligne 2: Supprimer la virgule après les triple quotes")
-        print("3. Remplacer '\"\"\",' par '\"\"\"'")
+        print("3. Remplacer par des guillemets normaux")
 
 if __name__ == "__main__":
     main()
