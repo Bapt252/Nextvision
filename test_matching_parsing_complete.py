@@ -4,7 +4,7 @@
 Test de l'intégration complète Nextvision V3.0 + Commitment Parser v4.0
 
 Author: Assistant Claude
-Version: 1.0.1-services-fixed
+Version: 1.0.2-attributes-fixed
 """
 
 import asyncio
@@ -98,7 +98,8 @@ class SystemeCompletTester:
         bridge_time = time.time() - bridge_start
         
         print(f"🌉 Bridge V3.0: {bridge_time*1000:.1f}ms")
-        print(f"   ✅ Profil: {candidat_profile.version}")
+        print(f"   ✅ Profil: {candidat_profile.personal_info.firstName} {candidat_profile.personal_info.lastName}")
+        print(f"   ✅ Expérience: {candidat_profile.experience_globale.value}")
         print(f"   ✅ Composants V3.0: {bridge_metrics.v3_components_count}")
         
         # ÉTAPE 3: Score Transport Intelligence V3.0 (si disponible et activé)
@@ -175,7 +176,8 @@ class SystemeCompletTester:
         bridge_time = time.time() - bridge_start
         
         print(f"🌉 Bridge V3.0: {bridge_time*1000:.1f}ms")
-        print(f"   ✅ Profil: {company_profile.version}")
+        print(f"   ✅ Entreprise: {company_profile.entreprise.nom}")
+        print(f"   ✅ Poste: {company_profile.poste.titre}")
         print(f"   ✅ Composants V3.0: {bridge_metrics.v3_components_count}")
         
         total_time = time.time() - start_time
@@ -197,6 +199,10 @@ class SystemeCompletTester:
         
         candidat_profile = candidat_result["candidat_profile"]
         company_profile = entreprise_result["company_profile"]
+        
+        # Information sur les profils
+        print(f"👤 Candidat: {candidat_profile.personal_info.firstName} {candidat_profile.personal_info.lastName}")
+        print(f"🏢 Entreprise: {company_profile.entreprise.nom} - {company_profile.poste.titre}")
         
         # Calcul matching bidirectionnel (CORRIGÉ: utilisation nouvelle API)
         try:
@@ -305,6 +311,18 @@ class SystemeCompletTester:
         print(f"   ✅ Parsing réel Commitment v4.0 (simulation)")
         print(f"   ✅ Matching bidirectionnel V3.0")
         
+        print(f"\n🎯 Détails finaux:")
+        if matching_result.get("success"):
+            candidat = candidat_result["candidat_profile"]
+            entreprise = entreprise_result["company_profile"]
+            match = matching_result["match_result"]
+            
+            print(f"   👤 {candidat.personal_info.firstName} ({candidat.experience_globale.value})")
+            print(f"   🏢 {entreprise.entreprise.nom} ({entreprise.poste.titre})")
+            print(f"   💰 Salaire candidat: {candidat.attentes.salaire_min}€ - {candidat.attentes.salaire_max}€")
+            print(f"   💰 Salaire poste: {entreprise.poste.salaire_min}€ - {entreprise.poste.salaire_max}€")
+            print(f"   📍 Localisation: {candidat.attentes.localisation_preferee} → {entreprise.poste.localisation}")
+            
         print(f"="*70)
 
 async def main():
