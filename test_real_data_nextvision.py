@@ -30,7 +30,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "http://localhost:8001"
 DESKTOP_PATH = Path.home() / "Desktop"
 CV_FOLDER = DESKTOP_PATH / "CV TEST"
 FDP_FOLDER = DESKTOP_PATH / "FDP TEST"

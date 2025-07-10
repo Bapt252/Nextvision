@@ -1,0 +1,15 @@
+{
+  "migration_id": "migration_20250710_121923",
+  "started_at": "2025-07-10T12:19:23.632071",
+  "version_from": "3.0.1",
+  "version_to": "3.1.0",
+  "steps_completed": [
+    "pre_checks",
+    "backup"
+  ],
+  "errors": [],
+  "warnings": [],
+  "backup_location": "backup_v30_migration_20250710_121923",
+  "error": "1 tests ont échoué. Migration annulée.",
+  "success": false
+}

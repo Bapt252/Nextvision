@@ -5,7 +5,7 @@
 
 Script de test pour valider les 3 corrections majeures :
 1. ✅ API FastAPI accessible sur port 8001
-2. ✅ Import TransportMethod fonctionnel  
+2. ✅ Import TravelMode fonctionnel  
 3. 🎯 CV Parsing optimisé >90%
 
 Author: Nextvision Team
@@ -71,25 +71,25 @@ class NextvisionValidator:
             print(f"   💡 Vérifiez que l'API tourne: python main.py")
     
     def test_transport_imports(self):
-        """Test 2: Import TransportMethod"""
-        print(f"\n{Colors.BLUE}🧪 Test 2: Import TransportMethod V3{Colors.END}")
+        """Test 2: Import TravelMode"""
+        print(f"\n{Colors.BLUE}🧪 Test 2: Import TravelMode V3{Colors.END}")
         
         try:
             # Test import principal
-            from nextvision.models.extended_matching_models_v3 import TransportMethod
-            print(f"   ✅ Import TransportMethod OK")
+            from nextvision.models.extended_matching_models_v3 import TravelMode
+            print(f"   ✅ Import TravelMode OK")
             
             # Test méthodes disponibles
-            methods = TransportMethod.get_all_methods()
+            methods = TravelMode.get_all_methods()
             print(f"   ✅ {len(methods)} méthodes transport disponibles: {methods}")
             
             # Test méthodes écologiques
-            eco_methods = TransportMethod.get_eco_methods()
+            eco_methods = TravelMode.get_eco_methods()
             print(f"   ✅ {len(eco_methods)} méthodes écologiques: {eco_methods}")
             
             # Test enum values
-            assert TransportMethod.VOITURE.value == "voiture"
-            assert TransportMethod.TRANSPORT_COMMUN.value == "transport_commun"
+            assert TravelMode.VOITURE.value == "voiture"
+            assert TravelMode.TRANSPORT_COMMUN.value == "transport_commun"
             print(f"   ✅ Valeurs enum cohérentes")
             
             self.results["transport_imports"] = True

@@ -90,9 +90,9 @@ class IntegrationTestSuite:
         """Test 2: Modèles Nextvision"""
         print_info("Test des modèles Nextvision...")
         
-        # Test import TravelMode (anciennement TransportMethod)
+        # Test import TravelMode (anciennement TravelMode)
         from nextvision.models.transport_models import TravelMode
-        print_success("✓ TravelMode importé (correction TransportMethod)")
+        print_success("✓ TravelMode importé (correction TravelMode)")
         
         # Test utilisation TravelMode
         driving_mode = TravelMode.DRIVING

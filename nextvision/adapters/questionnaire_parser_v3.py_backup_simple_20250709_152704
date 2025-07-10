@@ -1,0 +1,726 @@
+"""
+TARGET Nextvision V3.0 - Questionnaire Parser V3.0
+
+Parser intelligent pour exploitation des nouvelles données questionnaires V3.0 :
+- Extraction données mobilité, motivations, timing (candidat)
+- Extraction secteur, recrutement, avantages (entreprise)
+- Mapping vers composants V3.0 : 12 composants de matching
+- Fallback 100% compatible V2.0 si données manquantes
+- Validation auto-fix intelligente
+
+Author: NEXTEN Team
+Version: 3.0.0 - Extended Questionnaire Parsing
+"""
+
+import json
+import re
+import logging
+from typing import Dict, List, Optional, Union, Any, Tuple
+from datetime import datetime
+from dataclasses import dataclass
+from enum import Enum
+
+# Import des modèles V3.0
+from nextvision.models.extended_matching_models_v3 import (
+    ExtendedMatchingProfile, ListeningReasonType, MotivationType,
+    TravelMode, ContractPreference, WorkModalityType,
+    SectorCompatibilityData, TimingPreference, CandidateStatus,
+    CompanySectorType, CompanySize, RecruitmentUrgency
+)
+
+# Import compatibilité V2.0
+from nextvision.models.bidirectional_models import (
+    RaisonEcouteCandidat, NiveauExperience, TypeContrat,
+    UrgenceRecrutement
+)
+
+
+# Définition locale pour compatibilité
+from enum import Enum
+
+class(Enum):
+    CAR = "car"
+    PUBLIC_TRANSPORT = "public_transport"
+    BIKE = "bike"
+    WALK = "walk"
+    REMOTE = "remote"
+
+# Alias pour compatibilité
+TravelMode =
+
+
+# Définition locale TransportMethod pour compatibilité
+from enum import Enum
+
+class TransportMethod(Enum):
+    CAR = "car"
+    PUBLIC_TRANSPORT = "public_transport"  
+    BIKE = "bike"
+    WALK = "walk"
+    REMOTE = "remote"
+
+logger = logging.getLogger(__name__)
+
+# === STRUCTURES QUESTIONNAIRE V3.0 ===
+
+@dataclass
+class CandidateQuestionnaireV3:
+    """Structure donn es questionnaire candidat V3.0"""
+    # Étape 1 (déjà exploitée V2.0)
+    personal_info: Dict
+    skills: List[str]
+    experience: Dict
+    
+    # Étape 2 - Mobilité et préférences (NOUVEAU V3.0)
+    transport_methods: List[str] = None
+    max_travel_time: int = None  # minutes
+    contract_ranking: List[str] = None
+    office_preference: str = None  # "bureau", "télétravail", "hybride"
+    
+    # Étape 3 - Motivations et secteurs (NOUVEAU V3.0)
+    motivations_ranking: List[str] = None
+    secteurs_preferes: List[str] = None
+    secteurs_redhibitoires: List[str] = None
+    
+    # Étape 4 - Disponibilité et situation (NOUVEAU V3.0)
+    timing: str = None  # "immédiat", "1-3_mois", "3-6_mois"
+    employment_status: str = None  # "en_poste", "recherche", "étudiant"
+    listening_reasons: List[str] = None
+
+@dataclass
+class CompanyQuestionnaireV3:
+    """Structure donn es questionnaire entreprise V3.0"""
+    # Données ChatGPT (déjà exploitées V2.0)
+    titre: str
+    localisation: str
+    salaire: str
+    competences_requises: List[str]
+    experience_requise: str
+    
+    # Étape 1 - Structure (NOUVEAU V3.0)
+    company_sector: str = None
+    company_size: str = None
+    
+    # Étape 3 - Recrutement (NOUVEAU V3.0)
+    recruitment_delays: str = None  # "urgent", "normal", "flexible"
+    notice_management: str = None  # "accepte_preavis", "poste_immediat"
+    
+    # Étape 4 - Détails du poste (NOUVEAU V3.0)
+    contract_nature: str = None  # "CDI", "CDD", "freelance"
+    job_benefits: List[str] = None
+    remote_policy: str = None  # "sur_site", "télétravail", "hybride"
+
+# === MAPPINGS V3.0 ===
+
+class QuestionnaireV3Mappings:
+    """Mappings intelligents questionnaire  vers  composants V3.0"""
+    
+    # Mapping raisons d'écoute V2.0  vers  V3.0
+    LISTENING_REASONS_MAPPING = {
+        "poste_ne_coincide_pas": ListeningReasonType.CURRENT_ROLE_MISMATCH,
+        "opportunité_évolution": ListeningReasonType.CAREER_GROWTH,
+        "problème_management": ListeningReasonType.MANAGEMENT_ISSUES,
+        "salaire_insuffisant": ListeningReasonType.COMPENSATION_ISSUES,
+        "recherche_active": ListeningReasonType.ACTIVE_SEARCH,
+        "curieux_marché": ListeningReasonType.MARKET_CURIOSITY,
+        "insatisfaction_générale": ListeningReasonType.GENERAL_DISSATISFACTION
+    }
+    
+    # Mapping motivations
+    MOTIVATIONS_MAPPING = {
+        "évolution_carrière": MotivationType.CAREER_GROWTH,
+        "augmentation_salaire": MotivationType.SALARY_INCREASE,
+        "équilibre_vie": MotivationType.WORK_LIFE_BALANCE,
+        "défis_techniques": MotivationType.TECHNICAL_CHALLENGES,
+        "autonomie": MotivationType.AUTONOMY,
+        "impact_social": MotivationType.SOCIAL_IMPACT,
+        "formation": MotivationType.LEARNING_OPPORTUNITIES,
+        "reconnaissance": MotivationType.RECOGNITION
+    }
+    
+    # Mapping transport
+    TRANSPORT_MAPPING = {
+        "voiture": TravelMode.CAR,
+        "transport_public": TravelMode.PUBLIC_TRANSPORT,
+        "vélo": TravelMode.BIKE,
+        "marche": TravelMode.WALK,
+        "télétravail": TravelMode.REMOTE
+    }
+    
+    # Mapping secteurs entreprise
+    SECTOR_MAPPING = {
+        "technologie": CompanySectorType.TECHNOLOGY,
+        "finance": CompanySectorType.FINANCE,
+        "santé": CompanySectorType.HEALTHCARE,
+        "éducation": CompanySectorType.EDUCATION,
+        "commerce": CompanySectorType.RETAIL,
+        "industrie": CompanySectorType.MANUFACTURING,
+        "conseil": CompanySectorType.CONSULTING,
+        "média": CompanySectorType.MEDIA
+    }
+    
+    # Mapping tailles entreprise
+    SIZE_MAPPING = {
+        "startup": CompanySize.STARTUP,
+        "pme": CompanySize.SME,
+        "eti": CompanySize.MIDCAP,
+        "grand_groupe": CompanySize.LARGE_CORP
+    }
+
+# === PARSER CANDIDAT V3.0 ===
+
+class CandidateQuestionnaireParserV3:
+    """  Parser candidat V3.0 avec extension donn es questionnaire"""
+    
+    def __init__(self):
+        self.mappings = QuestionnaireV3Mappings()
+        
+    def parse_questionnaire_v3(self, questionnaire_data: Dict) -> CandidateQuestionnaireV3:
+        """Parse donn es questionnaire candidat vers structure V3.0"""
+        
+        try:
+            # Données de base V2.0 (compatibilité)
+            candidate_v3 = CandidateQuestionnaireV3(
+                personal_info=questionnaire_data.get("personal_info", {}),
+                skills=questionnaire_data.get("skills", []),
+                experience=questionnaire_data.get("experience", {})
+            )
+            
+            # === NOUVELLES DONNÉES V3.0 ===
+            
+            # Étape 2 - Mobilité et préférences
+            mobility_data = questionnaire_data.get("mobility_preferences", {})
+            candidate_v3.transport_methods = mobility_data.get("transport_methods", [])
+            candidate_v3.max_travel_time = self._parse_travel_time(mobility_data.get("max_travel_time"))
+            candidate_v3.contract_ranking = mobility_data.get("contract_preferences", [])
+            candidate_v3.office_preference = mobility_data.get("work_location_preference")
+            
+            # Étape 3 - Motivations et secteurs
+            motivation_data = questionnaire_data.get("motivations_sectors", {})
+            candidate_v3.motivations_ranking = motivation_data.get("motivations_ranking", [])
+            candidate_v3.secteurs_preferes = motivation_data.get("preferred_sectors", [])
+            candidate_v3.secteurs_redhibitoires = motivation_data.get("excluded_sectors", [])
+            
+            # Étape 4 - Disponibilité et situation
+            availability_data = questionnaire_data.get("availability_status", {})
+            candidate_v3.timing = availability_data.get("availability_timing")
+            candidate_v3.employment_status = availability_data.get("current_status")
+            candidate_v3.listening_reasons = availability_data.get("listening_reasons", [])
+            
+            logger.info(f"OK Questionnaire candidat V3.0 parsé avec {self._count_v3_fields(candidate_v3)} nouveaux champs")
+            
+            return candidate_v3
+            
+        except Exception as e:
+            logger.error(f"ERROR Erreur parsing candidat V3.0: {e}")
+            # Fallback vers structure minimale compatible V2.0
+            return CandidateQuestionnaireV3(
+                personal_info=questionnaire_data.get("personal_info", {}),
+                skills=questionnaire_data.get("skills", []),
+                experience=questionnaire_data.get("experience", {})
+            )
+    
+    def extract_v3_components(self, candidate_v3: CandidateQuestionnaireV3) -> Dict[str, Any]:
+        """TARGET Extraction composants V3.0 depuis donn es questionnaire"""
+        
+        components = {}
+        
+        try:
+            # 1. Listening Reason Scorer (3% poids)
+            if candidate_v3.listening_reasons:
+                components["listening_reason"] = self._extract_listening_reason(candidate_v3.listening_reasons)
+            
+            # 2. Professional Motivations (8% poids)
+            if candidate_v3.motivations_ranking:
+                components["motivations"] = self._extract_motivations(candidate_v3.motivations_ranking)
+            
+            # 3. Sector Compatibility (6% poids)
+            if candidate_v3.secteurs_preferes or candidate_v3.secteurs_redhibitoires:
+                components["sector_compatibility"] = self._extract_sector_preferences(
+                    candidate_v3.secteurs_preferes, candidate_v3.secteurs_redhibitoires
+                )
+            
+            # 4. Work Modality (4% poids)
+            if candidate_v3.office_preference:
+                components["work_modality"] = self._extract_work_modality(candidate_v3.office_preference)
+            
+            # 5. Timing Preferences (4% poids)
+            if candidate_v3.timing:
+                components["timing"] = self._extract_timing_preference(candidate_v3.timing)
+            
+            # 6. Candidate Status (2% poids)
+            if candidate_v3.employment_status:
+                components["candidate_status"] = self._extract_candidate_status(candidate_v3.employment_status)
+            
+            # 7. Transport/Location Extended (complément Location V2.0)
+            if candidate_v3.transport_methods or candidate_v3.max_travel_time:
+                components["transport_extended"] = self._extract_transport_data(
+                    candidate_v3.transport_methods, candidate_v3.max_travel_time
+                )
+            
+            logger.info(f"TARGET Extraits {len(components)} composants V3.0 depuis questionnaire")
+            
+            return components
+            
+        except Exception as e:
+            logger.error(f"ERROR Erreur extraction composants V3.0: {e}")
+            return {}
+    
+    # === MÉTHODES D'EXTRACTION ===
+    
+    def _extract_listening_reason(self, reasons: List[str]) -> Dict[str, Any]:
+        """Extraction raison d' coute principale"""
+        # Prendre la première raison comme principale
+        main_reason = reasons[0] if reasons else "curieux_marché"
+        
+        return {
+            "type": self.mappings.LISTENING_REASONS_MAPPING.get(main_reason, ListeningReasonType.MARKET_CURIOSITY),
+            "secondary_reasons": reasons[1:] if len(reasons) > 1 else [],
+            "confidence": 0.9 if len(reasons) >= 1 else 0.5
+        }
+    
+    def _extract_motivations(self, motivations_ranking: List[str]) -> Dict[str, Any]:
+        """Extraction motivations professionnelles avec ranking"""
+        mapped_motivations = []
+        
+        for i, motivation in enumerate(motivations_ranking[:5]):  # Top 5
+            mapped_type = self.mappings.MOTIVATIONS_MAPPING.get(motivation, MotivationType.CAREER_GROWTH)
+            weight = 1.0 - (i * 0.15)  # Décroissance poids par ranking
+            
+            mapped_motivations.append({
+                "type": mapped_type,
+                "weight": max(0.1, weight),
+                "rank": i + 1
+            })
+        
+        return {
+            "primary_motivations": mapped_motivations,
+            "motivation_diversity": len(set(motivations_ranking)),
+            "confidence": 0.8 if len(motivations_ranking) >= 3 else 0.6
+        }
+    
+    def _extract_sector_preferences(self, preferred: List[str], excluded: List[str]) -> Dict[str, Any]:
+        """Extraction pr f rences sectorielles"""
+        return {
+            "preferred_sectors": [self.mappings.SECTOR_MAPPING.get(s, s) for s in (preferred or [])],
+            "excluded_sectors": [self.mappings.SECTOR_MAPPING.get(s, s) for s in (excluded or [])],
+            "sector_flexibility": len(preferred or []) > 3,  # Flexible si +3 secteurs préférés
+            "has_restrictions": len(excluded or []) > 0
+        }
+    
+    def _extract_work_modality(self, office_preference: str) -> Dict[str, Any]:
+        """Extraction modalit  de travail"""
+        modality_mapping = {
+            "bureau": WorkModalityType.ON_SITE,
+            "télétravail": WorkModalityType.REMOTE,
+            "hybride": WorkModalityType.HYBRID
+        }
+        
+        return {
+            "preferred_modality": modality_mapping.get(office_preference, WorkModalityType.HYBRID),
+            "flexibility": office_preference == "hybride",
+            "remote_acceptance": office_preference in ["télétravail", "hybride"]
+        }
+    
+    def _extract_timing_preference(self, timing: str) -> Dict[str, Any]:
+        """Extraction pr f rences timing"""
+        timing_mapping = {
+            "immédiat": TimingPreference.IMMEDIATE,
+            "1-3_mois": TimingPreference.SHORT_TERM,
+            "3-6_mois": TimingPreference.MEDIUM_TERM,
+            "6_mois_plus": TimingPreference.LONG_TERM
+        }
+        
+        urgency_scores = {
+            "immédiat": 1.0,
+            "1-3_mois": 0.7,
+            "3-6_mois": 0.4,
+            "6_mois_plus": 0.1
+        }
+        
+        return {
+            "timing_preference": timing_mapping.get(timing, TimingPreference.MEDIUM_TERM),
+            "urgency_score": urgency_scores.get(timing, 0.4),
+            "immediate_availability": timing == "immédiat"
+        }
+    
+    def _extract_candidate_status(self, employment_status: str) -> Dict[str, Any]:
+        """Extraction statut candidat"""
+        status_mapping = {
+            "en_poste": CandidateStatus.EMPLOYED,
+            "recherche": CandidateStatus.ACTIVELY_SEARCHING,
+            "étudiant": CandidateStatus.STUDENT,
+            "freelance": CandidateStatus.FREELANCER,
+            "transition": CandidateStatus.BETWEEN_JOBS
+        }
+        
+        return {
+            "status": status_mapping.get(employment_status, CandidateStatus.EMPLOYED),
+            "availability_factor": 1.0 if employment_status == "recherche" else 0.6,
+            "notice_period_likely": employment_status == "en_poste"
+        }
+    
+    def _extract_transport_data(self, transport_methods: List[str], max_travel_time: int) -> Dict[str, Any]:
+        """Extraction donn es transport  tendues"""
+        mapped_methods = [self.mappings.TRANSPORT_MAPPING.get(t, TravelMode.CAR) 
+                         for t in (transport_methods or [])]
+        
+        return {
+            "transport_methods": mapped_methods,
+            "max_travel_time_minutes": max_travel_time or 45,
+            "transport_flexibility": len(mapped_methods) > 2,
+            "remote_capable": TravelMode.REMOTE in mapped_methods
+        }
+    
+    # === UTILITAIRES ===
+    
+    def _parse_travel_time(self, travel_time_str: Union[str, int]) -> Optional[int]:
+        """Parse temps de trajet en minutes"""
+        if isinstance(travel_time_str, int):
+            return travel_time_str
+        
+        if isinstance(travel_time_str, str):
+            # Extraction nombre de "30 min", "1h", "45 minutes"
+            numbers = re.findall(r'\d+', travel_time_str)
+            if numbers:
+                minutes = int(numbers[0])
+                # Si heure mentionnée, convertir
+                if 'h' in travel_time_str.lower():
+                    minutes *= 60
+                return minutes
+        
+        return None
+    
+    def _count_v3_fields(self, candidate_v3: CandidateQuestionnaireV3) -> int:
+        """Compte champs V3.0 non-null"""
+        v3_fields = [
+            candidate_v3.transport_methods, candidate_v3.max_travel_time,
+            candidate_v3.contract_ranking, candidate_v3.office_preference,
+            candidate_v3.motivations_ranking, candidate_v3.secteurs_preferes,
+            candidate_v3.secteurs_redhibitoires, candidate_v3.timing,
+            candidate_v3.employment_status, candidate_v3.listening_reasons
+        ]
+        return sum(1 for field in v3_fields if field is not None)
+
+# === PARSER ENTREPRISE V3.0 ===
+
+class CompanyQuestionnaireParserV3:
+    """  Parser entreprise V3.0 avec extension donn es questionnaire"""
+    
+    def __init__(self):
+        self.mappings = QuestionnaireV3Mappings()
+        
+    def parse_questionnaire_v3(self, questionnaire_data: Dict) -> CompanyQuestionnaireV3:
+        """Parse donn es questionnaire entreprise vers structure V3.0"""
+        
+        try:
+            # Données ChatGPT V2.0 (compatibilité)
+            company_v3 = CompanyQuestionnaireV3(
+                titre=questionnaire_data.get("titre", ""),
+                localisation=questionnaire_data.get("localisation", ""),
+                salaire=questionnaire_data.get("salaire", ""),
+                competences_requises=questionnaire_data.get("competences_requises", []),
+                experience_requise=questionnaire_data.get("experience_requise", "")
+            )
+            
+            # === NOUVELLES DONNÉES V3.0 ===
+            
+            # Étape 1 - Structure entreprise
+            structure_data = questionnaire_data.get("company_structure", {})
+            company_v3.company_sector = structure_data.get("sector")
+            company_v3.company_size = structure_data.get("size")
+            
+            # Étape 3 - Recrutement
+            recruitment_data = questionnaire_data.get("recruitment_process", {})
+            company_v3.recruitment_delays = recruitment_data.get("urgency")
+            company_v3.notice_management = recruitment_data.get("notice_period_policy")
+            
+            # Étape 4 - Détails du poste
+            job_details = questionnaire_data.get("job_details", {})
+            company_v3.contract_nature = job_details.get("contract_type")
+            company_v3.job_benefits = job_details.get("benefits", [])
+            company_v3.remote_policy = job_details.get("remote_work_policy")
+            
+            logger.info(f"OK Questionnaire entreprise V3.0 parsé avec {self._count_v3_fields(company_v3)} nouveaux champs")
+            
+            return company_v3
+            
+        except Exception as e:
+            logger.error(f"ERROR Erreur parsing entreprise V3.0: {e}")
+            # Fallback vers structure minimale V2.0
+            return CompanyQuestionnaireV3(
+                titre=questionnaire_data.get("titre", ""),
+                localisation=questionnaire_data.get("localisation", ""),
+                salaire=questionnaire_data.get("salaire", ""),
+                competences_requises=questionnaire_data.get("competences_requises", []),
+                experience_requise=questionnaire_data.get("experience_requise", "")
+            )
+    
+    def extract_v3_components(self, company_v3: CompanyQuestionnaireV3) -> Dict[str, Any]:
+        """TARGET Extraction composants V3.0 entreprise"""
+        
+        components = {}
+        
+        try:
+            # 1. Sector Information (pour Sector Compatibility)
+            if company_v3.company_sector:
+                components["company_sector"] = self._extract_company_sector(company_v3.company_sector)
+            
+            # 2. Urgency/Timing (pour Timing matching)
+            if company_v3.recruitment_delays:
+                components["recruitment_urgency"] = self._extract_recruitment_urgency(company_v3.recruitment_delays)
+            
+            # 3. Work Modality (pour Work Modality matching)
+            if company_v3.remote_policy:
+                components["work_modality_offer"] = self._extract_work_modality_offer(company_v3.remote_policy)
+            
+            # 4. Benefits/Compensation Extended
+            if company_v3.job_benefits:
+                components["benefits_extended"] = self._extract_benefits(company_v3.job_benefits)
+            
+            # 5. Company Culture (basé sur taille + secteur)
+            if company_v3.company_size or company_v3.company_sector:
+                components["company_culture"] = self._extract_company_culture(
+                    company_v3.company_size, company_v3.company_sector
+                )
+            
+            logger.info(f"TARGET Extraits {len(components)} composants V3.0 entreprise")
+            
+            return components
+            
+        except Exception as e:
+            logger.error(f"ERROR Erreur extraction composants V3.0 entreprise: {e}")
+            return {}
+    
+    # === MÉTHODES D'EXTRACTION ENTREPRISE ===
+    
+    def _extract_company_sector(self, sector: str) -> Dict[str, Any]:
+        """Extraction secteur entreprise"""
+        mapped_sector = self.mappings.SECTOR_MAPPING.get(sector, sector)
+        
+        return {
+            "sector_type": mapped_sector,
+            "sector_attractiveness": self._calculate_sector_attractiveness(sector),
+            "growth_potential": self._estimate_growth_potential(sector)
+        }
+    
+    def _extract_recruitment_urgency(self, urgency: str) -> Dict[str, Any]:
+        """Extraction urgence recrutement"""
+        urgency_mapping = {
+            "urgent": RecruitmentUrgency.URGENT,
+            "normal": RecruitmentUrgency.NORMAL,
+            "flexible": RecruitmentUrgency.FLEXIBLE
+        }
+        
+        urgency_scores = {
+            "urgent": 1.0,
+            "normal": 0.6,
+            "flexible": 0.2
+        }
+        
+        return {
+            "urgency_level": urgency_mapping.get(urgency, RecruitmentUrgency.NORMAL),
+            "urgency_score": urgency_scores.get(urgency, 0.6),
+            "timeline_flexibility": urgency == "flexible"
+        }
+    
+    def _extract_work_modality_offer(self, remote_policy: str) -> Dict[str, Any]:
+        """Extraction offre modalit  travail"""
+        modality_mapping = {
+            "sur_site": WorkModalityType.ON_SITE,
+            "télétravail": WorkModalityType.REMOTE,
+            "hybride": WorkModalityType.HYBRID
+        }
+        
+        return {
+            "offered_modality": modality_mapping.get(remote_policy, WorkModalityType.ON_SITE),
+            "modality_flexibility": remote_policy == "hybride",
+            "remote_days_possible": 3 if remote_policy == "hybride" else (5 if remote_policy == "télétravail" else 0)
+        }
+    
+    def _extract_benefits(self, benefits: List[str]) -> Dict[str, Any]:
+        """Extraction avantages  tendus"""
+        benefit_categories = {
+            "compensation": ["prime", "bonus", "intéressement", "actions"],
+            "wellbeing": ["mutuelle", "sport", "conciergerie", "café"],
+            "development": ["formation", "conference", "certification", "coaching"],
+            "flexibility": ["horaires", "télétravail", "congés", "sabbatique"]
+        }
+        
+        categorized_benefits = {}
+        for category, keywords in benefit_categories.items():
+            categorized_benefits[category] = [
+                b for b in benefits 
+                if any(keyword in b.lower() for keyword in keywords)
+            ]
+        
+        return {
+            "total_benefits": len(benefits),
+            "categorized_benefits": categorized_benefits,
+            "benefit_diversity": len([cat for cat, bens in categorized_benefits.items() if bens]),
+            "premium_benefits": len(benefits) > 8  # Seuil "premium"
+        }
+    
+    def _extract_company_culture(self, size: str, sector: str) -> Dict[str, Any]:
+        """Estimation culture entreprise"""
+        culture_traits = []
+        
+        # Traits basés sur taille
+        size_traits = {
+            "startup": ["agile", "innovative", "fast_paced"],
+            "pme": ["collaborative", "flexible", "personal"],
+            "eti": ["structured", "growing", "professional"],
+            "grand_groupe": ["stable", "resourceful", "corporate"]
+        }
+        
+        if size:
+            culture_traits.extend(size_traits.get(size, []))
+        
+        # Traits basés sur secteur
+        sector_traits = {
+            "technologie": ["innovative", "technical", "disruptive"],
+            "finance": ["analytical", "structured", "performance"],
+            "santé": ["caring", "rigorous", "impactful"]
+        }
+        
+        if sector:
+            culture_traits.extend(sector_traits.get(sector, []))
+        
+        return {
+            "culture_traits": list(set(culture_traits)),
+            "innovation_level": "high" if "innovative" in culture_traits else "medium",
+            "structure_level": "high" if "structured" in culture_traits else "medium"
+        }
+    
+    # === UTILITAIRES ENTREPRISE ===
+    
+    def _calculate_sector_attractiveness(self, sector: str) -> float:
+        """Score attractivit  secteur (0-1)"""
+        attractiveness_scores = {
+            "technologie": 0.9,
+            "finance": 0.7,
+            "conseil": 0.8,
+            "santé": 0.8,
+            "éducation": 0.6,
+            "industrie": 0.5
+        }
+        return attractiveness_scores.get(sector, 0.6)
+    
+    def _estimate_growth_potential(self, sector: str) -> float:
+        """Score potentiel croissance secteur (0-1)"""
+        growth_scores = {
+            "technologie": 0.95,
+            "santé": 0.85,
+            "éducation": 0.75,
+            "finance": 0.65,
+            "industrie": 0.45
+        }
+        return growth_scores.get(sector, 0.6)
+    
+    def _count_v3_fields(self, company_v3: CompanyQuestionnaireV3) -> int:
+        """Compte champs V3.0 non-null"""
+        v3_fields = [
+            company_v3.company_sector, company_v3.company_size,
+            company_v3.recruitment_delays, company_v3.notice_management,
+            company_v3.contract_nature, company_v3.job_benefits,
+            company_v3.remote_policy
+        ]
+        return sum(1 for field in v3_fields if field is not None)
+
+# === FACTORY V3.0 ===
+
+class QuestionnaireParserV3Factory:
+    """   Factory pour parsers questionnaire V3.0"""
+    
+    @staticmethod
+    def create_candidate_parser() -> CandidateQuestionnaireParserV3:
+        """Cr e parser candidat V3.0"""
+        return CandidateQuestionnaireParserV3()
+    
+    @staticmethod
+    def create_company_parser() -> CompanyQuestionnaireParserV3:
+        """Cr e parser entreprise V3.0"""
+        return CompanyQuestionnaireParserV3()
+    
+    @staticmethod
+    def create_full_pipeline():
+        """Cr e pipeline complet V3.0"""
+        return {
+            "candidate_parser": CandidateQuestionnaireParserV3(),
+            "company_parser": CompanyQuestionnaireParserV3()
+        }
+
+# === TESTS & VALIDATION ===
+
+if __name__ == "__main__":
+    # Test avec données simulées des questionnaires demo
+    
+    candidate_demo_data = {
+        "personal_info": {
+            "firstName": "Thomas",
+            "lastName": "Dupont"
+        },
+        "skills": ["JavaScript", "React", "Node.js"],
+        "experience": {"total_years": 5},
+        
+        # Nouvelles données V3.0
+        "mobility_preferences": {
+            "transport_methods": ["transport_public", "vélo"],
+            "max_travel_time": "45 min",
+            "work_location_preference": "hybride"
+        },
+        "motivations_sectors": {
+            "motivations_ranking": ["défis_techniques", "équilibre_vie", "évolution_carrière"],
+            "preferred_sectors": ["technologie", "finance"],
+            "excluded_sectors": ["industrie"]
+        },
+        "availability_status": {
+            "availability_timing": "1-3_mois",
+            "current_status": "en_poste",
+            "listening_reasons": ["opportunité_évolution", "défis_techniques"]
+        }
+    }
+    
+    company_demo_data = {
+        "titre": "Développeur Full Stack",
+        "localisation": "Paris",
+        "salaire": "45K-55K",
+        "competences_requises": ["JavaScript", "React"],
+        "experience_requise": "3-5 ans",
+        
+        # Nouvelles données V3.0
+        "company_structure": {
+            "sector": "technologie",
+            "size": "startup"
+        },
+        "recruitment_process": {
+            "urgency": "normal"
+        },
+        "job_details": {
+            "contract_type": "CDI",
+            "benefits": ["mutuelle", "tickets_restaurant", "formation"],
+            "remote_work_policy": "hybride"
+        }
+    }
+    
+    print("🧪 === TEST QUESTIONNAIRE PARSER V3.0 ===")
+    
+    # Test candidat
+    candidate_parser = QuestionnaireParserV3Factory.create_candidate_parser()
+    candidate_v3 = candidate_parser.parse_questionnaire_v3(candidate_demo_data)
+    candidate_components = candidate_parser.extract_v3_components(candidate_v3)
+    
+    print(f"👤 Candidat V3.0 parsé: {candidate_v3.personal_info['firstName']} {candidate_v3.personal_info['lastName']}")
+    print(f"TARGET Composants V3.0 extraits: {list(candidate_components.keys())}")
+    print(f"TOOL Raison écoute: {candidate_components.get('listening_reason', {}).get('type')}")
+    
+    # Test entreprise
+    company_parser = QuestionnaireParserV3Factory.create_company_parser()
+    company_v3 = company_parser.parse_questionnaire_v3(company_demo_data)
+    company_components = company_parser.extract_v3_components(company_v3)
+    
+    print(f"🏢 Entreprise V3.0 parsée: {company_v3.titre}")
+    print(f"TARGET Composants V3.0 extraits: {list(company_components.keys())}")
+    print(f"🏭 Secteur: {company_components.get('company_sector', {}).get('sector_type')}")
+    
+    print("OK Tests Questionnaire Parser V3.0 réussis!")

@@ -1,0 +1,1452 @@
+{
+  "test_metadata": {
+    "version": "3.0.0",
+    "test_type": "simple_transport_intelligence",
+    "timestamp": "2025-07-09T10:55:31.909151",
+    "google_maps_enabled": true
+  },
+  "files_discovery": {
+    "cvs": [
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Mohamed_Ouadhane.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/AGBASSE Teddy_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Rania Fokeladeh.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Issac HOUNKPATIN.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_DARMON_Charlotte.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BELTRANDO Alexandra_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/PIERRE Lucie_CV (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_KIEFFER.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Vincent_Lecocq_Controleur_de_gestion_Jan25.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/MAKOENA Claudette_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/28649daffa7db9dbc1c911ffd1c5cb294e425917.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Natandia Madina_ONADJA.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BUI Chan_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Francya_DENIS_dispo_en_juillet_2025.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DA SILVA christine manuelle_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DA SILVA christine.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/JOHNKENNADY Julien_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/OUBAIR Ikram_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DOROTHÉE LIM.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Rania_Amada.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/2023_-_CV_Beneteau_V1.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BOUGRIANE ABDELLAH_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Vincent_Lecocq_Controleur_de_gestion_Jan25 (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/LOFIGUE Mariam_CV (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Nadia.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_G.SREI_-_ContrA_leur_de_Gestion_ExpA_rimentA_.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Caroline_COTTART.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_-_Cedric_Laville_Comptable_GA_nA_ral.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/e5f021608b17063f35e415ec14fb6a2a798a1981.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Gulden SAHIN (1).pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_Magali_RAINGEVAL_gp.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/cv jessica rios FAF TEXTILE.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/fdp.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/FANDI Hajar_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/HUBERT PATRICE_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cnadidature de fama.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/LOTI Rue_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Douglas Eux CV 2.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/PETIT JEAN-FRANCOIS_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CVFr_Nelly_TANDA_2025.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Nasra Moussa.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/f870ece2e1dd13bf982b394e2f10068ed443fc00.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_ISABELLE_2024.pdf.242998532.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/TADRARTI Yassine_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/ULMANN Serge_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Mehdi Bakhti.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/REBECCA KALINSKY.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/REVERDY Edwige_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BEYE Pape_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Yoann_CAP_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/TADRARTI Yassine_CV[45].pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/BOCHET Elena_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_Comptable_gA_nA_ral_S.Boudir.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Tadjidine Halidi.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/62a44112d3188a6bae684089dfd71cfd85ec48bd.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/MBUYU TSHIDIBI Charlotte_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Move MOZA KAMBI.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/SALVAT Hugo_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Cv_lucrece_herady.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Stefania CARDO.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Bcom HR - Candidature de Sam.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/Gulden SAHIN.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/N'DIAYE Khadiatou_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/DEMIRASLAN Murvet_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/FASI Joseph_CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV Naminata TOURE 01 25.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/CV_2024-07-27_SONIA_TADJADIT.pdf",
+      "/Users/baptistecomas/Desktop/CV TEST/VILLARD Valentin_CV.pdf"
+    ],
+    "fdps": [
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste Assistant Facturation.pdf",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste Responsable Comptable -  Fi.pdf",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Général-91-Etampes.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Comptable Unique ACA (1).docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR- Opportunité Comptable.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/MDV - comptable Sage 1000 (2) 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Fiche de Poste Compta G Interim.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/CR - Chargée de reporting 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR-Comptable Général-Unique.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/CR-  Comptable Confirmé 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - FICHE DE POSTE – Technicien IT - IT Specialist - Paris 16.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiches de Poste Comptable G 8.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Attache de Ventes & Dev - Copie.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR- Comptable confirmé(e).docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Assistant(e) Administratif(ve) et Comptable.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Controleur de Gestion 2025 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Comptable Général - FMC.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Fiche de Poste Gestionnaire Paie et ADP - CI ORTF.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Unique Reuil-Malmaison.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste COMPTA AUX.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Job Desk Poste  Hospitality Manager  Œuvrant.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste - Comptable France - Reporting & Budget.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Interim Gestionnaire de Paie.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Ass Juridique.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de poste — Contrôleur Facturation (H-F) (Interim 9mois).docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/CR - Comptable Technique Chargé(e) de Portfeuille 1.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Chargée de Recouvrement-Comptable Client.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Comptable Unique 93 Montreuil.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR - Fiche de Poste Gestionnaire de Paie et ADP Confirmée.docx",
+      "/Users/baptistecomas/Desktop/FDP TEST/Bcom HR  - Comptable Général Paris 2.docx"
+    ]
+  },
+  "transport_intelligence": {
+    "results": [
+      {
+        "candidat_name": "Cv_Mohamed_Ouadhane",
+        "entreprise_name": "Bcom HR - Fiche de poste Assistant Facturation",
+        "transport_score": {
+          "final_score": 0.7600000000000001,
+          "score_breakdown": {
+            "final_score": 0.7600000000000001,
+            "time_compatibility_score": 0.5,
+            "flexibility_bonus": 0.0,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.9,
+            "compatible_modes_count": 1,
+            "flexibility_multiplier": 1.0
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport"
+            ],
+            "incompatible_modes": [
+              "vehicle"
+            ],
+            "compatibility_details": {
+              "public-transport": {
+                "actual_time_minutes": 30,
+                "time_limit_minutes": 45,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 9.9,
+                  "has_traffic_delay": false
+                }
+              },
+              "vehicle": {
+                "actual_time_minutes": 45,
+                "time_limit_minutes": 35,
+                "is_compatible": false,
+                "time_efficiency": 0.7777777777777778,
+                "route_details": {
+                  "distance_km": 24.26,
+                  "has_traffic_delay": false
+                }
+              }
+            },
+            "compatibility_rate": 0.5
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 30,
+            "distance_km": 9.9,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "public-transport": {
+              "duration_minutes": 30,
+              "distance_km": 9.9,
+              "travel_mode": "transit"
+            },
+            "vehicle": {
+              "duration_minutes": 45,
+              "distance_km": 24.26,
+              "travel_mode": "driving"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 0.76/1.0 (1/2 modes compatibles)",
+            "✅ public-transport: 30min ≤ 45min (efficacité: 100.0%)",
+            "❌ vehicle: 45min > 35min",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "📍 Un seul mode compatible: public-transport - considérer ajouter des alternatives pour plus de flexibilité",
+            "💡 vehicle: augmenter limite de 10min pour rendre compatible (35min → 45min)",
+            "✅ Bonne compatibilité transport - candidat viable",
+            "⚡ Un seul mode compatible - risque si problème transport"
+          ],
+          "calculated_at": "2025-07-09T10:55:33.272549",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "25 rue de Rivoli, 75001 Paris",
+            "entreprise_address": "1 Place de la Défense, 92400 Courbevoie",
+            "processing_context": {
+              "remote_days_per_week": 2,
+              "parking_provided": true,
+              "flexible_hours": true
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0
+            },
+            "potential_bottlenecks": [],
+            "optimization_opportunities": [
+              "vehicle: seulement 10min au-dessus de la limite"
+            ]
+          }
+        },
+        "calculation_time_ms": 1054.9769401550293,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "Cv_Mohamed_Ouadhane",
+        "entreprise_name": "Bcom HR - Fiche de poste Responsable Comptable -  Fi",
+        "transport_score": {
+          "final_score": 0.9787500000000001,
+          "score_breakdown": {
+            "final_score": 0.9787500000000001,
+            "time_compatibility_score": 1.0,
+            "flexibility_bonus": 0.3749999999999998,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.75,
+            "compatible_modes_count": 2,
+            "flexibility_multiplier": 1.15
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport",
+              "vehicle"
+            ],
+            "incompatible_modes": [],
+            "compatibility_details": {
+              "public-transport": {
+                "actual_time_minutes": 15,
+                "time_limit_minutes": 45,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 4.03,
+                  "has_traffic_delay": false
+                }
+              },
+              "vehicle": {
+                "actual_time_minutes": 32,
+                "time_limit_minutes": 35,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 6.22,
+                  "has_traffic_delay": true
+                }
+              }
+            },
+            "compatibility_rate": 1.0
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 15,
+            "distance_km": 4.03,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "public-transport": {
+              "duration_minutes": 15,
+              "distance_km": 4.03,
+              "travel_mode": "transit"
+            },
+            "vehicle": {
+              "duration_minutes": 32,
+              "distance_km": 6.22,
+              "travel_mode": "driving"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 0.98/1.0 (2/2 modes compatibles)",
+            "✅ public-transport: 15min ≤ 45min (efficacité: 100.0%)",
+            "✅ vehicle: 32min ≤ 35min (efficacité: 100.0%)",
+            "🔄 Bonus flexibilité: +37.5% (×1.15 pour 2 modes)",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "✨ Excellente flexibilité avec 2 modes compatibles",
+            "🌟 Excellente compatibilité transport - candidat hautement recommandé"
+          ],
+          "calculated_at": "2025-07-09T10:55:33.882660",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "25 rue de Rivoli, 75001 Paris",
+            "entreprise_address": "50 avenue des Champs-Élysées, 75008 Paris",
+            "processing_context": {
+              "remote_days_per_week": 1,
+              "parking_provided": false,
+              "flexible_hours": true
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport",
+              "vehicle"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0,
+              "vehicle": 1.0
+            },
+            "potential_bottlenecks": [],
+            "optimization_opportunities": []
+          }
+        },
+        "calculation_time_ms": 610.0800037384033,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "Cv_Mohamed_Ouadhane",
+        "entreprise_name": "Bcom HR - Fiche de Poste Comptable Générale 78",
+        "transport_score": {
+          "final_score": 1.0,
+          "score_breakdown": {
+            "final_score": 1.0,
+            "time_compatibility_score": 1.0,
+            "flexibility_bonus": 0.3749999999999998,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.75,
+            "compatible_modes_count": 2,
+            "flexibility_multiplier": 1.15
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport",
+              "vehicle"
+            ],
+            "incompatible_modes": [],
+            "compatibility_details": {
+              "public-transport": {
+                "actual_time_minutes": 17,
+                "time_limit_minutes": 45,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 3.34,
+                  "has_traffic_delay": false
+                }
+              },
+              "vehicle": {
+                "actual_time_minutes": 29,
+                "time_limit_minutes": 35,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 4.88,
+                  "has_traffic_delay": true
+                }
+              }
+            },
+            "compatibility_rate": 1.0
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 17,
+            "distance_km": 3.34,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "public-transport": {
+              "duration_minutes": 17,
+              "distance_km": 3.34,
+              "travel_mode": "transit"
+            },
+            "vehicle": {
+              "duration_minutes": 29,
+              "distance_km": 4.88,
+              "travel_mode": "driving"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 1.00/1.0 (2/2 modes compatibles)",
+            "✅ public-transport: 17min ≤ 45min (efficacité: 100.0%)",
+            "✅ vehicle: 29min ≤ 35min (efficacité: 100.0%)",
+            "🔄 Bonus flexibilité: +37.5% (×1.15 pour 2 modes)",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "✨ Excellente flexibilité avec 2 modes compatibles",
+            "🌟 Excellente compatibilité transport - candidat hautement recommandé"
+          ],
+          "calculated_at": "2025-07-09T10:55:34.561451",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "25 rue de Rivoli, 75001 Paris",
+            "entreprise_address": "15 place Vendôme, 75001 Paris",
+            "processing_context": {
+              "remote_days_per_week": 3,
+              "parking_provided": true,
+              "flexible_hours": false
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport",
+              "vehicle"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0,
+              "vehicle": 1.0
+            },
+            "potential_bottlenecks": [],
+            "optimization_opportunities": []
+          }
+        },
+        "calculation_time_ms": 678.7841320037842,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "AGBASSE Teddy_CV",
+        "entreprise_name": "Bcom HR - Fiche de poste Assistant Facturation",
+        "transport_score": {
+          "final_score": 0.6766666666666666,
+          "score_breakdown": {
+            "final_score": 0.6766666666666666,
+            "time_compatibility_score": 0.3333333333333333,
+            "flexibility_bonus": 0.0,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.9,
+            "compatible_modes_count": 1,
+            "flexibility_multiplier": 1.0
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport"
+            ],
+            "incompatible_modes": [
+              "bike",
+              "walking"
+            ],
+            "compatibility_details": {
+              "public-transport": {
+                "actual_time_minutes": 18,
+                "time_limit_minutes": 40,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 6.24,
+                  "has_traffic_delay": false
+                }
+              },
+              "bike": {
+                "actual_time_minutes": 28,
+                "time_limit_minutes": 25,
+                "is_compatible": false,
+                "time_efficiency": 0.8928571428571429,
+                "route_details": {
+                  "distance_km": 6.69,
+                  "has_traffic_delay": false
+                }
+              },
+              "walking": {
+                "actual_time_minutes": 86,
+                "time_limit_minutes": 45,
+                "is_compatible": false,
+                "time_efficiency": 0.5232558139534884,
+                "route_details": {
+                  "distance_km": 6.08,
+                  "has_traffic_delay": false
+                }
+              }
+            },
+            "compatibility_rate": 0.3333333333333333
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 18,
+            "distance_km": 6.24,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "public-transport": {
+              "duration_minutes": 18,
+              "distance_km": 6.24,
+              "travel_mode": "transit"
+            },
+            "bike": {
+              "duration_minutes": 28,
+              "distance_km": 6.69,
+              "travel_mode": "bicycling"
+            },
+            "walking": {
+              "duration_minutes": 86,
+              "distance_km": 6.08,
+              "travel_mode": "walking"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 0.68/1.0 (1/3 modes compatibles)",
+            "✅ public-transport: 18min ≤ 40min (efficacité: 100.0%)",
+            "❌ bike: 28min > 25min",
+            "❌ walking: 86min > 45min",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "📍 Un seul mode compatible: public-transport - considérer ajouter des alternatives pour plus de flexibilité",
+            "💡 bike: augmenter limite de 3min pour rendre compatible (25min → 28min)",
+            "💡 walking: augmenter limite de 41min pour rendre compatible (45min → 86min)",
+            "✅ Bonne compatibilité transport - candidat viable",
+            "⚡ Un seul mode compatible - risque si problème transport"
+          ],
+          "calculated_at": "2025-07-09T10:55:35.155031",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "15 avenue des Champs-Élysées, 75008 Paris",
+            "entreprise_address": "1 Place de la Défense, 92400 Courbevoie",
+            "processing_context": {
+              "remote_days_per_week": 2,
+              "parking_provided": true,
+              "flexible_hours": true
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0
+            },
+            "potential_bottlenecks": [
+              "walking"
+            ],
+            "optimization_opportunities": [
+              "bike: seulement 3min au-dessus de la limite"
+            ]
+          }
+        },
+        "calculation_time_ms": 593.562126159668,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "AGBASSE Teddy_CV",
+        "entreprise_name": "Bcom HR - Fiche de poste Responsable Comptable -  Fi",
+        "transport_score": {
+          "final_score": 1.0,
+          "score_breakdown": {
+            "final_score": 1.0,
+            "time_compatibility_score": 1.0,
+            "flexibility_bonus": 0.625,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.9,
+            "compatible_modes_count": 3,
+            "flexibility_multiplier": 1.25
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport",
+              "bike",
+              "walking"
+            ],
+            "incompatible_modes": [],
+            "compatibility_details": {
+              "public-transport": {
+                "actual_time_minutes": 4,
+                "time_limit_minutes": 40,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 0.22,
+                  "has_traffic_delay": false
+                }
+              },
+              "bike": {
+                "actual_time_minutes": 2,
+                "time_limit_minutes": 25,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 0.25,
+                  "has_traffic_delay": false
+                }
+              },
+              "walking": {
+                "actual_time_minutes": 4,
+                "time_limit_minutes": 45,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 0.22,
+                  "has_traffic_delay": false
+                }
+              }
+            },
+            "compatibility_rate": 1.0
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 4,
+            "distance_km": 0.22,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "public-transport": {
+              "duration_minutes": 4,
+              "distance_km": 0.22,
+              "travel_mode": "transit"
+            },
+            "bike": {
+              "duration_minutes": 2,
+              "distance_km": 0.25,
+              "travel_mode": "bicycling"
+            },
+            "walking": {
+              "duration_minutes": 4,
+              "distance_km": 0.22,
+              "travel_mode": "walking"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 1.00/1.0 (3/3 modes compatibles)",
+            "✅ public-transport: 4min ≤ 40min (efficacité: 100.0%)",
+            "✅ bike: 2min ≤ 25min (efficacité: 100.0%)",
+            "✅ walking: 4min ≤ 45min (efficacité: 100.0%)",
+            "🔄 Bonus flexibilité: +62.5% (×1.25 pour 3 modes)",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "✨ Excellente flexibilité avec 3 modes compatibles",
+            "🌟 Excellente compatibilité transport - candidat hautement recommandé",
+            "🔄 Candidate très flexible - plusieurs options transport"
+          ],
+          "calculated_at": "2025-07-09T10:55:35.448930",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "15 avenue des Champs-Élysées, 75008 Paris",
+            "entreprise_address": "50 avenue des Champs-Élysées, 75008 Paris",
+            "processing_context": {
+              "remote_days_per_week": 1,
+              "parking_provided": false,
+              "flexible_hours": true
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport",
+              "bike",
+              "walking"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0,
+              "bike": 1.0,
+              "walking": 1.0
+            },
+            "potential_bottlenecks": [],
+            "optimization_opportunities": []
+          }
+        },
+        "calculation_time_ms": 293.89095306396484,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "AGBASSE Teddy_CV",
+        "entreprise_name": "Bcom HR - Fiche de Poste Comptable Générale 78",
+        "transport_score": {
+          "final_score": 1.0,
+          "score_breakdown": {
+            "final_score": 1.0,
+            "time_compatibility_score": 1.0,
+            "flexibility_bonus": 0.625,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.9,
+            "compatible_modes_count": 3,
+            "flexibility_multiplier": 1.25
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport",
+              "bike",
+              "walking"
+            ],
+            "incompatible_modes": [],
+            "compatibility_details": {
+              "public-transport": {
+                "actual_time_minutes": 13,
+                "time_limit_minutes": 40,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 2.26,
+                  "has_traffic_delay": false
+                }
+              },
+              "bike": {
+                "actual_time_minutes": 10,
+                "time_limit_minutes": 25,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 2.31,
+                  "has_traffic_delay": false
+                }
+              },
+              "walking": {
+                "actual_time_minutes": 27,
+                "time_limit_minutes": 45,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 1.92,
+                  "has_traffic_delay": false
+                }
+              }
+            },
+            "compatibility_rate": 1.0
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 13,
+            "distance_km": 2.26,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "public-transport": {
+              "duration_minutes": 13,
+              "distance_km": 2.26,
+              "travel_mode": "transit"
+            },
+            "bike": {
+              "duration_minutes": 10,
+              "distance_km": 2.31,
+              "travel_mode": "bicycling"
+            },
+            "walking": {
+              "duration_minutes": 27,
+              "distance_km": 1.92,
+              "travel_mode": "walking"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 1.00/1.0 (3/3 modes compatibles)",
+            "✅ public-transport: 13min ≤ 40min (efficacité: 100.0%)",
+            "✅ bike: 10min ≤ 25min (efficacité: 100.0%)",
+            "✅ walking: 27min ≤ 45min (efficacité: 100.0%)",
+            "🔄 Bonus flexibilité: +62.5% (×1.25 pour 3 modes)",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "✨ Excellente flexibilité avec 3 modes compatibles",
+            "🌟 Excellente compatibilité transport - candidat hautement recommandé",
+            "🔄 Candidate très flexible - plusieurs options transport"
+          ],
+          "calculated_at": "2025-07-09T10:55:35.823317",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "15 avenue des Champs-Élysées, 75008 Paris",
+            "entreprise_address": "15 place Vendôme, 75001 Paris",
+            "processing_context": {
+              "remote_days_per_week": 3,
+              "parking_provided": true,
+              "flexible_hours": false
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport",
+              "bike",
+              "walking"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0,
+              "bike": 1.0,
+              "walking": 1.0
+            },
+            "potential_bottlenecks": [],
+            "optimization_opportunities": []
+          }
+        },
+        "calculation_time_ms": 374.3891716003418,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "Rania Fokeladeh",
+        "entreprise_name": "Bcom HR - Fiche de poste Assistant Facturation",
+        "transport_score": {
+          "final_score": 0.7600000000000001,
+          "score_breakdown": {
+            "final_score": 0.7600000000000001,
+            "time_compatibility_score": 0.5,
+            "flexibility_bonus": 0.0,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.9,
+            "compatible_modes_count": 1,
+            "flexibility_multiplier": 1.0
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport"
+            ],
+            "incompatible_modes": [
+              "vehicle"
+            ],
+            "compatibility_details": {
+              "vehicle": {
+                "actual_time_minutes": 47,
+                "time_limit_minutes": 30,
+                "is_compatible": false,
+                "time_efficiency": 0.6382978723404256,
+                "route_details": {
+                  "distance_km": 15.06,
+                  "has_traffic_delay": true
+                }
+              },
+              "public-transport": {
+                "actual_time_minutes": 26,
+                "time_limit_minutes": 50,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 10.73,
+                  "has_traffic_delay": false
+                }
+              }
+            },
+            "compatibility_rate": 0.5
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 26,
+            "distance_km": 10.73,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "vehicle": {
+              "duration_minutes": 47,
+              "distance_km": 15.06,
+              "travel_mode": "driving"
+            },
+            "public-transport": {
+              "duration_minutes": 26,
+              "distance_km": 10.73,
+              "travel_mode": "transit"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 0.76/1.0 (1/2 modes compatibles)",
+            "❌ vehicle: 47min > 30min",
+            "✅ public-transport: 26min ≤ 50min (efficacité: 100.0%)",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "📍 Un seul mode compatible: public-transport - considérer ajouter des alternatives pour plus de flexibilité",
+            "💡 vehicle: augmenter limite de 17min pour rendre compatible (30min → 47min)",
+            "✅ Bonne compatibilité transport - candidat viable",
+            "⚡ Un seul mode compatible - risque si problème transport"
+          ],
+          "calculated_at": "2025-07-09T10:55:36.905032",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "10 place de la République, 75011 Paris",
+            "entreprise_address": "1 Place de la Défense, 92400 Courbevoie",
+            "processing_context": {
+              "remote_days_per_week": 2,
+              "parking_provided": true,
+              "flexible_hours": true
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0
+            },
+            "potential_bottlenecks": [
+              "vehicle"
+            ],
+            "optimization_opportunities": []
+          }
+        },
+        "calculation_time_ms": 1081.70485496521,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "Rania Fokeladeh",
+        "entreprise_name": "Bcom HR - Fiche de poste Responsable Comptable -  Fi",
+        "transport_score": {
+          "final_score": 0.65,
+          "score_breakdown": {
+            "final_score": 0.65,
+            "time_compatibility_score": 0.5,
+            "flexibility_bonus": 0.0,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.9,
+            "compatible_modes_count": 1,
+            "flexibility_multiplier": 1.0
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "public-transport"
+            ],
+            "incompatible_modes": [
+              "vehicle"
+            ],
+            "compatibility_details": {
+              "vehicle": {
+                "actual_time_minutes": 36,
+                "time_limit_minutes": 30,
+                "is_compatible": false,
+                "time_efficiency": 0.8333333333333334,
+                "route_details": {
+                  "distance_km": 4.89,
+                  "has_traffic_delay": true
+                }
+              },
+              "public-transport": {
+                "actual_time_minutes": 19,
+                "time_limit_minutes": 50,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 4.92,
+                  "has_traffic_delay": false
+                }
+              }
+            },
+            "compatibility_rate": 0.5
+          },
+          "best_transport_option": {
+            "mode": "public-transport",
+            "duration_minutes": 19,
+            "distance_km": 4.92,
+            "has_traffic_delays": false
+          },
+          "all_routes": {
+            "vehicle": {
+              "duration_minutes": 36,
+              "distance_km": 4.89,
+              "travel_mode": "driving"
+            },
+            "public-transport": {
+              "duration_minutes": 19,
+              "distance_km": 4.92,
+              "travel_mode": "transit"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 0.65/1.0 (1/2 modes compatibles)",
+            "❌ vehicle: 36min > 30min",
+            "✅ public-transport: 19min ≤ 50min (efficacité: 100.0%)",
+            "🌟 Recommandé: public-transport"
+          ],
+          "recommendations": [
+            "📍 Un seul mode compatible: public-transport - considérer ajouter des alternatives pour plus de flexibilité",
+            "💡 vehicle: augmenter limite de 6min pour rendre compatible (30min → 36min)",
+            "✅ Bonne compatibilité transport - candidat viable",
+            "⚡ Un seul mode compatible - risque si problème transport"
+          ],
+          "calculated_at": "2025-07-09T10:55:37.283665",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "10 place de la République, 75011 Paris",
+            "entreprise_address": "50 avenue des Champs-Élysées, 75008 Paris",
+            "processing_context": {
+              "remote_days_per_week": 1,
+              "parking_provided": false,
+              "flexible_hours": true
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "public-transport"
+            ],
+            "time_efficiency_by_mode": {
+              "public-transport": 1.0
+            },
+            "potential_bottlenecks": [],
+            "optimization_opportunities": [
+              "vehicle: seulement 6min au-dessus de la limite"
+            ]
+          }
+        },
+        "calculation_time_ms": 378.62420082092285,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      },
+      {
+        "candidat_name": "Rania Fokeladeh",
+        "entreprise_name": "Bcom HR - Fiche de Poste Comptable Générale 78",
+        "transport_score": {
+          "final_score": 1.0,
+          "score_breakdown": {
+            "final_score": 1.0,
+            "time_compatibility_score": 1.0,
+            "flexibility_bonus": 0.3749999999999998,
+            "efficiency_score": 1.0,
+            "reliability_score": 0.75,
+            "compatible_modes_count": 2,
+            "flexibility_multiplier": 1.15
+          },
+          "compatibility_analysis": {
+            "compatible_modes": [
+              "vehicle",
+              "public-transport"
+            ],
+            "incompatible_modes": [],
+            "compatibility_details": {
+              "vehicle": {
+                "actual_time_minutes": 25,
+                "time_limit_minutes": 30,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 3.22,
+                  "has_traffic_delay": true
+                }
+              },
+              "public-transport": {
+                "actual_time_minutes": 18,
+                "time_limit_minutes": 50,
+                "is_compatible": true,
+                "time_efficiency": 1.0,
+                "route_details": {
+                  "distance_km": 3.11,
+                  "has_traffic_delay": false
+                }
+              }
+            },
+            "compatibility_rate": 1.0
+          },
+          "best_transport_option": {
+            "mode": "vehicle",
+            "duration_minutes": 25,
+            "distance_km": 3.22,
+            "has_traffic_delays": true
+          },
+          "all_routes": {
+            "vehicle": {
+              "duration_minutes": 25,
+              "distance_km": 3.22,
+              "travel_mode": "driving"
+            },
+            "public-transport": {
+              "duration_minutes": 18,
+              "distance_km": 3.11,
+              "travel_mode": "transit"
+            }
+          },
+          "explanations": [
+            "🎯 Score transport: 1.00/1.0 (2/2 modes compatibles)",
+            "✅ vehicle: 25min ≤ 30min (efficacité: 100.0%)",
+            "✅ public-transport: 18min ≤ 50min (efficacité: 100.0%)",
+            "🔄 Bonus flexibilité: +37.5% (×1.15 pour 2 modes)",
+            "🌟 Recommandé: vehicle"
+          ],
+          "recommendations": [
+            "✨ Excellente flexibilité avec 2 modes compatibles",
+            "🌟 Excellente compatibilité transport - candidat hautement recommandé"
+          ],
+          "calculated_at": "2025-07-09T10:55:37.570864",
+          "version": "3.0.0",
+          "scorer": "LocationTransportScorerV3",
+          "engine_metadata": {
+            "processed_by": "TransportIntelligenceEngine",
+            "version": "3.0.0",
+            "candidat_address": "10 place de la République, 75011 Paris",
+            "entreprise_address": "15 place Vendôme, 75001 Paris",
+            "processing_context": {
+              "remote_days_per_week": 3,
+              "parking_provided": true,
+              "flexible_hours": false
+            },
+            "enhancements_applied": [
+              "engine_recommendations",
+              "pattern_analysis"
+            ]
+          },
+          "pattern_analysis": {
+            "preferred_modes": [
+              "vehicle",
+              "public-transport"
+            ],
+            "time_efficiency_by_mode": {
+              "vehicle": 1.0,
+              "public-transport": 1.0
+            },
+            "potential_bottlenecks": [],
+            "optimization_opportunities": []
+          }
+        },
+        "calculation_time_ms": 287.2271537780762,
+        "google_maps_used": true,
+        "status": "✅ RÉEL"
+      }
+    ],
+    "performance": {
+      "total_combinations": 9,
+      "successful_calculations": 9,
+      "success_rate": 100.0,
+      "google_maps_enabled": true,
+      "real_calculations": true
+    }
+  },
+  "matching_results": {
+    "matches": [
+      {
+        "candidat_name": "Cv_Mohamed_Ouadhane",
+        "entreprise_name": "Bcom HR - Fiche de poste Assistant Facturation",
+        "final_score": 0.831,
+        "scores_detail": {
+          "transport": 0.76,
+          "skills": 0.91,
+          "experience": 0.88,
+          "motivations": 0.8
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 30,
+            "distance_km": 9.9,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "🌟 Excellent",
+        "calculation_time_ms": 1054.9769401550293,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "Cv_Mohamed_Ouadhane",
+        "entreprise_name": "Bcom HR - Fiche de poste Responsable Comptable -  Fi",
+        "final_score": 0.913,
+        "scores_detail": {
+          "transport": 0.979,
+          "skills": 0.91,
+          "experience": 0.76,
+          "motivations": 0.96
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport",
+            "vehicle"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 15,
+            "distance_km": 4.03,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "🌟 Excellent",
+        "calculation_time_ms": 610.0800037384033,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "Cv_Mohamed_Ouadhane",
+        "entreprise_name": "Bcom HR - Fiche de Poste Comptable Générale 78",
+        "final_score": 0.903,
+        "scores_detail": {
+          "transport": 1.0,
+          "skills": 0.91,
+          "experience": 0.88,
+          "motivations": 0.8
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport",
+            "vehicle"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 17,
+            "distance_km": 3.34,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "🌟 Excellent",
+        "calculation_time_ms": 678.7841320037842,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "AGBASSE Teddy_CV",
+        "entreprise_name": "Bcom HR - Fiche de poste Assistant Facturation",
+        "final_score": 0.796,
+        "scores_detail": {
+          "transport": 0.677,
+          "skills": 0.83,
+          "experience": 0.88,
+          "motivations": 0.84
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 18,
+            "distance_km": 6.24,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "✅ Très bon",
+        "calculation_time_ms": 593.562126159668,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "AGBASSE Teddy_CV",
+        "entreprise_name": "Bcom HR - Fiche de poste Responsable Comptable -  Fi",
+        "final_score": 0.859,
+        "scores_detail": {
+          "transport": 1.0,
+          "skills": 0.83,
+          "experience": 0.76,
+          "motivations": 0.8
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport",
+            "bike",
+            "walking"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 4,
+            "distance_km": 0.22,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "🌟 Excellent",
+        "calculation_time_ms": 293.89095306396484,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "AGBASSE Teddy_CV",
+        "entreprise_name": "Bcom HR - Fiche de Poste Comptable Générale 78",
+        "final_score": 0.893,
+        "scores_detail": {
+          "transport": 1.0,
+          "skills": 0.83,
+          "experience": 0.88,
+          "motivations": 0.84
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport",
+            "bike",
+            "walking"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 13,
+            "distance_km": 2.26,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "🌟 Excellent",
+        "calculation_time_ms": 374.3891716003418,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "Rania Fokeladeh",
+        "entreprise_name": "Bcom HR - Fiche de poste Assistant Facturation",
+        "final_score": 0.837,
+        "scores_detail": {
+          "transport": 0.76,
+          "skills": 0.85,
+          "experience": 0.88,
+          "motivations": 0.88
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 26,
+            "distance_km": 10.73,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "🌟 Excellent",
+        "calculation_time_ms": 1081.70485496521,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "Rania Fokeladeh",
+        "entreprise_name": "Bcom HR - Fiche de poste Responsable Comptable -  Fi",
+        "final_score": 0.77,
+        "scores_detail": {
+          "transport": 0.65,
+          "skills": 0.85,
+          "experience": 0.76,
+          "motivations": 0.84
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "public-transport"
+          ],
+          "best_transport": {
+            "mode": "public-transport",
+            "duration_minutes": 19,
+            "distance_km": 4.92,
+            "has_traffic_delays": false
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "✅ Très bon",
+        "calculation_time_ms": 378.62420082092285,
+        "version": "3.0.0_transport_intelligence"
+      },
+      {
+        "candidat_name": "Rania Fokeladeh",
+        "entreprise_name": "Bcom HR - Fiche de Poste Comptable Générale 78",
+        "final_score": 0.908,
+        "scores_detail": {
+          "transport": 1.0,
+          "skills": 0.85,
+          "experience": 0.88,
+          "motivations": 0.88
+        },
+        "transport_details": {
+          "compatible_modes": [
+            "vehicle",
+            "public-transport"
+          ],
+          "best_transport": {
+            "mode": "vehicle",
+            "duration_minutes": 25,
+            "distance_km": 3.22,
+            "has_traffic_delays": true
+          },
+          "google_maps_used": true
+        },
+        "match_quality": "🌟 Excellent",
+        "calculation_time_ms": 287.2271537780762,
+        "version": "3.0.0_transport_intelligence"
+      }
+    ],
+    "scores": {
+      "total_matches": 9,
+      "successful_matches": 9,
+      "average_score": 0.857,
+      "max_score": 0.913,
+      "min_score": 0.77,
+      "excellent_matches": 7,
+      "excellent_rate": 77.8
+    }
+  },
+  "performance_summary": {
+    "total_execution_time_sec": 5.66,
+    "files_discovered": {
+      "cvs": 69,
+      "fdps": 34
+    },
+    "transport_intelligence": {
+      "total_combinations": 9,
+      "successful_calculations": 9,
+      "success_rate": 100.0,
+      "google_maps_enabled": true,
+      "real_calculations": true
+    },
+    "matching_results": {
+      "total_matches": 9,
+      "successful_matches": 9,
+      "average_score": 0.857,
+      "max_score": 0.913,
+      "min_score": 0.77,
+      "excellent_matches": 7,
+      "excellent_rate": 77.8
+    },
+    "v3_innovations": {
+      "transport_intelligence_v3": "✅ Testé",
+      "google_maps_integration": "✅ Fonctionnel",
+      "scoring_ponderation_v3": "✅ Validé (30% transport)",
+      "real_time_calculations": "✅ Opérationnel"
+    }
+  },
+  "errors": []
+}

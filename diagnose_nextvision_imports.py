@@ -85,9 +85,9 @@ class NextvisionImportDiagnostic:
                 'description': 'Commitment Bridge chemin incorrect'
             },
             {
-                'pattern': r'TransportMethod',
+                'pattern': r'TravelMode',
                 'correct': 'TravelMode',
-                'description': 'Ancien modèle TransportMethod utilisé'
+                'description': 'Ancien modèle TravelMode utilisé'
             }
         ]
         
@@ -327,7 +327,7 @@ class NextvisionImportDiagnostic:
         if len(high) > 0:
             print("2. ⚠️ IMPORTANT: Corriger les chemins d'imports")
             print("   • Plusieurs modules utilisent d'anciens chemins")
-            print("   • Remplacer TransportMethod par TravelMode")
+            print("   • Remplacer TravelMode par TravelMode")
         
         if len(medium) > 0:
             print("3. ℹ️ OPTIMISATION: Issues moyennes à corriger ensuite")

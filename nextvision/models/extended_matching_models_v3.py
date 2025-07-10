@@ -61,7 +61,7 @@ class CandidateStatus(Enum):
     ETUDIANT = "etudiant"
     FREELANCE = "freelance"
 
-class TransportMethod(Enum):
+class TravelMode(Enum):
     """Moyens de transport disponibles pour Transport Intelligence"""
     VOITURE = "voiture"
     TRANSPORT_COMMUN = "transport_commun"
@@ -135,7 +135,7 @@ class LocationProfile:
 @dataclass
 class TransportIntelligenceProfile:
     """Intelligence Transport - Nouveau V3.0"""
-    preferred_methods: List[TransportMethod] = field(default_factory=list)
+    preferred_methods: List[TravelMode] = field(default_factory=list)
     max_commute_time: int = 45  # minutes
     max_transport_cost_daily: float = 15.0  # euros/jour
     ecological_preference: bool = False
@@ -449,7 +449,7 @@ def validate_extended_profile(profile: ExtendedMatchingProfile) -> Tuple[bool, L
 @dataclass
 class TransportCompatibilityResult:
     """Résultat de compatibilité transport"""
-    method: TransportMethod
+    method: TravelMode
     time_minutes: int
     cost_daily: float
     comfort_score: float  # 0-1
@@ -462,7 +462,7 @@ class TransportIntelligenceScorer:
     
     @staticmethod
     def score_transport_method(
-        method: TransportMethod,
+        method: TravelMode,
         time_minutes: int,
         max_time: int,
         cost_daily: float,
@@ -473,19 +473,19 @@ class TransportIntelligenceScorer:
         
         # Scores de base par méthode
         base_scores = {
-            TransportMethod.VOITURE: {"comfort": 0.9, "reliability": 0.8},
-            TransportMethod.TRANSPORT_COMMUN: {"comfort": 0.6, "reliability": 0.7},
-            TransportMethod.VELO: {"comfort": 0.5, "reliability": 0.6},
-            TransportMethod.MARCHE: {"comfort": 0.3, "reliability": 0.9},
-            TransportMethod.TROTTINETTE: {"comfort": 0.7, "reliability": 0.5},
-            TransportMethod.COVOITURAGE: {"comfort": 0.8, "reliability": 0.7}
+            TravelMode.VOITURE: {"comfort": 0.9, "reliability": 0.8},
+            TravelMode.TRANSPORT_COMMUN: {"comfort": 0.6, "reliability": 0.7},
+            TravelMode.VELO: {"comfort": 0.5, "reliability": 0.6},
+            TravelMode.MARCHE: {"comfort": 0.3, "reliability": 0.9},
+            TravelMode.TROTTINETTE: {"comfort": 0.7, "reliability": 0.5},
+            TravelMode.COVOITURAGE: {"comfort": 0.8, "reliability": 0.7}
         }
         
         comfort = base_scores.get(method, {"comfort": 0.5})["comfort"]
         reliability = base_scores.get(method, {"reliability": 0.5})["reliability"]
         
         # Bonus écologique
-        is_eco = method in [TransportMethod.VELO, TransportMethod.MARCHE, TransportMethod.TRANSPORT_COMMUN]
+        is_eco = method in [TravelMode.VELO, TravelMode.MARCHE, TravelMode.TRANSPORT_COMMUN]
         if eco_preference and is_eco:
             comfort += 0.1
             reliability += 0.1
@@ -604,9 +604,9 @@ if __name__ == "__main__":
     
     # Test Transport Intelligence
     print("\n=== Transport Methods ===")
-    print(f"Méthodes disponibles: {TransportMethod.get_all_methods()}")
-    print(f"Méthodes écologiques: {TransportMethod.get_eco_methods()}")
-    print(f"Méthodes gratuites: {TransportMethod.get_cost_free_methods()}")
+    print(f"Méthodes disponibles: {TravelMode.get_all_methods()}")
+    print(f"Méthodes écologiques: {TravelMode.get_eco_methods()}")
+    print(f"Méthodes gratuites: {TravelMode.get_cost_free_methods()}")
     
     is_valid, errors = validate_extended_profile(profile)
     print(f"\nValidation: {'✅ OK' if is_valid else '❌ Erreurs'}")

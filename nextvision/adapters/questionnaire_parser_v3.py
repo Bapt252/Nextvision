@@ -23,7 +23,7 @@ from enum import Enum
 # Import des modèles V3.0
 from nextvision.models.extended_matching_models_v3 import (
     ExtendedMatchingProfile, ListeningReasonType, MotivationType,
-    TransportMethod, ContractPreference, WorkModalityType,
+    TravelMode, ContractPreference, WorkModalityType,
     SectorCompatibilityData, TimingPreference, CandidateStatus,
     CompanySectorType, CompanySize, RecruitmentUrgency
 )
@@ -115,11 +115,11 @@ class QuestionnaireV3Mappings:
     
     # Mapping transport
     TRANSPORT_MAPPING = {
-        "voiture": TransportMethod.CAR,
-        "transport_public": TransportMethod.PUBLIC_TRANSPORT,
-        "vélo": TransportMethod.BIKE,
-        "marche": TransportMethod.WALK,
-        "télétravail": TransportMethod.REMOTE
+        "voiture": TravelMode.CAR,
+        "transport_public": TravelMode.PUBLIC_TRANSPORT,
+        "vélo": TravelMode.BIKE,
+        "marche": TravelMode.WALK,
+        "télétravail": TravelMode.REMOTE
     }
     
     # Mapping secteurs entreprise
@@ -337,14 +337,14 @@ class CandidateQuestionnaireParserV3:
     
     def _extract_transport_data(self, transport_methods: List[str], max_travel_time: int) -> Dict[str, Any]:
         """Extraction données transport étendues"""
-        mapped_methods = [self.mappings.TRANSPORT_MAPPING.get(t, TransportMethod.CAR) 
+        mapped_methods = [self.mappings.TRANSPORT_MAPPING.get(t, TravelMode.CAR) 
                          for t in (transport_methods or [])]
         
         return {
             "transport_methods": mapped_methods,
             "max_travel_time_minutes": max_travel_time or 45,
             "transport_flexibility": len(mapped_methods) > 2,
-            "remote_capable": TransportMethod.REMOTE in mapped_methods
+            "remote_capable": TravelMode.REMOTE in mapped_methods
         }
     
     # === UTILITAIRES ===

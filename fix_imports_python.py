@@ -90,8 +90,8 @@ class NextvisionIntegrationFixer:
                 print_error(f"Échec installation {dep}: {e}")
     
     def fix_transport_method_imports(self):
-        """Corrige les imports TransportMethod → TravelMode"""
-        print_status("Correction des imports TransportMethod...")
+        """Corrige les imports TravelMode → TravelMode"""
+        print_status("Correction des imports TravelMode...")
         
         files_fixed = 0
         
@@ -102,23 +102,23 @@ class NextvisionIntegrationFixer:
                 
                 original_content = content
                 
-                # Pattern 1: Import direct de TransportMethod
+                # Pattern 1: Import direct de TravelMode
                 content = re.sub(
-                    r'from nextvision\.models\.extended_matching_models_v3 import.*TransportMethod',
+                    r'from nextvision\.models\.extended_matching_models_v3 import.*TravelMode',
                     'from nextvision.models.transport_models import TravelMode',
                     content
                 )
                 
-                # Pattern 2: Usage de TransportMethod dans le code
+                # Pattern 2: Usage de TravelMode dans le code
                 content = re.sub(
-                    r'\bTransportMethod\b',
+                    r'\bTravelMode\b',
                     'TravelMode',
                     content
                 )
                 
-                # Pattern 3: Imports multiples avec TransportMethod
+                # Pattern 3: Imports multiples avec TravelMode
                 content = re.sub(
-                    r'from nextvision\.models\.extended_matching_models_v3 import \((.*?)TransportMethod(.*?)\)',
+                    r'from nextvision\.models\.extended_matching_models_v3 import \((.*?)TravelMode(.*?)\)',
                     r'from nextvision.models.extended_matching_models_v3 import (\1\2)\nfrom nextvision.models.transport_models import TravelMode',
                     content,
                     flags=re.DOTALL
@@ -128,17 +128,17 @@ class NextvisionIntegrationFixer:
                     with open(py_file, 'w', encoding='utf-8') as f:
                         f.write(content)
                     
-                    print_success(f"✅ Corrigé TransportMethod dans: {py_file.name}")
+                    print_success(f"✅ Corrigé TravelMode dans: {py_file.name}")
                     files_fixed += 1
-                    self.fixes_applied.append(f"Corrigé TransportMethod: {py_file}")
+                    self.fixes_applied.append(f"Corrigé TravelMode: {py_file}")
                     
             except Exception as e:
                 print_error(f"Erreur correction {py_file}: {e}")
         
         if files_fixed > 0:
-            print_success(f"TransportMethod corrigé dans {files_fixed} fichiers")
+            print_success(f"TravelMode corrigé dans {files_fixed} fichiers")
         else:
-            print_success("Aucun import TransportMethod trouvé à corriger")
+            print_success("Aucun import TravelMode trouvé à corriger")
     
     def fix_absolute_imports(self):
         """Corrige les imports relatifs en imports absolus"""
@@ -346,7 +346,7 @@ typing-extensions>=4.8.0
         # 5. Création __init__.py manquants
         self.create_missing_init_files()
         
-        # 6. Correction imports TransportMethod
+        # 6. Correction imports TravelMode
         self.fix_transport_method_imports()
         
         # 7. Correction imports relatifs

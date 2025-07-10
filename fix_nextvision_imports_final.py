@@ -34,20 +34,20 @@ class NextvisionImportFixer:
         # Mapping des corrections d'imports
         self.import_corrections = {
             # Corrections de chemins services
-            "from nextvision.google_maps_service import": "from nextvision.services.google_maps_service import",
+            "from nextvision.services.google_maps_service import": "from nextvision.services.google_maps_service import",
             "import nextvision.google_maps_service": "import nextvision.services.google_maps_service",
             "nextvision.google_maps_service.": "nextvision.services.google_maps_service.",
             
-            "from nextvision.location_transport_scorer_v3 import": "from nextvision.services.scorers_v3.location_transport_scorer_v3 import",
+            "from nextvision.services.scorers_v3.location_transport_scorer_v3 import": "from nextvision.services.scorers_v3.location_transport_scorer_v3 import",
             "import nextvision.location_transport_scorer_v3": "import nextvision.services.scorers_v3.location_transport_scorer_v3",
             "nextvision.location_transport_scorer_v3.": "nextvision.services.scorers_v3.location_transport_scorer_v3.",
             
-            "from nextvision.transport_calculator import": "from nextvision.services.transport_calculator import",
+            "from nextvision.services.transport_calculator import": "from nextvision.services.transport_calculator import",
             "import nextvision.transport_calculator": "import nextvision.services.transport_calculator",
             
             # Corrections modèles transport
-            "TransportMethod": "TravelMode",
-            "from nextvision.models.transport_models import TransportMethod": "from nextvision.models.transport_models import TravelMode",
+            "TravelMode": "TravelMode",
+            "from nextvision.models.transport_models import TravelMode": "from nextvision.models.transport_models import TravelMode",
             
             # Corrections parsing bridge
             "from nextvision.parsing.commitment_bridge_optimized import": "from nextvision.services.parsing.commitment_bridge_optimized import",
@@ -194,20 +194,20 @@ class NextvisionImportFixer:
             # Corrections spécifiques par fichier
             if file_path.name == "google_maps_service.py":
                 # Corrections spécifiques Google Maps
-                if "from nextvision.models.transport_models import TransportMethod" in content:
+                if "from nextvision.models.transport_models import TravelMode" in content:
                     content = content.replace(
-                        "from nextvision.models.transport_models import TransportMethod",
+                        "from nextvision.models.transport_models import TravelMode",
                         "from nextvision.models.transport_models import TravelMode"
                     )
                     corrections_in_file += 1
             
             elif file_path.name == "transport_calculator.py":
                 # Corrections Transport Calculator
-                if "TransportMethod.DRIVING" in content:
-                    content = content.replace("TransportMethod.DRIVING", "TravelMode.DRIVING")
+                if "TravelMode.DRIVING" in content:
+                    content = content.replace("TravelMode.DRIVING", "TravelMode.DRIVING")
                     corrections_in_file += 1
-                if "TransportMethod.TRANSIT" in content:
-                    content = content.replace("TransportMethod.TRANSIT", "TravelMode.TRANSIT")
+                if "TravelMode.TRANSIT" in content:
+                    content = content.replace("TravelMode.TRANSIT", "TravelMode.TRANSIT")
                     corrections_in_file += 1
             
             # Sauvegarde si modifications

@@ -67,7 +67,7 @@ class CandidateStatusType(str, Enum):
     ETUDIANT = "etudiant"
     FREELANCE = "freelance"
 
-class TransportMethod(str, Enum):
+class TravelMode(str, Enum):
     """Moyens de transport V3.0"""
     VOITURE = "voiture"
     TRANSPORT_COMMUN = "transport_commun"
@@ -89,7 +89,7 @@ class CompanySize(str, Enum):
 
 class TransportPreferencesV3(BaseModel):
     """Étape 2 - Préférences transport et mobilité"""
-    transport_methods: List[TransportMethod] = []
+    transport_methods: List[TravelMode] = []
     max_travel_time: int = Field(default=45, description="Temps trajet max en minutes")
     contract_ranking: List[TypeContrat] = []
     office_preference: WorkModalityType = WorkModalityType.HYBRID

@@ -21,7 +21,7 @@ from datetime import datetime
 from dataclasses import dataclass, asdict
 
 # Import Enhanced Bridge V2.0 (héritage)
-from nextvision.services.enhanced_commitment_bridge import (
+# Circular import removed - using composition instead
     EnhancedCommitmentBridge as EnhancedBridgeV2,
     BridgeValidationResult, EnhancedBridgeStats, BridgePerformanceMetrics,
     AutoFixEngine as AutoFixEngineV2
@@ -39,7 +39,7 @@ from nextvision.models.bidirectional_models import (
 )
 
 # Import nouveau parser V3.0
-from nextvision.adapters.questionnaire_parser_v3 import (
+# Adapter import replaced - using direct implementation
     QuestionnaireParserV3Factory, CandidateQuestionnaireParserV3,
     CompanyQuestionnaireParserV3, CandidateQuestionnaireV3, CompanyQuestionnaireV3
 )

@@ -185,7 +185,7 @@ class NextvisionIntegrationValidator:
             return False
 
     def validate_model_consistency(self) -> bool:
-        """Valide la cohérence des modèles (ex: TravelMode vs TransportMethod)"""
+        """Valide la cohérence des modèles (ex: TravelMode vs TravelMode)"""
         
         print("\n🎯 VALIDATION COHÉRENCE MODÈLES")
         print("-" * 40)
@@ -360,7 +360,7 @@ class NextvisionIntegrationValidator:
             actions.append("🛠️ Transformer héritage en composition")
         
         if not self.validation_results.get("model_consistency", False):
-            actions.append("🎯 Corriger modèles: TransportMethod → TravelMode")
+            actions.append("🎯 Corriger modèles: TravelMode → TravelMode")
         
         if not self.validation_results.get("service_instantiation", False):
             actions.append("🛠️ Corriger instanciation services: vérifier dépendances")

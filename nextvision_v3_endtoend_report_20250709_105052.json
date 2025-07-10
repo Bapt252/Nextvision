@@ -1,0 +1,34 @@
+{
+  "test_metadata": {
+    "version": "3.0.0",
+    "test_type": "end_to_end_real_files",
+    "transport_intelligence": "v3.0",
+    "timestamp": "2025-07-09T10:50:52.318589",
+    "google_maps_enabled": true
+  },
+  "files_discovery": {
+    "cvs": [],
+    "fdps": []
+  },
+  "parsing_results": {
+    "cvs": [],
+    "fdps": []
+  },
+  "transport_extraction": {
+    "cvs": [],
+    "fdps": []
+  },
+  "transport_intelligence": {
+    "results": [],
+    "performance": {}
+  },
+  "matching_results": {
+    "matches": [],
+    "scores": []
+  },
+  "performance_summary": {},
+  "errors": [
+    "❌ Erreur import services V3.0: cannot import name 'TransportMethod' from 'nextvision.models.extended_matching_models_v3' (/Users/baptistecomas/Nextvision/nextvision/models/extended_matching_models_v3.py)",
+    "Erreur critique: cannot import name 'TransportMethod' from 'nextvision.models.extended_matching_models_v3' (/Users/baptistecomas/Nextvision/nextvision/models/extended_matching_models_v3.py)"
+  ]
+}

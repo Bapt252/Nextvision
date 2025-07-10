@@ -1,0 +1,127 @@
+{
+  "test_summary": {
+    "total_duration_seconds": 0.004899,
+    "timestamp": "2025-07-10T12:19:24.233663",
+    "version": "3.1.0",
+    "tests_passed": 4,
+    "tests_failed": 1
+  },
+  "detection_tests": {
+    "success": true,
+    "details": {
+      "charlotte_daf": {
+        "detected_level": "EXECUTIVE",
+        "expected_level": "EXECUTIVE",
+        "confidence_score": 0.8212499999999999,
+        "expected_confidence_min": 0.7,
+        "years_experience": 15,
+        "salary_range": [
+          2019,
+          2024
+        ],
+        "management_indicators": [
+          "management",
+          "équipe",
+          "supervision",
+          "pilotage",
+          "budget",
+          "reporting"
+        ],
+        "success": true
+      },
+      "comptable_general": {
+        "detected_level": "JUNIOR",
+        "expected_level": "JUNIOR",
+        "confidence_score": 0.797142857142857,
+        "expected_confidence_min": 0.6,
+        "years_experience": 5,
+        "salary_range": [
+          2000,
+          5000
+        ],
+        "management_indicators": [
+          "management",
+          "équipe",
+          "formation"
+        ],
+        "success": true
+      },
+      "responsable_comptable": {
+        "detected_level": "MANAGER",
+        "expected_level": "MANAGER",
+        "confidence_score": 0.7,
+        "expected_confidence_min": 0.7,
+        "years_experience": 12,
+        "salary_range": [
+          8000,
+          12000
+        ],
+        "management_indicators": [
+          "encadrement",
+          "équipe",
+          "supervision",
+          "formation",
+          "reporting"
+        ],
+        "success": true
+      }
+    }
+  },
+  "scoring_tests": {
+    "success": false,
+    "details": {
+      "charlotte_vs_comptable": {
+        "hierarchical_score": 0.0,
+        "compatibility_level": "Incompatible - écart hiérarchique trop important",
+        "candidate_level": "EXECUTIVE",
+        "job_level": "JUNIOR",
+        "salary_warning": "Écart salarial important: candidat minimum 75000€ vs poste maximum 5000€",
+        "success": true
+      },
+      "charlotte_vs_responsable": {
+        "hierarchical_score": 0.21168749999999997,
+        "compatibility_level": "Match partiel - attention surqualification",
+        "candidate_level": "EXECUTIVE",
+        "job_level": "MANAGER",
+        "salary_warning": "Écart salarial important: candidat minimum 75000€ vs poste maximum 12000€",
+        "success": false
+      }
+    }
+  },
+  "bridge_tests": {
+    "success": true,
+    "total_score": 0.29000000000000004,
+    "hierarchical_score": 0.0,
+    "compatibility": "poor",
+    "alerts_count": 2,
+    "critical_alerts": [
+      {
+        "type": "CRITICAL_MISMATCH",
+        "message": "Inadéquation hiérarchique critique: EXECUTIVE → JUNIOR",
+        "impact": "HIGH",
+        "recommendation": "Chercher un poste correspondant au niveau du candidat",
+        "score_impact": "Score réduit de 0.04"
+      }
+    ],
+    "processing_time": 0.27099999999999996,
+    "version": "3.1.0-hierarchical"
+  },
+  "real_case_tests": {
+    "success": true,
+    "score_before_v30": 0.6675,
+    "score_after_v31": 0.515,
+    "improvement": 0.15249999999999997,
+    "hierarchical_score": 0.0,
+    "compatibility_before": "good",
+    "compatibility_after": "average",
+    "alerts_generated": 1
+  },
+  "performance_tests": {
+    "success": true,
+    "average_time_ms": 0.19299999999999998,
+    "max_time_ms": 0.355,
+    "min_time_ms": 0.101,
+    "samples_tested": 3,
+    "performance_target_ms": 50.0
+  }
+}
