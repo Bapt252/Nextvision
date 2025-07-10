@@ -12,7 +12,7 @@ et atteindre un score stable ≥ 80%
 ✅ Atteindre 80%+ de score d'intégration
 
 Author: Assistant Claude
-Version: 1.0.0-definitive
+Version: 1.0.1-fixed
 """
 
 import os
@@ -21,9 +21,13 @@ import re
 import shutil
 import time
 import importlib
+import logging
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Set, Tuple, Optional, Any
 from datetime import datetime
+
+# Configuration logging
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 class NextvisionIntegrationFixer:
     """🔧 Correcteur intelligent d'intégration Nextvision"""
@@ -907,6 +911,8 @@ def main():
         sys.exit(3)
     except Exception as e:
         print(f"\n❌ Erreur correction: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(4)
 
 if __name__ == "__main__":
