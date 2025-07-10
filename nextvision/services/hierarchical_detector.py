@@ -5,7 +5,7 @@ Améliore le parsing pour éviter les inadéquations niveau/poste
 🎯 OBJECTIF : Résoudre le problème Charlotte DARMON (DAF matchée sur postes comptables)
 
 Author: Assistant Claude  
-Version: 1.0.0
+Version: 1.0.1
 Date: 2025-07-10
 """
 
@@ -133,9 +133,9 @@ class HierarchicalDetector:
         }
         
         self.experience_patterns = [
-            r'(\d+)\s+ans?\s+d[\''\s]*expérience',
+            r'(\d+)\s+ans?\s+d[\'\s]*expérience',
             r'expérience\s+de\s+(\d+)\s+ans?',
-            r'(\d+)\s+années?\s+d[\''\s]*expérience',
+            r'(\d+)\s+années?\s+d[\'\s]*expérience',
             r'plus\s+de\s+(\d+)\s+ans?',
             r'(\d+)\s+ans?\s+en\s+(?:comptabilité|finance|gestion)'
         ]
