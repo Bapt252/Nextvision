@@ -337,27 +337,6 @@ class GPTNextvisionIntegrator:
                 scores['sector'] * self.weights_v31['sector']
             )
             
-            # PATCH V3.2.1: Application pénalité sectorielle pour incompatibilités critiques
-            candidate_sector = candidate_data.get('professional_info', {}).get('sector', '').lower()
-            job_sector = job_data.get('job_info', {}).get('sector', '').lower()
-            
-            # Détection incompatibilité Tech ↔ Finance/Comptabilité
-            tech_keywords = ["tech", "informatique", "développement"]
-            finance_keywords = ["finance", "comptabilité", "compta"]
-            
-            candidate_tech = any(keyword in candidate_sector for keyword in tech_keywords)
-            candidate_finance = any(keyword in candidate_sector for keyword in finance_keywords)
-            job_tech = any(keyword in job_sector for keyword in tech_keywords)
-            job_finance = any(keyword in job_sector for keyword in finance_keywords)
-            
-            # Application pénalité si incompatibilité détectée
-            if (candidate_tech and job_finance) or (candidate_finance and job_tech):
-                original_score = total_score
-                penalty = 0.5 if "comptabil" in (candidate_sector + job_sector) else 0.6
-                total_score = original_score * penalty
-                alerts.append(f"SECTORAL_PENALTY: Incompatibilité {candidate_sector} vs {job_sector} (pénalité: {penalty:.1f})")
-                self.logger.debug(f"Pénalité sectorielle V3.2.1: {original_score:.3f} → {total_score:.3f}")
-            
             # Détection des alertes critiques
             if total_score < self.critical_mismatch_threshold:
                 alerts.append(f"CRITICAL_MISMATCH: Score total {total_score:.3f} < {self.critical_mismatch_threshold}")
