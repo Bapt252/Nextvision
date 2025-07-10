@@ -1,11 +1,11 @@
 """
-CV Parser GPT v4.0.3 - Module exhaustif pour Nextvision V3.1 - SALARY VALIDATION FIXED
-===========================================================
+CV Parser GPT v4.0.4 - Module exhaustif pour Nextvision V3.1 - PROMPT TEMPLATE FIXED
+==============================================================================
 
 Parser CV utilisant l'API OpenAI adapté du JavaScript fonctionnel.
 Module isolé pour éviter les conflits de logging.
 
-Version: 4.0.3 - Gestion robuste des salaires "Non mentionné"
+Version: 4.0.4 - Correction du template de prompt (échappement des accolades JSON)
 """
 
 import json
@@ -55,19 +55,18 @@ class CVData:
 
 class CVParserGPT:
     """
-    Parser CV GPT v4.0.3 - Adapté du JavaScript fonctionnel avec validation salaire robuste
+    Parser CV GPT v4.0.4 - Template prompt corrigé avec échappement accolades JSON
     """
     
     def __init__(self, openai_client=None):
         self.client = openai_client
         self.logger = cv_logger
-        self.version = "4.0.3"
+        self.version = "4.0.4"
         
-        # Prompt optimisé adapté du JavaScript fonctionnel
-        self.prompt_template = """
-Analysez ce CV et extrayez TOUTES les informations dans ce format JSON exact:
+        # Prompt optimisé avec accolades JSON échappées
+        self.prompt_template = """Analysez ce CV et extrayez TOUTES les informations dans ce format JSON exact:
 
-{
+{{
   "nom_complet": "Prénom Nom",
   "email": "email@domain.com",
   "telephone": "+33...",
@@ -79,13 +78,13 @@ Analysez ce CV et extrayez TOUTES les informations dans ce format JSON exact:
   "salaire_souhaite": montant_souhaité_euros,
   "competences": ["comp1", "comp2", ...],
   "logiciels": ["logiciel1", "logiciel2", ...],
-  "langues": [{"langue": "Français", "niveau": "Natif"}, ...],
-  "formations": [{"diplome": "nom", "ecole": "nom", "annee": "2020"}, ...],
-  "experiences": [{"poste": "titre", "entreprise": "nom", "debut": "MM/YYYY", "fin": "MM/YYYY", "description": "tâches"}],
+  "langues": [{{"langue": "Français", "niveau": "Natif"}}, ...],
+  "formations": [{{"diplome": "nom", "ecole": "nom", "annee": "2020"}}, ...],
+  "experiences": [{{"poste": "titre", "entreprise": "nom", "debut": "MM/YYYY", "fin": "MM/YYYY", "description": "tâches"}}],
   "secteur_activite": "secteur principal",
   "disponibilite": "immédiate|préavis X mois",
   "mobilite_geographique": true/false
-}
+}}
 
 RÈGLES IMPORTANTES:
 1. Déduisez le niveau hiérarchique selon l'expérience et le titre:
@@ -104,8 +103,7 @@ RÈGLES IMPORTANTES:
 4. Retournez UNIQUEMENT le JSON valide, sans texte supplémentaire
 
 CV à analyser:
-{cv_text}
-"""
+{cv_text}"""
 
     def _safe_int_conversion(self, value: Any, field_name: str = "") -> Optional[int]:
         """
@@ -220,7 +218,7 @@ CV à analyser:
                 self.logger.warning("Pas de client OpenAI configuré, utilisation du profil fallback")
                 return self._get_fallback_profile()
             
-            # Appel OpenAI avec prompt optimisé
+            # Appel OpenAI avec prompt optimisé (template corrigé)
             prompt = self.prompt_template.format(cv_text=cv_text)
             
             response = self.client.chat.completions.create(
