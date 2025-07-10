@@ -1,11 +1,11 @@
 """
-Job Parser GPT v3.0.1 - Module fiches de poste pour Nextvision V3.1
-====================================================================
+Job Parser GPT v3.0.2 - Module fiches de poste pour Nextvision V3.1 - PROMPT FIXED
+===================================================================================
 
 Parser fiches de poste utilisant l'API OpenAI adapté du JavaScript fonctionnel.
 Module isolé pour éviter les conflits de logging.
 
-Version: 3.0.1
+Version: 3.0.2 - Correction du template prompt (échappement accolades JSON)
 """
 
 import json
@@ -61,19 +61,18 @@ class JobData:
 
 class JobParserGPT:
     """
-    Parser fiches de poste GPT v3.0.1 - Adapté du JavaScript fonctionnel
+    Parser fiches de poste GPT v3.0.2 - Template prompt corrigé avec échappement accolades JSON
     """
     
     def __init__(self, openai_client=None):
         self.client = openai_client
         self.logger = job_logger
-        self.version = "3.0.1"
+        self.version = "3.0.2"
         
-        # Prompt optimisé adapté du JavaScript fonctionnel
-        self.prompt_template = """
-Analysez cette fiche de poste et extrayez TOUTES les informations dans ce format JSON exact:
+        # Prompt optimisé avec accolades JSON échappées
+        self.prompt_template = """Analysez cette fiche de poste et extrayez TOUTES les informations dans ce format JSON exact:
 
-{
+{{
   "titre_poste": "titre exact du poste",
   "entreprise": "nom de l'entreprise",
   "secteur_activite": "secteur principal",
@@ -87,14 +86,14 @@ Analysez cette fiche de poste et extrayez TOUTES les informations dans ce format
   "competences_requises": ["comp1", "comp2", ...],
   "competences_souhaitees": ["comp1", "comp2", ...],
   "logiciels_requis": ["logiciel1", "logiciel2", ...],
-  "langues_requises": [{"langue": "Français", "niveau": "Courant"}, ...],
+  "langues_requises": [{{"langue": "Français", "niveau": "Courant"}}, ...],
   "formations_requises": ["formation1", "formation2", ...],
   "description": "description complète du poste",
   "missions": ["mission1", "mission2", ...],
   "avantages": ["avantage1", "avantage2", ...],
   "remote_possible": true/false,
   "taille_entreprise": "startup|PME|ETI|GE"
-}
+}}
 
 RÈGLES IMPORTANTES:
 1. Déduisez le niveau hiérarchique selon le titre et l'expérience:
@@ -111,8 +110,7 @@ RÈGLES IMPORTANTES:
 5. Retournez UNIQUEMENT le JSON, rien d'autre
 
 Fiche de poste à analyser:
-{job_text}
-"""
+{job_text}"""
 
     def extract_hierarchical_level(self, experience_min: int, experience_max: int, titre_poste: str) -> str:
         """
@@ -191,7 +189,7 @@ Fiche de poste à analyser:
                 self.logger.warning("Pas de client OpenAI configuré, utilisation du poste fallback")
                 return self._get_fallback_job()
             
-            # Appel OpenAI avec prompt optimisé
+            # Appel OpenAI avec prompt optimisé (template corrigé)
             prompt = self.prompt_template.format(job_text=job_text)
             
             response = self.client.chat.completions.create(
@@ -202,10 +200,19 @@ Fiche de poste à analyser:
             )
             
             response_text = response.choices[0].message.content.strip()
+            self.logger.debug(f"Réponse GPT brute: {response_text[:200]}...")
             
             # Nettoyage du JSON si encapsulé dans des backticks
             if response_text.startswith('```json'):
                 response_text = response_text.replace('```json', '').replace('```', '').strip()
+            elif response_text.startswith('```'):
+                response_text = response_text.replace('```', '').strip()
+            
+            # Extraction JSON robuste
+            json_start = response_text.find('{')
+            json_end = response_text.rfind('}')
+            if json_start >= 0 and json_end > json_start:
+                response_text = response_text[json_start:json_end + 1]
             
             parsed_data = json.loads(response_text)
             
@@ -214,7 +221,7 @@ Fiche de poste à analyser:
             
             # Log des performances
             elapsed_time = (time.time() - start_time) * 1000
-            self.logger.info(f"Fiche de poste parsée en {elapsed_time:.1f}ms - Niveau: {job_data.niveau_hierarchique}")
+            self.logger.info(f"Fiche de poste parsée en {elapsed_time:.1f}ms - Poste: {job_data.titre_poste} - Niveau: {job_data.niveau_hierarchique}")
             
             return job_data
             
