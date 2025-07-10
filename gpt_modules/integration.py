@@ -1,11 +1,11 @@
 """
-GPT Nextvision Integration Module V3.1 - CORRECTED
-=====================================
+GPT Nextvision Integration Module V3.2.1 - SALARY VALIDATION FIXED
+=============================================================
 
-Module d'intégration entre les parsers GPT et le système Nextvision V3.1.
-CORRECTION: Scores plus stricts pour résoudre le cas Charlotte DARMON.
+Module d'intégration entre les parsers GPT et le système Nextvision V3.2.1.
+MISE À JOUR: Compatible avec CV Parser v4.0.3 (gestion robuste des salaires).
 
-Version: 1.0.1 (FIXED)
+Version: 1.0.2 (SALARY FIXED)
 """
 
 import json
@@ -33,7 +33,8 @@ class MatchResult:
 
 class GPTNextvisionIntegrator:
     """
-    Intégrateur principal GPT <-> Nextvision V3.1
+    Intégrateur principal GPT <-> Nextvision V3.2.1
+    Compatible avec CV Parser v4.0.3 (gestion robuste des salaires)
     """
     
     def __init__(self, cv_parser=None, job_parser=None, hierarchical_detector=None, enhanced_bridge=None):
@@ -42,16 +43,16 @@ class GPTNextvisionIntegrator:
         self.hierarchical_detector = hierarchical_detector
         self.enhanced_bridge = enhanced_bridge
         self.logger = integration_logger
-        self.version = "1.0.1"  # Version corrigée
+        self.version = "1.0.2"  # Version avec gestion salaire fixée
         
-        # Pondérations V3.1 avec NOUVEAU secteur (5%)
+        # Pondérations V3.2.1 avec secteur (5%)
         self.weights_v31 = {
             'semantic': 0.30,      # 30% - Compatibilité sémantique
             'hierarchical': 0.15,  # 15% - Niveau hiérarchique  
             'salary': 0.20,        # 20% - Compatibilité salariale
             'experience': 0.20,    # 20% - Années d'expérience
             'location': 0.15,      # 15% - Localisation
-            'sector': 0.05         # 5% - NOUVEAU: Secteur d'activité
+            'sector': 0.05         # 5% - Secteur d'activité
         }
         
         # Seuils de validation
@@ -61,7 +62,7 @@ class GPTNextvisionIntegrator:
 
     def calculate_sector_score(self, candidate_sector: str, job_sector: str) -> float:
         """
-        CORRIGÉ: Calcule la compatibilité secteur (5% du score total)
+        Calcule la compatibilité secteur (5% du score total)
         Plus strict pour Finance vs Comptabilité
         """
         if not candidate_sector or not job_sector:
@@ -88,7 +89,7 @@ class GPTNextvisionIntegrator:
         candidate_conseil = any(keyword in candidate_lower for keyword in conseil_keywords)
         job_conseil = any(keyword in job_lower for keyword in conseil_keywords)
         
-        # CORRECTION: Finance vs Comptabilité plus strict
+        # Finance vs Comptabilité plus strict
         if candidate_finance and job_finance:
             # Finance générale vs Comptabilité = compatibilité limitée
             if 'finance' in candidate_lower and 'comptabil' in job_lower:
@@ -147,17 +148,30 @@ class GPTNextvisionIntegrator:
     def calculate_salary_score(self, candidate_current: int, candidate_expected: int, 
                              job_min: int, job_max: int) -> float:
         """
-        CORRIGÉ: Calcule la compatibilité salariale (plus strict)
+        COMPATIBLE CV Parser v4.0.3: Calcule la compatibilité salariale avec gestion robuste
         """
-        if not all([candidate_current, candidate_expected, job_min, job_max]):
-            return 0.5  # Score neutre si données manquantes
+        # Gestion des valeurs None ou 0 (nouvelles dans v4.0.3)
+        if not candidate_expected and not candidate_current:
+            self.logger.debug("Aucun salaire candidat disponible, score neutre")
+            return 0.5
             
-        # Utilise le salaire souhaité du candidat comme référence
-        target_salary = candidate_expected
+        if not job_min or not job_max:
+            self.logger.debug("Fourchette salariale poste manquante, score neutre")
+            return 0.5
+            
+        # Utilise le salaire souhaité du candidat comme référence, sinon l'actuel
+        target_salary = candidate_expected if candidate_expected else candidate_current
+        
+        if not target_salary:
+            self.logger.debug("Aucun salaire de référence candidat, score neutre")
+            return 0.5
+            
         job_mid = (job_min + job_max) / 2
         
         # Calcul de l'écart relatif
         salary_gap = abs(target_salary - job_mid) / job_mid
+        
+        self.logger.debug(f"Comparaison salaire: {target_salary}€ vs {job_mid}€ (écart: {salary_gap:.1%})")
         
         # Correspondance parfaite (±10%)
         if salary_gap <= 0.1:
@@ -171,7 +185,7 @@ class GPTNextvisionIntegrator:
         elif salary_gap <= 0.3:
             return 0.6
             
-        # CORRECTION: Écarts importants très pénalisés
+        # Écarts importants très pénalisés
         elif salary_gap <= 0.5:
             return 0.4
         elif salary_gap <= 1.0:
@@ -182,7 +196,7 @@ class GPTNextvisionIntegrator:
 
     def calculate_experience_score(self, candidate_years: int, job_min: int, job_max: int) -> float:
         """
-        CORRIGÉ: Calcule la compatibilité d'expérience (plus strict sur surqualification)
+        Calcule la compatibilité d'expérience (plus strict sur surqualification)
         """
         if not candidate_years or not job_min:
             return 0.5
@@ -195,7 +209,7 @@ class GPTNextvisionIntegrator:
         elif candidate_years >= job_min * 0.8:
             return 0.8
             
-        # CORRECTION: Surqualification plus stricte
+        # Surqualification plus stricte
         elif candidate_years > job_max:
             exp_ratio = candidate_years / job_max
             
@@ -219,7 +233,7 @@ class GPTNextvisionIntegrator:
 
     def calculate_semantic_score(self, candidate_data: Dict, job_data: Dict) -> float:
         """
-        CORRIGÉ: Score sémantique plus strict pour incompatibilités
+        Score sémantique plus strict pour incompatibilités
         """
         # Extraction des compétences
         candidate_skills = candidate_data.get('skills', {}).get('technical_skills', [])
@@ -260,7 +274,7 @@ class GPTNextvisionIntegrator:
         # Score combiné (70% requis, 30% préféré)
         semantic_score = (required_ratio * 0.7) + (preferred_ratio * 0.3)
         
-        # CORRECTION: Plafonnement pour cas critiques
+        # Plafonnement pour cas critiques
         # Charlotte (direction, stratégie) vs Comptable (saisie, basique)
         candidate_level = candidate_data.get('professional_info', {}).get('hierarchical_level', '')
         job_level = job_data.get('requirements', {}).get('hierarchical_level', '')
@@ -273,7 +287,8 @@ class GPTNextvisionIntegrator:
 
     def perform_complete_matching(self, candidate_data: Dict, job_data: Dict) -> MatchResult:
         """
-        Effectue un matching complet avec le système V3.1 CORRIGÉ
+        Effectue un matching complet avec le système V3.2.1
+        Compatible avec CV Parser v4.0.3 (gestion salaires robuste)
         """
         start_time = time.time()
         
@@ -282,7 +297,7 @@ class GPTNextvisionIntegrator:
             candidate_level = candidate_data.get('professional_info', {}).get('hierarchical_level', 'ENTRY')
             job_level = job_data.get('requirements', {}).get('hierarchical_level', 'ENTRY')
             
-            # Calcul des scores individuels CORRIGÉS
+            # Calcul des scores individuels
             scores = {}
             alerts = []
             
@@ -295,7 +310,7 @@ class GPTNextvisionIntegrator:
             if hierarchical_status.startswith('CRITICAL'):
                 alerts.append(f"CRITICAL_MISMATCH: Incompatibilité hiérarchique ({candidate_level} vs {job_level})")
             
-            # 2. Score salarial (20%) - CORRIGÉ
+            # 2. Score salarial (20%) - COMPATIBLE v4.0.3
             salary_score = self.calculate_salary_score(
                 candidate_data.get('professional_info', {}).get('current_salary', 0),
                 candidate_data.get('professional_info', {}).get('expected_salary', 0),
@@ -304,7 +319,7 @@ class GPTNextvisionIntegrator:
             )
             scores['salary'] = salary_score
             
-            # 3. Score expérience (20%) - CORRIGÉ
+            # 3. Score expérience (20%)
             experience_score = self.calculate_experience_score(
                 candidate_data.get('professional_info', {}).get('experience_years', 0),
                 job_data.get('requirements', {}).get('experience_min', 0),
@@ -312,14 +327,14 @@ class GPTNextvisionIntegrator:
             )
             scores['experience'] = experience_score
             
-            # 4. NOUVEAU: Score secteur (5%) - CORRIGÉ
+            # 4. Score secteur (5%)
             sector_score = self.calculate_sector_score(
                 candidate_data.get('professional_info', {}).get('sector', ''),
                 job_data.get('job_info', {}).get('sector', '')
             )
             scores['sector'] = sector_score
             
-            # 5. Score sémantique (30%) - CORRIGÉ
+            # 5. Score sémantique (30%)
             semantic_score = self.calculate_semantic_score(candidate_data, job_data)
             scores['semantic'] = semantic_score
             
@@ -327,7 +342,7 @@ class GPTNextvisionIntegrator:
             location_score = 0.8  # Score par défaut pour les tests
             scores['location'] = location_score
             
-            # Calcul du score total avec pondérations V3.1
+            # Calcul du score total avec pondérations V3.2.1
             total_score = (
                 scores['semantic'] * self.weights_v31['semantic'] +
                 scores['hierarchical'] * self.weights_v31['hierarchical'] +
@@ -337,7 +352,7 @@ class GPTNextvisionIntegrator:
                 scores['sector'] * self.weights_v31['sector']
             )
             
-            # PATCH V3.2.1: Application pénalité sectorielle pour incompatibilités critiques
+            # Application pénalité sectorielle pour incompatibilités critiques
             candidate_sector = candidate_data.get('professional_info', {}).get('sector', '').lower()
             job_sector = job_data.get('job_info', {}).get('sector', '').lower()
             
@@ -407,15 +422,16 @@ class GPTNextvisionIntegrator:
     def test_charlotte_darmon_vs_comptable(self) -> Dict[str, Any]:
         """
         Test spécifique Charlotte DARMON vs poste comptable
+        Compatible avec CV Parser v4.0.3 (gestion salaires robuste)
         DOIT valider les 5 objectifs mentionnés dans le contexte
         """
-        self.logger.info("🧪 DÉBUT TEST CHARLOTTE DARMON VS COMPTABLE")
+        self.logger.info("🧪 DÉBUT TEST CHARLOTTE DARMON VS COMPTABLE (v4.0.3 compatible)")
         
         # Récupération des profils de test
         if self.cv_parser:
-            charlotte_data = self.cv_parser.to_nextvision_format(
-                self.cv_parser.get_charlotte_darmon_profile()
-            )
+            charlotte_profile = self.cv_parser.get_charlotte_darmon_profile()
+            charlotte_data = self.cv_parser.to_nextvision_format(charlotte_profile)
+            self.logger.info(f"CV Parser v{getattr(self.cv_parser, 'version', 'N/A')} - Charlotte: {charlotte_profile.salaire_actuel}€/{charlotte_profile.salaire_souhaite}€")
         else:
             # Profil Charlotte en cas de parser non disponible
             charlotte_data = {
@@ -435,6 +451,7 @@ class GPTNextvisionIntegrator:
                     ]
                 }
             }
+            self.logger.warning("CV Parser non disponible, utilisation profil statique")
         
         if self.job_parser:
             comptable_data = self.job_parser.to_nextvision_format(
@@ -456,6 +473,7 @@ class GPTNextvisionIntegrator:
                     ]
                 }
             }
+            self.logger.warning("Job Parser non disponible, utilisation profil statique")
         
         # Exécution du matching
         result = self.perform_complete_matching(charlotte_data, comptable_data)
@@ -480,7 +498,8 @@ class GPTNextvisionIntegrator:
             "system_version": {
                 "integration": self.version,
                 "cv_parser": getattr(self.cv_parser, 'version', 'N/A'),
-                "job_parser": getattr(self.job_parser, 'version', 'N/A')
+                "job_parser": getattr(self.job_parser, 'version', 'N/A'),
+                "salary_handling": "v4.0.3 compatible (robust validation)"
             }
         }
         
@@ -488,11 +507,16 @@ class GPTNextvisionIntegrator:
         success_emoji = "✅" if rapport["success"] else "❌"
         self.logger.info(f"{success_emoji} TEST TERMINÉ - Score: {result.total_score:.3f} - Objectifs: {sum(objectives.values())}/5")
         
+        # Log détaillé des scores pour debugging
+        self.logger.debug(f"Détail scores: {result.scores_breakdown}")
+        if result.alerts:
+            self.logger.debug(f"Alertes: {result.alerts}")
+        
         return rapport
 
     def integration_status(self) -> Dict[str, Any]:
         """
-        Statut de l'intégration GPT <-> Nextvision V3.1
+        Statut de l'intégration GPT <-> Nextvision V3.2.1
         """
         return {
             "integration_version": self.version,
@@ -503,19 +527,24 @@ class GPTNextvisionIntegrator:
                 "performance_target_ms": self.performance_target_ms
             },
             "parsers_status": {
-                "cv_parser": "Available" if self.cv_parser else "Not configured",
-                "job_parser": "Available" if self.job_parser else "Not configured",
+                "cv_parser": f"Available (v{getattr(self.cv_parser, 'version', 'N/A')})" if self.cv_parser else "Not configured",
+                "job_parser": f"Available (v{getattr(self.job_parser, 'version', 'N/A')})" if self.job_parser else "Not configured",
                 "hierarchical_detector": "Available" if self.hierarchical_detector else "Not configured",
                 "enhanced_bridge": "Available" if self.enhanced_bridge else "Not configured"
             },
             "features": [
-                "Système hiérarchique V3.1 intégré",
+                "Système hiérarchique V3.2.1 intégré",
                 "Nouveau scoring secteur (5%)",
-                "Détection CRITICAL_MISMATCH",
+                "Détection CRITICAL_MISMATCH", 
                 "Performance < 100ms maintenue",
                 "Parsers GPT isolés (conflict-free)",
-                "CORRECTION: Scoring plus strict v1.0.1"
-            ]
+                "FIXED: CV Parser v4.0.3 - Gestion robuste des salaires"
+            ],
+            "compatibility": {
+                "cv_parser_min_version": "4.0.3",
+                "salary_validation": "robust (handles 'Non mentionné', None, empty values)",
+                "parsing_errors": "auto-fallback to estimation"
+            }
         }
 
 
@@ -523,28 +552,39 @@ class GPTNextvisionIntegrator:
 def quick_test_charlotte_vs_comptable():
     """
     Test rapide Charlotte vs Comptable sans dépendances externes
+    Compatible avec CV Parser v4.0.3
     """
-    from .cv_parser import CVParserGPT
-    from .job_parser import JobParserGPT
-    
-    # Initialisation des parsers
-    cv_parser = CVParserGPT()
-    job_parser = JobParserGPT()
-    
-    # Initialisation de l'intégrateur
-    integrator = GPTNextvisionIntegrator(
-        cv_parser=cv_parser,
-        job_parser=job_parser
-    )
-    
-    # Exécution du test
-    return integrator.test_charlotte_darmon_vs_comptable()
+    try:
+        from .cv_parser import CVParserGPT
+        from .job_parser import JobParserGPT
+        
+        # Initialisation des parsers
+        cv_parser = CVParserGPT()
+        job_parser = JobParserGPT()
+        
+        # Initialisation de l'intégrateur
+        integrator = GPTNextvisionIntegrator(
+            cv_parser=cv_parser,
+            job_parser=job_parser
+        )
+        
+        # Exécution du test
+        return integrator.test_charlotte_darmon_vs_comptable()
+        
+    except ImportError as e:
+        print(f"❌ Erreur import parsers: {e}")
+        return {"success": False, "error": f"Import error: {e}"}
 
 
 if __name__ == "__main__":
     # Test autonome
-    print("🚀 Test autonome de l'intégration GPT V3.1 CORRIGÉ")
+    print("🚀 Test autonome de l'intégration GPT V3.2.1 (CV Parser v4.0.3 compatible)")
     result = quick_test_charlotte_vs_comptable()
-    print(f"Résultat: {result['success']}")
-    print(f"Score: {result['result'].total_score:.3f}")
-    print(f"Objectifs validés: {sum(result['objectives_validation'].values())}/5")
+    
+    if "error" in result:
+        print(f"❌ Erreur: {result['error']}")
+    else:
+        print(f"Résultat: {result['success']}")
+        print(f"Score: {result['result'].total_score:.3f}")
+        print(f"Objectifs validés: {sum(result['objectives_validation'].values())}/5")
+        print(f"Performance: {result['result'].performance_ms:.1f}ms")
