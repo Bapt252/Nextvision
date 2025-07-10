@@ -1,16 +1,17 @@
 """
-CV Parser GPT v4.0.1 - Module exhaustif pour Nextvision V3.1
+CV Parser GPT v4.0.2 - Module exhaustif pour Nextvision V3.1 - JSON PARSING FIXED
 ===========================================================
 
 Parser CV utilisant l'API OpenAI adapté du JavaScript fonctionnel.
 Module isolé pour éviter les conflits de logging.
 
-Version: 4.0.1
+Version: 4.0.2 - JSON parsing robuste
 """
 
 import json
 import logging
 import time
+import re
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
@@ -54,13 +55,13 @@ class CVData:
 
 class CVParserGPT:
     """
-    Parser CV GPT v4.0.1 - Adapté du JavaScript fonctionnel
+    Parser CV GPT v4.0.2 - Adapté du JavaScript fonctionnel avec JSON parsing robuste
     """
     
     def __init__(self, openai_client=None):
         self.client = openai_client
         self.logger = cv_logger
-        self.version = "4.0.1"
+        self.version = "4.0.2"
         
         # Prompt optimisé adapté du JavaScript fonctionnel
         self.prompt_template = """
@@ -97,11 +98,109 @@ RÈGLES IMPORTANTES:
 
 2. Estimez les salaires si non mentionnés selon le niveau et secteur
 3. Extrayez TOUTES les compétences techniques et soft skills
-4. Retournez UNIQUEMENT le JSON, rien d'autre
+4. Retournez UNIQUEMENT le JSON valide, sans texte supplémentaire
 
 CV à analyser:
 {cv_text}
 """
+
+    def clean_json_response(self, response_text: str) -> str:
+        """
+        Nettoie la réponse GPT pour extraire un JSON valide
+        Version robuste qui gère tous les cas
+        """
+        try:
+            # Supprimer les espaces en début et fin
+            response_text = response_text.strip()
+            
+            # Cas 1: JSON encapsulé dans des backticks
+            if response_text.startswith('```json'):
+                response_text = response_text.replace('```json', '').replace('```', '').strip()
+            elif response_text.startswith('```'):
+                response_text = response_text.replace('```', '').strip()
+            
+            # Cas 2: Texte avant le JSON
+            # Chercher le premier {
+            json_start = response_text.find('{')
+            if json_start > 0:
+                response_text = response_text[json_start:]
+            
+            # Cas 3: Texte après le JSON
+            # Chercher le dernier }
+            json_end = response_text.rfind('}')
+            if json_end > 0:
+                response_text = response_text[:json_end + 1]
+            
+            # Cas 4: Supprimer les retours à la ligne au début/fin
+            response_text = response_text.strip()
+            
+            # Cas 5: Vérifier que ça commence et finit bien par { }
+            if not response_text.startswith('{'):
+                raise ValueError("JSON ne commence pas par {")
+            if not response_text.endswith('}'):
+                raise ValueError("JSON ne finit pas par }")
+            
+            # Cas 6: Nettoyer les caractères de contrôle
+            response_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', response_text)
+            
+            return response_text
+            
+        except Exception as e:
+            self.logger.error(f"Erreur nettoyage JSON: {str(e)}")
+            raise
+
+    def parse_cv_text(self, cv_text: str) -> CVData:
+        """
+        Parse un CV à partir du texte extrait
+        """
+        start_time = time.time()
+        
+        try:
+            if not self.client:
+                self.logger.warning("Pas de client OpenAI configuré, utilisation du profil fallback")
+                return self._get_fallback_profile()
+            
+            # Appel OpenAI avec prompt optimisé
+            prompt = self.prompt_template.format(cv_text=cv_text)
+            
+            response = self.client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,
+                max_tokens=2000
+            )
+            
+            response_text = response.choices[0].message.content.strip()
+            self.logger.debug(f"Réponse GPT brute: {response_text[:200]}...")
+            
+            # Nettoyage robuste du JSON
+            cleaned_json = self.clean_json_response(response_text)
+            self.logger.debug(f"JSON nettoyé: {cleaned_json[:200]}...")
+            
+            # Parse JSON
+            parsed_data = json.loads(cleaned_json)
+            
+            # Conversion en CVData avec validation
+            cv_data = self._validate_and_convert(parsed_data)
+            
+            # Log des performances
+            elapsed_time = (time.time() - start_time) * 1000
+            self.logger.info(f"CV parsé en {elapsed_time:.1f}ms - Niveau: {cv_data.niveau_hierarchique}")
+            
+            return cv_data
+            
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Erreur JSON parsing: {str(e)}")
+            self.logger.error(f"JSON problématique: {response_text if 'response_text' in locals() else 'N/A'}")
+            elapsed_time = (time.time() - start_time) * 1000
+            self.logger.info(f"Fallback utilisé après {elapsed_time:.1f}ms")
+            return self._get_fallback_profile()
+            
+        except Exception as e:
+            self.logger.error(f"Erreur parsing CV: {str(e)}")
+            elapsed_time = (time.time() - start_time) * 1000
+            self.logger.info(f"Fallback utilisé après {elapsed_time:.1f}ms")
+            return self._get_fallback_profile()
 
     def extract_hierarchical_level(self, experience_years: int, titre_poste: str) -> str:
         """
@@ -160,50 +259,6 @@ CV à analyser:
             return int(base_min * 1.2), int(base_max * 1.2)
             
         return base_min, base_max
-
-    def parse_cv_text(self, cv_text: str) -> CVData:
-        """
-        Parse un CV à partir du texte extrait
-        """
-        start_time = time.time()
-        
-        try:
-            if not self.client:
-                self.logger.warning("Pas de client OpenAI configuré, utilisation du profil fallback")
-                return self._get_fallback_profile()
-            
-            # Appel OpenAI avec prompt optimisé
-            prompt = self.prompt_template.format(cv_text=cv_text)
-            
-            response = self.client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.1,
-                max_tokens=2000
-            )
-            
-            response_text = response.choices[0].message.content.strip()
-            
-            # Nettoyage du JSON si encapsulé dans des backticks
-            if response_text.startswith('```json'):
-                response_text = response_text.replace('```json', '').replace('```', '').strip()
-            
-            parsed_data = json.loads(response_text)
-            
-            # Conversion en CVData avec validation
-            cv_data = self._validate_and_convert(parsed_data)
-            
-            # Log des performances
-            elapsed_time = (time.time() - start_time) * 1000
-            self.logger.info(f"CV parsé en {elapsed_time:.1f}ms - Niveau: {cv_data.niveau_hierarchique}")
-            
-            return cv_data
-            
-        except Exception as e:
-            self.logger.error(f"Erreur parsing CV: {str(e)}")
-            elapsed_time = (time.time() - start_time) * 1000
-            self.logger.info(f"Fallback utilisé après {elapsed_time:.1f}ms")
-            return self._get_fallback_profile()
 
     def _validate_and_convert(self, parsed_data: Dict[str, Any]) -> CVData:
         """
