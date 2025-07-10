@@ -4,7 +4,7 @@
 Test de l'intégration complète Nextvision V3.0 + Commitment Parser v4.0
 
 Author: Assistant Claude
-Version: 1.0.0-complete
+Version: 1.0.0-complete (Fixed)
 """
 
 import asyncio
@@ -20,7 +20,10 @@ from nextvision.services.enhanced_commitment_bridge_v3_simplified import (
 
 # Import Transport Intelligence V3.0
 from nextvision.engines.transport_intelligence_engine import TransportIntelligenceEngine
-from nextvision.services.bidirectional_matcher import BiDirectionalMatcherV2
+
+# Import BiDirectional Matcher (CORRIGÉ: sans V2)
+from nextvision.services.bidirectional_matcher import BiDirectionalMatcher, BiDirectionalMatcherFactory
+from nextvision.models.bidirectional_models import BiDirectionalMatchingRequest
 
 class SystemeCompletTester:
     """🧪 Testeur système complet Matching + Parsing"""
@@ -32,13 +35,13 @@ class SystemeCompletTester:
         # Initialisation Transport Intelligence V3.0
         self.transport_engine = TransportIntelligenceEngine()
         
-        # Initialisation Matcher Bidirectionnel
-        self.matcher = BiDirectionalMatcherV2()
+        # Initialisation Matcher Bidirectionnel (CORRIGÉ)
+        self.matcher = BiDirectionalMatcherFactory.create_basic_matcher()
         
         print("🚀 Système complet initialisé:")
         print("   ✅ Enhanced Bridge V3.0 Simplifié")
         print("   ✅ Transport Intelligence V3.0")
-        print("   ✅ BiDirectional Matcher V2")
+        print("   ✅ BiDirectional Matcher (v3.0 compatible)")
     
     async def test_candidat_parsing_to_matching(self, candidat_data: Dict[str, Any]):
         """🔄 Test complet : Parsing → Bridge → Matching"""
@@ -83,9 +86,9 @@ class SystemeCompletTester:
             transport_start = time.time()
             try:
                 transport_score = await self.transport_engine.calculate_transport_score(
-                    candidat_location=candidat_profile.location,
+                    candidat_location=candidat_profile.attentes.localisation_preferee,
                     job_location="La Défense, Paris",
-                    mobility_preferences=candidat_profile.mobility_preferences
+                    mobility_preferences=candidat_profile.motivations
                 )
                 transport_time = time.time() - transport_start
                 
@@ -169,25 +172,37 @@ class SystemeCompletTester:
         candidat_profile = candidat_result["candidat_profile"]
         company_profile = entreprise_result["company_profile"]
         
-        # Calcul matching bidirectionnel
+        # Calcul matching bidirectionnel (CORRIGÉ: utilisation nouvelle API)
         try:
-            match_result = await self.matcher.calculate_bidirectional_match(
-                candidat_profile, company_profile
+            # Création de la requête de matching
+            matching_request = BiDirectionalMatchingRequest(
+                candidat=candidat_profile,
+                entreprise=company_profile,
+                force_adaptive_weighting=True
             )
+            
+            # Calcul du matching
+            match_result = await self.matcher.calculate_bidirectional_match(matching_request)
             
             matching_time = time.time() - start_time
             
             print(f"✅ Matching calculé en {matching_time*1000:.1f}ms")
-            print(f"🎯 Score global: {match_result.global_score:.3f}")
-            print(f"👤 Score candidat → entreprise: {match_result.candidate_to_company_score:.3f}")
-            print(f"🏢 Score entreprise → candidat: {match_result.company_to_candidate_score:.3f}")
+            print(f"🎯 Score global: {match_result.matching_score:.3f}")
+            print(f"🎯 Compatibilité: {match_result.compatibility}")
+            print(f"🧠 Confiance: {match_result.confidence:.3f}")
             
             # Détails des composants
             print(f"\n📊 Détails composants:")
-            print(f"   💼 Skills: {match_result.skills_score:.3f}")
-            print(f"   💰 Salary: {match_result.salary_score:.3f}")
-            print(f"   📍 Location: {match_result.location_score:.3f}")
+            print(f"   🧠 Sémantique: {match_result.component_scores.semantique_score:.3f}")
+            print(f"   💰 Salaire: {match_result.component_scores.salaire_score:.3f}")
+            print(f"   📈 Expérience: {match_result.component_scores.experience_score:.3f}")
+            print(f"   📍 Localisation: {match_result.component_scores.localisation_score:.3f}")
             print(f"   🚗 Transport: {candidat_result.get('transport_score', 0.8):.3f}")
+            
+            # Pondération adaptative
+            print(f"\n🎯 Pondération adaptative:")
+            print(f"   👤 Raison candidat: {match_result.adaptive_weighting.raison_candidat.value}")
+            print(f"   🏢 Urgence entreprise: {match_result.adaptive_weighting.urgence_entreprise.value}")
             
             return {
                 "match_result": match_result,
@@ -197,6 +212,8 @@ class SystemeCompletTester:
             
         except Exception as e:
             print(f"❌ Erreur matching: {e}")
+            import traceback
+            traceback.print_exc()
             return {
                 "error": str(e),
                 "matching_time_ms": 0,
@@ -224,8 +241,9 @@ class SystemeCompletTester:
         
         print(f"\n🎯 Résultats:")
         if matching_result.get("success"):
-            score = matching_result["match_result"].global_score
-            print(f"   ✅ Matching réussi: {score:.3f}")
+            score = matching_result["match_result"].matching_score
+            compatibility = matching_result["match_result"].compatibility
+            print(f"   ✅ Matching réussi: {score:.3f} ({compatibility})")
             if score >= 0.8:
                 print(f"   🎉 EXCELLENT MATCH (≥0.8)")
             elif score >= 0.6:
@@ -241,7 +259,7 @@ class SystemeCompletTester:
         print(f"   ✅ Enhanced Bridge V3.0 Simplifié")
         print(f"   ✅ Transport Intelligence V3.0")
         print(f"   ✅ Parsing réel Commitment v4.0 (simulation)")
-        print(f"   ✅ Matching bidirectionnel V2")
+        print(f"   ✅ Matching bidirectionnel V3.0")
         
         print(f"="*70)
 
@@ -257,6 +275,8 @@ async def main():
         tester = SystemeCompletTester()
     except Exception as e:
         print(f"❌ Erreur initialisation: {e}")
+        import traceback
+        traceback.print_exc()
         return
     
     # DONNÉES TEST (simulant les données du parser réel)
