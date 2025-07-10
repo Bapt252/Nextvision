@@ -3,7 +3,7 @@
 Valide la résolution du problème Charlotte DARMON (DAF vs postes comptables)
 
 Author: Assistant Claude
-Version: 1.0.0  
+Version: 1.0.1  
 Date: 2025-07-10
 """
 
@@ -418,7 +418,10 @@ class HierarchicalSystemTester:
             
             print(f"📊 Score AVANT V3.0: {score_v30:.3f} ({'✅ Acceptable' if score_v30 >= 0.6 else '❌ Rejeté'})")
             print(f"📊 Score APRÈS V3.1: {score_v31:.3f} ({'✅ Acceptable' if score_v31 >= 0.6 else '❌ Rejeté'})")
-            print(f"📈 Amélioration: {improvement:.3f} ({'✅ Filtrage réussi' if improvement > 0.1 else '❌ Pas d\\'amélioration'})")
+            
+            # Correction de la ligne problématique
+            improvement_status = "✅ Filtrage réussi" if improvement > 0.1 else "❌ Pas d'amélioration"
+            print(f"📈 Amélioration: {improvement:.3f} ({improvement_status})")
             
             if success:
                 print("✅ Le système hiérarchique filtre correctement l'inadéquation Charlotte DARMON")
