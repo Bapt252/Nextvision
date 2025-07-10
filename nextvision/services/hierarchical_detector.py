@@ -5,7 +5,7 @@ Améliore le parsing pour éviter les inadéquations niveau/poste
 🎯 OBJECTIF : Résoudre le problème Charlotte DARMON (DAF matchée sur postes comptables)
 
 Author: Assistant Claude  
-Version: 1.0.1
+Version: 1.0.2
 Date: 2025-07-10
 """
 
@@ -61,12 +61,12 @@ class HierarchicalDetector:
                     r'\bchef\s+comptable\s+principal\b'
                 ],
                 'keywords': [
-                    'supervision équipe', 'reporting direction', 'budget département',
-                    'coordination', 'optimisation processus', 'audit interne'
+                    'budget département', 'optimisation processus', 'audit interne',
+                    'interface direction', 'définition procédures'
                 ],
                 'responsibilities': [
-                    'encadrement équipe', 'définition procédures', 'contrôle budgétaire',
-                    'reporting mensuel', 'interface direction'
+                    'encadrement équipe', 'contrôle budgétaire',
+                    'reporting mensuel'
                 ]
             },
             
@@ -77,12 +77,12 @@ class HierarchicalDetector:
                     r'\bmanager\b', r'\bsuperviseur\b'
                 ],
                 'keywords': [
-                    'encadrement', 'formation équipe', 'planning', 'coordination',
-                    'validation', 'contrôle', 'reporting hiérarchique'
+                    'encadrement', 'formation équipe', 'planning',
+                    'validation', 'contrôle'
                 ],
                 'responsibilities': [
                     'management équipe', 'formation collaborateurs', 'contrôle qualité',
-                    'planification', 'reporting'
+                    'planification'
                 ]
             },
             
@@ -92,7 +92,7 @@ class HierarchicalDetector:
                     r'\bcomptable\s+principal\b', r'\bcomptable\s+unique\b'
                 ],
                 'keywords': [
-                    'autonomie', 'expertise', 'conseil', 'formation junior',
+                    'autonomie', 'expertise', 'conseil',
                     'dossiers complexes', 'client portefeuille'
                 ],
                 'responsibilities': [
@@ -103,8 +103,8 @@ class HierarchicalDetector:
             
             HierarchicalLevel.JUNIOR: {
                 'titles': [
-                    r'\bcomptable\b', r'\bassistant\s+comptable\b',
-                    r'\baide\s+comptable\b', r'\bcomptable\s+général\b'
+                    r'\bcomptable\s+général\b', r'\bassistant\s+comptable\b',
+                    r'\baide\s+comptable\b', r'\bcomptable\b(?!\s+(?:senior|confirmé|expérimenté|principal|unique))'
                 ],
                 'keywords': [
                     'saisie', 'assistance', 'support', 'apprentissage',
@@ -112,7 +112,7 @@ class HierarchicalDetector:
                 ],
                 'responsibilities': [
                     'saisie comptable', 'classement', 'assistance',
-                    'tâches courantes', 'formation'
+                    'tâches courantes', 'rapprochements bancaires'
                 ]
             },
             
@@ -133,9 +133,9 @@ class HierarchicalDetector:
         }
         
         self.experience_patterns = [
-            r'(\d+)\s+ans?\s+d[\'\s]*expérience',
+            r'(\d+)\s+ans?\s+d[\'\\s]*expérience',
             r'expérience\s+de\s+(\d+)\s+ans?',
-            r'(\d+)\s+années?\s+d[\'\s]*expérience',
+            r'(\d+)\s+années?\s+d[\'\\s]*expérience',
             r'plus\s+de\s+(\d+)\s+ans?',
             r'(\d+)\s+ans?\s+en\s+(?:comptabilité|finance|gestion)'
         ]
@@ -161,6 +161,7 @@ class HierarchicalDetector:
         text_lower = text.lower()
         best_match = None
         highest_confidence = 0.0
+        matched_keywords = []
         
         for level, patterns in self.level_patterns.items():
             confidence, keywords = self._calculate_level_confidence(text_lower, patterns)
@@ -179,8 +180,8 @@ class HierarchicalDetector:
         # Détection des indicateurs de management
         management_indicators = self._detect_management_indicators(text_lower)
         
-        # Ajustement du niveau basé sur l'expérience
-        if best_match and years_exp:
+        # Ajustement du niveau basé sur l'expérience (SEULEMENT pour les CV, pas les fiches de poste)
+        if best_match and years_exp and not is_job_posting:
             best_match = self._adjust_level_by_experience(best_match, years_exp)
             highest_confidence = min(highest_confidence + 0.1, 1.0)
         
@@ -190,7 +191,7 @@ class HierarchicalDetector:
             years_experience=years_exp,
             salary_range=salary_range,
             management_indicators=management_indicators,
-            keywords_found=matched_keywords if best_match else []
+            keywords_found=matched_keywords
         )
     
     def _calculate_level_confidence(self, text: str, patterns: Dict) -> Tuple[float, List[str]]:
@@ -198,13 +199,17 @@ class HierarchicalDetector:
         total_score = 0.0
         found_keywords = []
         
-        # Vérification des titres (poids: 0.5)
+        # Vérification des titres (poids: 0.6 - plus important)
+        title_matches = 0
         for title_pattern in patterns.get('titles', []):
             if re.search(title_pattern, text, re.IGNORECASE):
-                total_score += 0.5
+                title_matches += 1
                 found_keywords.append(title_pattern)
         
-        # Vérification des mots-clés (poids: 0.3)
+        if patterns.get('titles') and title_matches > 0:
+            total_score += 0.6
+        
+        # Vérification des mots-clés (poids: 0.25)
         keyword_score = 0
         for keyword in patterns.get('keywords', []):
             if keyword in text:
@@ -212,9 +217,9 @@ class HierarchicalDetector:
                 found_keywords.append(keyword)
         
         if patterns.get('keywords'):
-            total_score += (keyword_score / len(patterns['keywords'])) * 0.3
+            total_score += (keyword_score / len(patterns['keywords'])) * 0.25
         
-        # Vérification des responsabilités (poids: 0.2)
+        # Vérification des responsabilités (poids: 0.15)
         resp_score = 0
         for resp in patterns.get('responsibilities', []):
             if resp in text:
@@ -222,7 +227,7 @@ class HierarchicalDetector:
                 found_keywords.append(resp)
         
         if patterns.get('responsibilities'):
-            total_score += (resp_score / len(patterns['responsibilities'])) * 0.2
+            total_score += (resp_score / len(patterns['responsibilities'])) * 0.15
         
         return min(total_score, 1.0), found_keywords
     
@@ -270,15 +275,18 @@ class HierarchicalDetector:
         return found_indicators
     
     def _adjust_level_by_experience(self, base_level: HierarchicalLevel, years: int) -> HierarchicalLevel:
-        """Ajuste le niveau en fonction de l'expérience"""
+        """Ajuste le niveau en fonction de l'expérience (uniquement pour les CV)"""
+        # Ajustement plus conservateur
         if years < 2:
-            return min(base_level, HierarchicalLevel.JUNIOR)
+            return HierarchicalLevel.ENTRY if base_level.value <= 1 else HierarchicalLevel.JUNIOR
         elif years < 5:
             return base_level
-        elif years < 10:
+        elif years >= 15:  # Seulement 15+ ans peuvent monter de 2 niveaux
             return HierarchicalLevel(min(base_level.value + 1, HierarchicalLevel.EXECUTIVE.value))
-        else:  # 10+ ans
-            return HierarchicalLevel(min(base_level.value + 2, HierarchicalLevel.EXECUTIVE.value))
+        elif years >= 10:  # 10+ ans peuvent monter de 1 niveau
+            return HierarchicalLevel(min(base_level.value + 1, HierarchicalLevel.DIRECTOR.value))
+        else:
+            return base_level
 
 class HierarchicalScoring:
     """Système de scoring prenant en compte le niveau hiérarchique"""
