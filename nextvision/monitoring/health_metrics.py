@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Any, Callable, Union
 import json
-import logging
+import nextvision_logging as logging
 from collections import defaultdict, deque
 
 try:

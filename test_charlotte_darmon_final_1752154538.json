@@ -1,0 +1,50 @@
+{
+  "test_name": "Charlotte DARMON vs Comptable ENTRY",
+  "timestamp": 1752154538.9937868,
+  "result": {
+    "candidate_name": "Charlotte DARMON",
+    "job_title": "Comptable",
+    "total_score": 0.3350000000000001,
+    "scores_breakdown": {
+      "hierarchical": 0.1,
+      "salary": 0.1,
+      "experience": 0.8,
+      "sector": 0.4,
+      "semantic": 0.0,
+      "location": 0.8
+    },
+    "hierarchical_compatibility": "CRITICAL_OVERQUALIFIED",
+    "alerts": [
+      "CRITICAL_MISMATCH: Incompatibilité hiérarchique (EXECUTIVE vs ENTRY)",
+      "CRITICAL_MISMATCH: Score total 0.335 < 0.4"
+    ],
+    "performance_ms": 0.025033950805664062,
+    "recommendation": "NO_MATCH"
+  },
+  "objectives_validation": {
+    "1_score_abaisse": true,
+    "2_incompatibilite_hierarchique": true,
+    "3_alerte_critical_mismatch": true,
+    "4_performance_maintenue": true,
+    "5_secteur_integre": true
+  },
+  "success": true,
+  "weights_used": {
+    "semantic": 0.3,
+    "hierarchical": 0.15,
+    "salary": 0.2,
+    "experience": 0.2,
+    "location": 0.15,
+    "sector": 0.05
+  },
+  "system_version": {
+    "integration": "1.0.1",
+    "cv_parser": "4.0.1",
+    "job_parser": "3.0.1"
+  },
+  "test_execution": {
+    "total_time_ms": 28.60879898071289,
+    "timestamp": "2025-07-10T15:35:38.993937",
+    "environment": "nextvision_v31_gpt_integration"
+  }
+}

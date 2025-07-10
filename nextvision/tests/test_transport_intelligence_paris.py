@@ -10,7 +10,7 @@ Usage: python -m nextvision.tests.test_transport_intelligence_paris
 """
 
 import asyncio
-import logging
+import nextvision_logging as logging
 import json
 from typing import Dict, Any
 from datetime import datetime

@@ -7,7 +7,7 @@ Version: 2.0.0 - Google Maps Intelligence
 """
 
 import os
-import logging
+import nextvision_logging as logging
 from typing import Dict, Optional, List
 from dataclasses import dataclass
 from enum import Enum

@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union, Callable
-import logging
+import nextvision_logging as logging
 
 try:
     import redis.asyncio as redis

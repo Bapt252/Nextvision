@@ -12,7 +12,7 @@ Author: NEXTEN Development Team
 Version: 3.0 - SÉCURITÉ MAXIMALE
 """
 
-import logging
+import nextvision_logging as logging
 import time
 from typing import Dict, List, Optional, Tuple, Any, Union
 from dataclasses import dataclass, field, asdict

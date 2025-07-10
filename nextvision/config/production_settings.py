@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, Any, Optional, List, Union
 from pathlib import Path
-import logging
+import nextvision_logging as logging
 
 
 class Environment(Enum):

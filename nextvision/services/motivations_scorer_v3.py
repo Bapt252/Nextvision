@@ -23,7 +23,7 @@ Author: NEXTEN Team
 Version: 3.0.0 - Motivations Matching Scorer
 """
 
-import logging
+import nextvision_logging as logging
 import time
 from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass

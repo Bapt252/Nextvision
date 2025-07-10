@@ -10,7 +10,7 @@ import asyncio
 import json
 import time
 import hashlib
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict

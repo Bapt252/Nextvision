@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Any, Callable, Union, Type
-import logging
+import nextvision_logging as logging
 
 from ..logging.structured_logging import get_structured_logger
 from ..monitoring.health_metrics import MetricsCollector

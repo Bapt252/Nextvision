@@ -12,7 +12,7 @@ Features:
 
 import asyncio
 import time
-import logging
+import nextvision_logging as logging
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Callable, Union

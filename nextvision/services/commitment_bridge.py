@@ -8,7 +8,7 @@ Version: 1.1.0 - Fixed proxy URLs
 
 import requests
 import json
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel
 import asyncio

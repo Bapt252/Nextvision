@@ -8,7 +8,7 @@ Version: 3.1.0
 Date: 2025-07-10
 """
 
-import logging
+import nextvision_logging as logging
 from typing import Dict, Any, Tuple, List, Optional
 from datetime import datetime
 

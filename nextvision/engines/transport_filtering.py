@@ -10,7 +10,7 @@ Performance: 1000 jobs < 2s, gain CPU 20-40%
 from __future__ import annotations  # 🔧 FIX: Annotations différées pour éviter NameError
 
 import asyncio
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Tuple, Optional
 from datetime import datetime
 import time

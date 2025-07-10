@@ -12,7 +12,7 @@ Features:
 """
 
 import json
-import logging
+import nextvision_logging as logging
 import time
 import uuid
 from contextlib import contextmanager

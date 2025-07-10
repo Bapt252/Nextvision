@@ -6,7 +6,7 @@ Author: Nextvision Team
 Version: 1.0.0
 """
 
-import logging
+import nextvision_logging as logging
 import json
 from datetime import datetime
 from typing import Dict, Any, Optional

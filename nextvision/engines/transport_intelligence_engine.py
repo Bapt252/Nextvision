@@ -11,7 +11,7 @@ Architecture: Engine → LocationTransportScorerV3 → GoogleMapsService → Goo
 """
 
 import asyncio
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 import json

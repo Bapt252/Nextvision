@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Any, Callable, Tuple, Union
-import logging
+import nextvision_logging as logging
 import psutil
 import concurrent.futures
 from functools import wraps

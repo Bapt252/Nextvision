@@ -14,7 +14,7 @@ Version: 3.0.0 - Extended Questionnaire Parsing
 
 import json
 import re
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Union, Any, Tuple
 from datetime import datetime
 from dataclasses import dataclass

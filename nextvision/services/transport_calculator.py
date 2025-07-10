@@ -7,7 +7,7 @@ Version: 2.0.0 - Google Maps Intelligence
 """
 
 import asyncio
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 
