@@ -4,7 +4,7 @@
 Test de l'intégration complète Nextvision V3.0 + Commitment Parser v4.0
 
 Author: Assistant Claude
-Version: 1.0.0-complete (Fixed)
+Version: 1.0.1-services-fixed
 """
 
 import asyncio
@@ -18,12 +18,19 @@ from nextvision.services.enhanced_commitment_bridge_v3_simplified import (
     SimplifiedBridgeFactory, EnhancedCommitmentBridgeV3Simplified
 )
 
-# Import Transport Intelligence V3.0
-from nextvision.engines.transport_intelligence_engine import TransportIntelligenceEngine
-
 # Import BiDirectional Matcher (CORRIGÉ: sans V2)
 from nextvision.services.bidirectional_matcher import BiDirectionalMatcher, BiDirectionalMatcherFactory
 from nextvision.models.bidirectional_models import BiDirectionalMatchingRequest
+
+# Import services optionnels pour Transport Intelligence
+try:
+    from nextvision.engines.transport_intelligence_engine import TransportIntelligenceEngine
+    from nextvision.services.google_maps_service import GoogleMapsService
+    from nextvision.services.transport_calculator import TransportCalculator
+    TRANSPORT_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Transport Intelligence désactivé: {e}")
+    TRANSPORT_AVAILABLE = False
 
 class SystemeCompletTester:
     """🧪 Testeur système complet Matching + Parsing"""
@@ -32,15 +39,28 @@ class SystemeCompletTester:
         # Initialisation Enhanced Bridge V3.0 Simplifié
         self.bridge = SimplifiedBridgeFactory.create_bridge()
         
-        # Initialisation Transport Intelligence V3.0
-        self.transport_engine = TransportIntelligenceEngine()
+        # Initialisation Transport Intelligence V3.0 (si disponible)
+        if TRANSPORT_AVAILABLE:
+            try:
+                # Création des services requis pour Transport Intelligence
+                self.google_maps_service = GoogleMapsService()
+                self.transport_calculator = TransportCalculator(self.google_maps_service)
+                self.transport_engine = TransportIntelligenceEngine(
+                    self.google_maps_service, self.transport_calculator
+                )
+                print("   ✅ Transport Intelligence V3.0 (avec Google Maps)")
+            except Exception as e:
+                print(f"   ⚠️ Transport Intelligence non disponible: {e}")
+                self.transport_engine = None
+        else:
+            self.transport_engine = None
+            print("   ⚠️ Transport Intelligence V3.0 désactivé")
         
         # Initialisation Matcher Bidirectionnel (CORRIGÉ)
         self.matcher = BiDirectionalMatcherFactory.create_basic_matcher()
         
         print("🚀 Système complet initialisé:")
         print("   ✅ Enhanced Bridge V3.0 Simplifié")
-        print("   ✅ Transport Intelligence V3.0")
         print("   ✅ BiDirectional Matcher (v3.0 compatible)")
     
     async def test_candidat_parsing_to_matching(self, candidat_data: Dict[str, Any]):
@@ -81,15 +101,22 @@ class SystemeCompletTester:
         print(f"   ✅ Profil: {candidat_profile.version}")
         print(f"   ✅ Composants V3.0: {bridge_metrics.v3_components_count}")
         
-        # ÉTAPE 3: Score Transport Intelligence V3.0
-        if candidat_data.get("test_transport", False):
+        # ÉTAPE 3: Score Transport Intelligence V3.0 (si disponible et activé)
+        transport_score = 0.8  # Score par défaut
+        
+        if (self.transport_engine and 
+            candidat_data.get("test_transport", False) and 
+            TRANSPORT_AVAILABLE):
             transport_start = time.time()
             try:
-                transport_score = await self.transport_engine.calculate_transport_score(
-                    candidat_location=candidat_profile.attentes.localisation_preferee,
-                    job_location="La Défense, Paris",
-                    mobility_preferences=candidat_profile.motivations
+                transport_score = await self.transport_engine.calculate_intelligent_location_score(
+                    candidat_address=candidat_profile.attentes.localisation_preferee,
+                    entreprise_address="La Défense, Paris",
+                    transport_methods=["public-transport", "vehicle"],
+                    travel_times={"public-transport": 45, "vehicle": 35},
+                    context={"test_mode": True}
                 )
+                transport_score = transport_score.get("final_score", 0.8)
                 transport_time = time.time() - transport_start
                 
                 print(f"🚗 Transport Intelligence: {transport_time*1000:.1f}ms")
@@ -98,7 +125,6 @@ class SystemeCompletTester:
                 print(f"⚠️ Transport Intelligence: Erreur {e}")
                 transport_score = 0.8  # Score par défaut
         else:
-            transport_score = 0.8  # Score par défaut
             print(f"🚗 Transport Intelligence: Score par défaut {transport_score}")
         
         total_time = time.time() - start_time
@@ -204,6 +230,17 @@ class SystemeCompletTester:
             print(f"   👤 Raison candidat: {match_result.adaptive_weighting.raison_candidat.value}")
             print(f"   🏢 Urgence entreprise: {match_result.adaptive_weighting.urgence_entreprise.value}")
             
+            # Recommandations
+            if match_result.recommandations_candidat:
+                print(f"\n💡 Recommandations candidat:")
+                for rec in match_result.recommandations_candidat[:2]:  # Afficher 2 premières
+                    print(f"   • {rec}")
+            
+            if match_result.points_forts:
+                print(f"\n✅ Points forts:")
+                for point in match_result.points_forts[:2]:  # Afficher 2 premiers
+                    print(f"   • {point}")
+            
             return {
                 "match_result": match_result,
                 "matching_time_ms": matching_time * 1000,
@@ -243,7 +280,11 @@ class SystemeCompletTester:
         if matching_result.get("success"):
             score = matching_result["match_result"].matching_score
             compatibility = matching_result["match_result"].compatibility
+            confidence = matching_result["match_result"].confidence
+            
             print(f"   ✅ Matching réussi: {score:.3f} ({compatibility})")
+            print(f"   🧠 Confiance: {confidence:.3f}")
+            
             if score >= 0.8:
                 print(f"   🎉 EXCELLENT MATCH (≥0.8)")
             elif score >= 0.6:
@@ -257,7 +298,10 @@ class SystemeCompletTester:
         
         print(f"\n🎊 Système complet:")
         print(f"   ✅ Enhanced Bridge V3.0 Simplifié")
-        print(f"   ✅ Transport Intelligence V3.0")
+        if TRANSPORT_AVAILABLE and self.transport_engine:
+            print(f"   ✅ Transport Intelligence V3.0")
+        else:
+            print(f"   ⚠️ Transport Intelligence V3.0 (mode dégradé)")
         print(f"   ✅ Parsing réel Commitment v4.0 (simulation)")
         print(f"   ✅ Matching bidirectionnel V3.0")
         
@@ -351,6 +395,12 @@ async def main():
         print(f"2. Remplir questionnaire et récupérer JSON")
         print(f"3. Modifier candidat_test avec vos données")
         print(f"4. Relancer le script")
+        
+        if not TRANSPORT_AVAILABLE or not tester.transport_engine:
+            print(f"\n⚙️  Pour activer Transport Intelligence:")
+            print(f"1. Configurer API Google Maps")
+            print(f"2. Installer dépendances transport")
+            print(f"3. Modifier test_transport=True dans candidat_test")
         
     except Exception as e:
         print(f"❌ Erreur test système complet: {e}")
