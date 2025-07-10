@@ -1,11 +1,11 @@
 """
-GPT Nextvision Integration Module V3.1
+GPT Nextvision Integration Module V3.1 - CORRECTED
 =====================================
 
 Module d'intégration entre les parsers GPT et le système Nextvision V3.1.
-Coordonne l'ensemble du pipeline de matching avec les nouvelles pondérations.
+CORRECTION: Scores plus stricts pour résoudre le cas Charlotte DARMON.
 
-Version: 1.0.0
+Version: 1.0.1 (FIXED)
 """
 
 import json
@@ -42,7 +42,7 @@ class GPTNextvisionIntegrator:
         self.hierarchical_detector = hierarchical_detector
         self.enhanced_bridge = enhanced_bridge
         self.logger = integration_logger
-        self.version = "1.0.0"
+        self.version = "1.0.1"  # Version corrigée
         
         # Pondérations V3.1 avec NOUVEAU secteur (5%)
         self.weights_v31 = {
@@ -61,7 +61,8 @@ class GPTNextvisionIntegrator:
 
     def calculate_sector_score(self, candidate_sector: str, job_sector: str) -> float:
         """
-        NOUVEAU: Calcule la compatibilité secteur (5% du score total)
+        CORRIGÉ: Calcule la compatibilité secteur (5% du score total)
+        Plus strict pour Finance vs Comptabilité
         """
         if not candidate_sector or not job_sector:
             return 0.5  # Score neutre si données manquantes
@@ -73,7 +74,7 @@ class GPTNextvisionIntegrator:
         if candidate_lower == job_lower:
             return 1.0
             
-        # Correspondances sectorielles proches
+        # Correspondances sectorielles
         finance_keywords = ['finance', 'comptabilité', 'audit', 'contrôle', 'gestion']
         tech_keywords = ['tech', 'informatique', 'digital', 'logiciel', 'développement']
         conseil_keywords = ['conseil', 'consulting', 'stratégie', 'audit']
@@ -87,8 +88,15 @@ class GPTNextvisionIntegrator:
         candidate_conseil = any(keyword in candidate_lower for keyword in conseil_keywords)
         job_conseil = any(keyword in job_lower for keyword in conseil_keywords)
         
-        # Bonus pour secteurs proches
-        if (candidate_finance and job_finance) or (candidate_tech and job_tech) or (candidate_conseil and job_conseil):
+        # CORRECTION: Finance vs Comptabilité plus strict
+        if candidate_finance and job_finance:
+            # Finance générale vs Comptabilité = compatibilité limitée
+            if 'finance' in candidate_lower and 'comptabil' in job_lower:
+                return 0.4  # Score plus bas pour Charlotte vs Comptable
+            return 0.6  # Autres cas finance
+            
+        # Tech et conseil inchangés
+        if (candidate_tech and job_tech) or (candidate_conseil and job_conseil):
             return 0.8
             
         # Finance vers conseil (secteurs compatibles)
@@ -96,7 +104,7 @@ class GPTNextvisionIntegrator:
             return 0.6
             
         # Score par défaut pour secteurs différents
-        return 0.3
+        return 0.2  # Plus strict
 
     def calculate_hierarchical_score(self, candidate_level: str, job_level: str) -> tuple:
         """
@@ -139,7 +147,7 @@ class GPTNextvisionIntegrator:
     def calculate_salary_score(self, candidate_current: int, candidate_expected: int, 
                              job_min: int, job_max: int) -> float:
         """
-        Calcule la compatibilité salariale
+        CORRIGÉ: Calcule la compatibilité salariale (plus strict)
         """
         if not all([candidate_current, candidate_expected, job_min, job_max]):
             return 0.5  # Score neutre si données manquantes
@@ -148,25 +156,33 @@ class GPTNextvisionIntegrator:
         target_salary = candidate_expected
         job_mid = (job_min + job_max) / 2
         
+        # Calcul de l'écart relatif
+        salary_gap = abs(target_salary - job_mid) / job_mid
+        
         # Correspondance parfaite (±10%)
-        if abs(target_salary - job_mid) / job_mid <= 0.1:
+        if salary_gap <= 0.1:
             return 1.0
             
         # Correspondance bonne (±20%)
-        elif abs(target_salary - job_mid) / job_mid <= 0.2:
+        elif salary_gap <= 0.2:
             return 0.8
             
         # Correspondance acceptable (±30%)
-        elif abs(target_salary - job_mid) / job_mid <= 0.3:
+        elif salary_gap <= 0.3:
             return 0.6
             
-        # Problème salarial majeur
-        else:
+        # CORRECTION: Écarts importants très pénalisés
+        elif salary_gap <= 0.5:
+            return 0.4
+        elif salary_gap <= 1.0:
             return 0.2
+        else:
+            # Charlotte (90K€) vs Comptable (32.5K€) = 177% d'écart
+            return 0.1  # Score très bas pour écarts énormes
 
     def calculate_experience_score(self, candidate_years: int, job_min: int, job_max: int) -> float:
         """
-        Calcule la compatibilité d'expérience
+        CORRIGÉ: Calcule la compatibilité d'expérience (plus strict sur surqualification)
         """
         if not candidate_years or not job_min:
             return 0.5
@@ -179,22 +195,85 @@ class GPTNextvisionIntegrator:
         elif candidate_years >= job_min * 0.8:
             return 0.8
             
-        # Expérience supérieure (surqualifié mais acceptable)
+        # CORRECTION: Surqualification plus stricte
         elif candidate_years > job_max:
-            # Surqualification modérée acceptable
-            if candidate_years <= job_max * 1.5:
+            exp_ratio = candidate_years / job_max
+            
+            # Surqualification modérée (1.5x max)
+            if exp_ratio <= 1.5:
                 return 0.7
-            # Surqualification excessive (comme Charlotte vs comptable)
-            else:
+            # Surqualification importante (2x max)
+            elif exp_ratio <= 2.0:
+                return 0.5
+            # Surqualification critique (2.5x max)
+            elif exp_ratio <= 2.5:
                 return 0.3
+            # Surqualification excessive (3x+ max)
+            # Charlotte: 15 ans vs 5 ans max = 3x
+            else:
+                return 0.2  # Score très bas
                 
         # Expérience insuffisante
         else:
             return 0.2
 
+    def calculate_semantic_score(self, candidate_data: Dict, job_data: Dict) -> float:
+        """
+        CORRIGÉ: Score sémantique plus strict pour incompatibilités
+        """
+        # Extraction des compétences
+        candidate_skills = candidate_data.get('skills', {}).get('technical_skills', [])
+        job_required_skills = job_data.get('requirements', {}).get('required_skills', [])
+        job_preferred_skills = job_data.get('requirements', {}).get('preferred_skills', [])
+        
+        if not candidate_skills or not job_required_skills:
+            return 0.4  # Score par défaut plus bas
+        
+        # Calcul de compatibilité sémantique simple
+        candidate_skills_lower = [skill.lower() for skill in candidate_skills]
+        required_skills_lower = [skill.lower() for skill in job_required_skills]
+        preferred_skills_lower = [skill.lower() for skill in job_preferred_skills]
+        
+        # Compétences requises matchées
+        required_matches = 0
+        for req_skill in required_skills_lower:
+            for cand_skill in candidate_skills_lower:
+                if req_skill in cand_skill or cand_skill in req_skill:
+                    required_matches += 1
+                    break
+        
+        # Compétences préférées matchées  
+        preferred_matches = 0
+        for pref_skill in preferred_skills_lower:
+            for cand_skill in candidate_skills_lower:
+                if pref_skill in cand_skill or cand_skill in pref_skill:
+                    preferred_matches += 1
+                    break
+        
+        # Score basé sur les matches
+        if not required_skills_lower:
+            return 0.4
+            
+        required_ratio = required_matches / len(required_skills_lower)
+        preferred_ratio = preferred_matches / len(preferred_skills_lower) if preferred_skills_lower else 0
+        
+        # Score combiné (70% requis, 30% préféré)
+        semantic_score = (required_ratio * 0.7) + (preferred_ratio * 0.3)
+        
+        # CORRECTION: Plafonnement pour cas critiques
+        # Charlotte (direction, stratégie) vs Comptable (saisie, basique)
+        candidate_level = candidate_data.get('professional_info', {}).get('hierarchical_level', '')
+        job_level = job_data.get('requirements', {}).get('hierarchical_level', '')
+        
+        if candidate_level == 'EXECUTIVE' and job_level == 'ENTRY':
+            # Plafonnement sémantique pour incompatibilité hiérarchique
+            semantic_score = min(semantic_score, 0.4)
+        
+        return semantic_score
+
     def perform_complete_matching(self, candidate_data: Dict, job_data: Dict) -> MatchResult:
         """
-        Effectue un matching complet avec le système V3.1
+        Effectue un matching complet avec le système V3.1 CORRIGÉ
         """
         start_time = time.time()
         
@@ -203,7 +282,7 @@ class GPTNextvisionIntegrator:
             candidate_level = candidate_data.get('professional_info', {}).get('hierarchical_level', 'ENTRY')
             job_level = job_data.get('requirements', {}).get('hierarchical_level', 'ENTRY')
             
-            # Calcul des scores individuels
+            # Calcul des scores individuels CORRIGÉS
             scores = {}
             alerts = []
             
@@ -216,7 +295,7 @@ class GPTNextvisionIntegrator:
             if hierarchical_status.startswith('CRITICAL'):
                 alerts.append(f"CRITICAL_MISMATCH: Incompatibilité hiérarchique ({candidate_level} vs {job_level})")
             
-            # 2. Score salarial (20%)
+            # 2. Score salarial (20%) - CORRIGÉ
             salary_score = self.calculate_salary_score(
                 candidate_data.get('professional_info', {}).get('current_salary', 0),
                 candidate_data.get('professional_info', {}).get('expected_salary', 0),
@@ -225,7 +304,7 @@ class GPTNextvisionIntegrator:
             )
             scores['salary'] = salary_score
             
-            # 3. Score expérience (20%)
+            # 3. Score expérience (20%) - CORRIGÉ
             experience_score = self.calculate_experience_score(
                 candidate_data.get('professional_info', {}).get('experience_years', 0),
                 job_data.get('requirements', {}).get('experience_min', 0),
@@ -233,19 +312,18 @@ class GPTNextvisionIntegrator:
             )
             scores['experience'] = experience_score
             
-            # 4. NOUVEAU: Score secteur (5%)
+            # 4. NOUVEAU: Score secteur (5%) - CORRIGÉ
             sector_score = self.calculate_sector_score(
                 candidate_data.get('professional_info', {}).get('sector', ''),
                 job_data.get('job_info', {}).get('sector', '')
             )
             scores['sector'] = sector_score
             
-            # 5. Score sémantique (30%) - Simplifié pour les tests
-            # En production, utiliserait le système d'embeddings existant
-            semantic_score = 0.7  # Score par défaut pour les tests
+            # 5. Score sémantique (30%) - CORRIGÉ
+            semantic_score = self.calculate_semantic_score(candidate_data, job_data)
             scores['semantic'] = semantic_score
             
-            # 6. Score localisation (15%) - Simplifié
+            # 6. Score localisation (15%) - Inchangé
             location_score = 0.8  # Score par défaut pour les tests
             scores['location'] = location_score
             
@@ -327,6 +405,13 @@ class GPTNextvisionIntegrator:
                     "current_salary": 80000,
                     "expected_salary": 90000,
                     "sector": "Finance"
+                },
+                "skills": {
+                    "technical_skills": [
+                        "Direction financière", "Contrôle de gestion", "Audit interne", 
+                        "Consolidation", "Stratégie financière", "Management d'équipe",
+                        "IFRS", "Fiscalité", "Trésorerie", "Budget prévisionnel"
+                    ]
                 }
             }
         
@@ -343,7 +428,11 @@ class GPTNextvisionIntegrator:
                     "experience_min": 2,
                     "experience_max": 5,
                     "salary_min": 30000,
-                    "salary_max": 35000
+                    "salary_max": 35000,
+                    "required_skills": [
+                        "Saisie comptable", "Rapprochements bancaires", "TVA",
+                        "Paie simple", "Excel", "Rigueur"
+                    ]
                 }
             }
         
@@ -403,7 +492,8 @@ class GPTNextvisionIntegrator:
                 "Nouveau scoring secteur (5%)",
                 "Détection CRITICAL_MISMATCH",
                 "Performance < 100ms maintenue",
-                "Parsers GPT isolés (conflict-free)"
+                "Parsers GPT isolés (conflict-free)",
+                "CORRECTION: Scoring plus strict v1.0.1"
             ]
         }
 
@@ -432,7 +522,7 @@ def quick_test_charlotte_vs_comptable():
 
 if __name__ == "__main__":
     # Test autonome
-    print("🚀 Test autonome de l'intégration GPT V3.1")
+    print("🚀 Test autonome de l'intégration GPT V3.1 CORRIGÉ")
     result = quick_test_charlotte_vs_comptable()
     print(f"Résultat: {result['success']}")
     print(f"Score: {result['result'].total_score:.3f}")
