@@ -1,18 +1,18 @@
 """
-CV Parser GPT v4.0.2 - Module exhaustif pour Nextvision V3.1 - JSON PARSING FIXED
+CV Parser GPT v4.0.3 - Module exhaustif pour Nextvision V3.1 - SALARY VALIDATION FIXED
 ===========================================================
 
 Parser CV utilisant l'API OpenAI adapté du JavaScript fonctionnel.
 Module isolé pour éviter les conflits de logging.
 
-Version: 4.0.2 - JSON parsing robuste
+Version: 4.0.3 - Gestion robuste des salaires "Non mentionné"
 """
 
 import json
 import logging
 import time
 import re
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from dataclasses import dataclass
 
 # Configuration du logging isolé pour ce module
@@ -55,13 +55,13 @@ class CVData:
 
 class CVParserGPT:
     """
-    Parser CV GPT v4.0.2 - Adapté du JavaScript fonctionnel avec JSON parsing robuste
+    Parser CV GPT v4.0.3 - Adapté du JavaScript fonctionnel avec validation salaire robuste
     """
     
     def __init__(self, openai_client=None):
         self.client = openai_client
         self.logger = cv_logger
-        self.version = "4.0.2"
+        self.version = "4.0.3"
         
         # Prompt optimisé adapté du JavaScript fonctionnel
         self.prompt_template = """
@@ -96,13 +96,73 @@ RÈGLES IMPORTANTES:
    - DIRECTOR: 12-20 ans, directeur, head of
    - EXECUTIVE: 20+ ans, DG, DRH, DAF, CEO, CTO
 
-2. Estimez les salaires si non mentionnés selon le niveau et secteur
+2. Pour les salaires:
+   - Si mentionné: utilisez le montant exact en euros
+   - Si non mentionné: mettez "Non mentionné" (string)
+   
 3. Extrayez TOUTES les compétences techniques et soft skills
 4. Retournez UNIQUEMENT le JSON valide, sans texte supplémentaire
 
 CV à analyser:
 {cv_text}
 """
+
+    def _safe_int_conversion(self, value: Any, field_name: str = "") -> Optional[int]:
+        """
+        Conversion sécurisée vers int avec gestion des cas spéciaux
+        
+        Args:
+            value: Valeur à convertir
+            field_name: Nom du champ (pour debug)
+            
+        Returns:
+            int ou None si conversion impossible
+        """
+        if value is None:
+            self.logger.debug(f"Champ {field_name}: valeur None")
+            return None
+            
+        if isinstance(value, int):
+            return value
+            
+        if isinstance(value, float):
+            return int(value)
+            
+        if isinstance(value, str):
+            # Cas spéciaux pour les valeurs non numériques
+            value_lower = value.lower().strip()
+            non_numeric_indicators = [
+                'non mentionné', 'non mentionnÉ', 'non mentione',
+                'n/a', 'na', 'néant', 'neant', 
+                'inconnu', 'non spécifié', 'non specifie',
+                'à définir', 'a definir', 'à négocier', 'a negocier',
+                'selon profil', 'variable', 'confidentiel', '',
+                'non renseigné', 'non renseigne'
+            ]
+            
+            if value_lower in non_numeric_indicators:
+                self.logger.debug(f"Champ {field_name}: valeur non numérique détectée: '{value}'")
+                return None
+            
+            # Tentative d'extraction numérique
+            # Supprimer espaces, €, K, k, etc.
+            cleaned = re.sub(r'[^\d]', '', value)
+            if cleaned:
+                try:
+                    num_value = int(cleaned)
+                    # Gestion des abréviations K (milliers)
+                    if 'k' in value_lower or '€k' in value_lower:
+                        num_value *= 1000
+                    self.logger.debug(f"Champ {field_name}: '{value}' converti en {num_value}")
+                    return num_value
+                except ValueError:
+                    pass
+            
+            self.logger.debug(f"Champ {field_name}: impossible de convertir '{value}' en entier")
+            return None
+        
+        self.logger.debug(f"Champ {field_name}: type non supporté {type(value)}")
+        return None
 
     def clean_json_response(self, response_text: str) -> str:
         """
@@ -185,7 +245,7 @@ CV à analyser:
             
             # Log des performances
             elapsed_time = (time.time() - start_time) * 1000
-            self.logger.info(f"CV parsé en {elapsed_time:.1f}ms - Niveau: {cv_data.niveau_hierarchique}")
+            self.logger.info(f"CV parsé en {elapsed_time:.1f}ms - Candidat: {cv_data.nom_complet} - Niveau: {cv_data.niveau_hierarchique}")
             
             return cv_data
             
@@ -262,11 +322,11 @@ CV à analyser:
 
     def _validate_and_convert(self, parsed_data: Dict[str, Any]) -> CVData:
         """
-        Valide et convertit les données parsées en CVData
+        Valide et convertit les données parsées en CVData avec gestion robuste des salaires
         """
         cv_data = CVData()
         
-        # Mapping des champs
+        # Mapping des champs basiques
         cv_data.nom_complet = parsed_data.get('nom_complet', '')
         cv_data.email = parsed_data.get('email', '')
         cv_data.telephone = parsed_data.get('telephone', '')
@@ -290,19 +350,44 @@ CV à analyser:
                 cv_data.titre_poste
             )
         
-        # Estimation des salaires si manquants
-        salaire_actuel = parsed_data.get('salaire_actuel', 0)
-        salaire_souhaite = parsed_data.get('salaire_souhaite', 0)
+        # 🚀 VALIDATION ROBUSTE DES SALAIRES
+        salaire_actuel_raw = parsed_data.get('salaire_actuel')
+        salaire_souhaite_raw = parsed_data.get('salaire_souhaite')
         
-        if not salaire_actuel or not salaire_souhaite:
-            min_sal, max_sal = self.estimate_salary(cv_data.niveau_hierarchique, cv_data.secteur_activite)
-            cv_data.salaire_actuel = salaire_actuel or min_sal
-            cv_data.salaire_souhaite = salaire_souhaite or max_sal
+        self.logger.debug(f"Salaires bruts reçus - Actuel: {salaire_actuel_raw}, Souhaité: {salaire_souhaite_raw}")
+        
+        # Conversion sécurisée des salaires
+        salaire_actuel_int = self._safe_int_conversion(salaire_actuel_raw, "salaire_actuel")
+        salaire_souhaite_int = self._safe_int_conversion(salaire_souhaite_raw, "salaire_souhaite")
+        
+        # Si les deux salaires sont disponibles
+        if salaire_actuel_int is not None and salaire_souhaite_int is not None:
+            cv_data.salaire_actuel = salaire_actuel_int
+            cv_data.salaire_souhaite = salaire_souhaite_int
+            self.logger.debug(f"Salaires convertis - Actuel: {cv_data.salaire_actuel}€, Souhaité: {cv_data.salaire_souhaite}€")
+        
+        # Si seulement un salaire est disponible
+        elif salaire_actuel_int is not None:
+            cv_data.salaire_actuel = salaire_actuel_int
+            # Estimation du salaire souhaité (+15% typiquement)
+            cv_data.salaire_souhaite = int(salaire_actuel_int * 1.15)
+            self.logger.debug(f"Salaire actuel converti: {cv_data.salaire_actuel}€, souhaité estimé: {cv_data.salaire_souhaite}€")
+        
+        elif salaire_souhaite_int is not None:
+            cv_data.salaire_souhaite = salaire_souhaite_int
+            # Estimation du salaire actuel (-15% typiquement)
+            cv_data.salaire_actuel = int(salaire_souhaite_int * 0.85)
+            self.logger.debug(f"Salaire souhaité converti: {cv_data.salaire_souhaite}€, actuel estimé: {cv_data.salaire_actuel}€")
+        
+        # Si aucun salaire n'est disponible
         else:
-            cv_data.salaire_actuel = int(salaire_actuel)
-            cv_data.salaire_souhaite = int(salaire_souhaite)
+            # Estimation complète basée sur le niveau hiérarchique et secteur
+            min_sal, max_sal = self.estimate_salary(cv_data.niveau_hierarchique, cv_data.secteur_activite)
+            cv_data.salaire_actuel = min_sal
+            cv_data.salaire_souhaite = max_sal
+            self.logger.info(f"Salaires estimés pour niveau {cv_data.niveau_hierarchique} - Actuel: {cv_data.salaire_actuel}€, Souhaité: {cv_data.salaire_souhaite}€")
         
-        # Listes
+        # Mapping des listes
         cv_data.competences = parsed_data.get('competences', [])
         cv_data.logiciels = parsed_data.get('logiciels', [])
         cv_data.langues = parsed_data.get('langues', [])
