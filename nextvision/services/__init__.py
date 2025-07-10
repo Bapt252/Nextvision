@@ -27,6 +27,11 @@ from .enhanced_commitment_bridge_v3_hierarchical import (
     HierarchicalBridgeMetrics
 )
 
+# Vos imports existants (préservés)
+from .google_maps_service import GoogleMapsService
+from .transport_calculator import TransportCalculator
+from .enhanced_commitment_bridge_v3_integrated import EnhancedCommitmentBridgeV3Integrated
+
 __all__ = [
     # Services V3.0 (compatibilité)
     "CommitmentNextvisionBridge",
@@ -45,6 +50,11 @@ __all__ = [
     "EnhancedCommitmentBridgeV3Hierarchical",
     "HierarchicalBridgeFactory",
     "HierarchicalBridgeMetrics",
+    
+    # Vos services existants (préservés)
+    "GoogleMapsService",
+    "TransportCalculator", 
+    "EnhancedCommitmentBridgeV3Integrated"
 ]
 
 # 🎯 Shortcuts pour utilisation simplifiée
