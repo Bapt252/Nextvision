@@ -27,12 +27,12 @@ patterns_to_remove = [
 for pattern in patterns_to_remove:
     content = re.sub(pattern, '', content, flags=re.DOTALL)
 
-# Insérer la bonne définition après TransportMethod
+# Insérer la bonne définition après TravelMode
 insertion_point = content.find('class WorkModalityType(Enum):')
 if insertion_point != -1:
     content = content[:insertion_point] + correct_contract_enum + '\n\n' + content[insertion_point:]
 else:
-    # Sinon insérer après TransportMethod
+    # Sinon insérer après TravelMode
     insertion_point = content.find('class MotivationType(Enum):')
     if insertion_point != -1:
         content = content[:insertion_point] + correct_contract_enum + '\n\n' + content[insertion_point:]

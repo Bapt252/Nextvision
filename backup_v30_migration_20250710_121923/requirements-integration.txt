@@ -1,0 +1,89 @@
+# ===================================
+# NEXTVISION V3.0 + COMMITMENT- ENHANCED PARSER V4.0
+# Requirements d'intégration complète
+# ===================================
+
+# === CORE FRAMEWORK ===
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+typing-extensions>=4.8.0
+
+# === HTTP CLIENT & ASYNC ===
+requests>=2.31.0
+aiohttp>=3.9.0
+httpx>=0.25.0
+aiofiles>=23.2.1
+python-multipart>=0.0.6
+
+# === PARSING & AUTOMATION (COMMITMENT- BRIDGE) ===
+playwright>=1.40.0
+asyncio-throttle>=1.0.2
+
+# === GOOGLE MAPS INTELLIGENCE V3.0 ===
+geopy>=2.4.0
+shapely>=2.0.2
+numpy>=1.24.0
+
+# === DATA PROCESSING & SERIALIZATION ===
+dataclasses-json>=0.6.1
+orjson>=3.9.9
+
+# === CACHE & PERFORMANCE ===
+redis>=5.0.0
+aioredis>=2.0.1
+pickle-mixin>=1.0.2
+
+# === TESTING FRAMEWORK ===
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-mock>=3.12.0
+pytest-cov>=4.1.0
+
+# === LOGGING & MONITORING ===
+structlog>=23.2.0
+prometheus-client>=0.19.0
+
+# === DEVELOPMENT TOOLS ===
+ipython>=8.17.2
+black>=23.11.0
+isort>=5.12.0
+mypy>=1.7.1
+
+# === SECURITY ===
+cryptography>=41.0.7
+python-jose[cryptography]>=3.3.0
+
+# === CONFIGURATION MANAGEMENT ===
+pyyaml>=6.0.1
+toml>=0.10.2
+
+# === PRODUCTION OPTIONAL (décommenter si nécessaire) ===
+# gunicorn>=21.2.0
+# supervisor>=4.2.5
+# sentry-sdk[fastapi]>=1.38.0
+# elastic-apm>=6.19.0
+
+# === COMPATIBILITY FIXES ===
+# Fix pour certaines versions Python
+six>=1.16.0
+wheel>=0.41.2
+setuptools>=68.0.0
+
+# === NEXTVISION SPECIFIC ===
+# Dépendances spécifiques pour l'architecture Nextvision
+asyncio>=3.4.3
+
+# === COMMITMENT- PARSER DEPENDENCIES ===
+# Dépendances pour l'intégration avec Commitment- Enhanced Parser v4.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+selenium>=4.15.0
+
+# === FALLBACK & COMPATIBILITY ===
+# Fallbacks pour environnements contraints
+urllib3>=2.0.0
+certifi>=2023.7.22
+charset-normalizer>=3.3.0
+idna>=3.4

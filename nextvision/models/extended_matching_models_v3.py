@@ -61,6 +61,30 @@ class CandidateStatus(Enum):
     ETUDIANT = "etudiant"
     FREELANCE = "freelance"
 
+class TravelMode(Enum):
+    """Moyens de transport disponibles pour Transport Intelligence"""
+    VOITURE = "voiture"
+    TRANSPORT_COMMUN = "transport_commun"
+    VELO = "velo"
+    MARCHE = "marche"
+    TROTTINETTE = "trottinette"
+    COVOITURAGE = "covoiturage"
+    
+    @classmethod
+    def get_all_methods(cls) -> List[str]:
+        """Retourne tous les moyens de transport disponibles"""
+        return [method.value for method in cls]
+    
+    @classmethod
+    def get_eco_methods(cls) -> List[str]:
+        """Retourne les moyens de transport écologiques"""
+        return [cls.VELO.value, cls.MARCHE.value, cls.TRANSPORT_COMMUN.value]
+    
+    @classmethod
+    def get_cost_free_methods(cls) -> List[str]:
+        """Retourne les moyens de transport gratuits"""
+        return [cls.VELO.value, cls.MARCHE.value]
+
 # ================================
 # MODÈLES V2.0 PRÉSERVÉS
 # ================================
@@ -107,6 +131,18 @@ class LocationProfile:
 # ================================
 # NOUVEAUX MODÈLES V3.0
 # ================================
+
+@dataclass
+class TransportIntelligenceProfile:
+    """Intelligence Transport - Nouveau V3.0"""
+    preferred_methods: List[TravelMode] = field(default_factory=list)
+    max_commute_time: int = 45  # minutes
+    max_transport_cost_daily: float = 15.0  # euros/jour
+    ecological_preference: bool = False
+    comfort_importance: float = 0.5  # 0-1 scale
+    reliability_importance: float = 0.8  # 0-1 scale
+    accepts_multiple_transports: bool = True
+    weight: float = 0.06
 
 @dataclass
 class ProfessionalMotivationsProfile:
@@ -202,6 +238,7 @@ class AdaptiveWeightingConfig:
                 "salary": 0.20,
                 "experience": 0.15,
                 "location": 0.10,
+                "transport_intelligence": 0.06,
                 "motivations": 0.08,
                 "sector_compatibility": 0.06,
                 "contract_flexibility": 0.05,
@@ -221,6 +258,7 @@ class AdaptiveWeightingConfig:
                     "motivations": 0.05,
                     "experience": 0.12,
                     "location": 0.08,
+                    "transport_intelligence": 0.04,
                     "sector_compatibility": 0.05,
                     "contract_flexibility": 0.04,
                     "timing_compatibility": 0.03,
@@ -233,6 +271,7 @@ class AdaptiveWeightingConfig:
                     "salary": 0.15,
                     "experience": 0.12,
                     "location": 0.08,
+                    "transport_intelligence": 0.04,
                     "contract_flexibility": 0.04,
                     "timing_compatibility": 0.03,
                     "work_modality": 0.03,
@@ -240,6 +279,7 @@ class AdaptiveWeightingConfig:
                 },
                 ListeningReasonType.LOCALISATION: {
                     "location": 0.25,  # Boost majeur
+                    "transport_intelligence": 0.12,  # Boost secondaire transport
                     "work_modality": 0.06,  # Boost secondaire
                     "semantic": 0.20,
                     "salary": 0.18,
@@ -256,6 +296,7 @@ class AdaptiveWeightingConfig:
                     "semantic": 0.22,
                     "salary": 0.18,
                     "location": 0.12,
+                    "transport_intelligence": 0.06,
                     "motivations": 0.10,
                     "experience": 0.12,
                     "sector_compatibility": 0.05
@@ -267,6 +308,7 @@ class AdaptiveWeightingConfig:
                     "salary": 0.15,
                     "sector_compatibility": 0.08,
                     "location": 0.08,
+                    "transport_intelligence": 0.04,
                     "salary_progression": 0.04,
                     "contract_flexibility": 0.03,
                     "timing_compatibility": 0.02
@@ -279,7 +321,7 @@ class AdaptiveWeightingConfig:
 
 @dataclass
 class ExtendedMatchingProfile:
-    """Profil complet de matching V3.0 - 12 composants"""
+    """Profil complet de matching V3.0 - 13 composants"""
     
     # V2.0 Préservés (poids ajustés)
     semantic: SemanticProfile = field(default_factory=SemanticProfile)
@@ -288,6 +330,7 @@ class ExtendedMatchingProfile:
     location: LocationProfile = field(default_factory=LocationProfile)
     
     # V3.0 Nouveaux
+    transport_intelligence: TransportIntelligenceProfile = field(default_factory=TransportIntelligenceProfile)
     motivations: ProfessionalMotivationsProfile = field(default_factory=ProfessionalMotivationsProfile)
     sector_compatibility: SectorCompatibilityProfile = field(default_factory=SectorCompatibilityProfile)
     contract_flexibility: ContractFlexibilityProfile = field(default_factory=ContractFlexibilityProfile)
@@ -365,9 +408,9 @@ def convert_v2_to_v3_profile(v2_data: Dict[str, Any]) -> ExtendedMatchingProfile
     return profile
 
 def get_component_list() -> List[str]:
-    """Retourne la liste des 12 composants V3.0"""
+    """Retourne la liste des 13 composants V3.0"""
     return [
-        "semantic", "salary", "experience", "location",
+        "semantic", "salary", "experience", "location", "transport_intelligence",
         "motivations", "sector_compatibility", "contract_flexibility",
         "timing_compatibility", "work_modality", "salary_progression",
         "listening_reason", "candidate_status"
@@ -399,26 +442,68 @@ def validate_extended_profile(profile: ExtendedMatchingProfile) -> Tuple[bool, L
     
     return len(errors) == 0, errors
 
-if __name__ == "__main__":
-    # Test de base
-    profile = ExtendedMatchingProfile()
-    
-    # Test pondération adaptative
-    profile.listening_reason.primary_reason = ListeningReasonType.REMUNERATION_FAIBLE
-    adaptive_weights = profile.get_adaptive_weights()
-    
-    print("=== NEXTVISION V3.0 - Test Modèles ===")
-    print(f"Composants V3.0: {len(get_component_list())}")
-    print(f"Raison d'écoute: {profile.listening_reason.primary_reason.value}")
-    print(f"Poids adaptatifs: {adaptive_weights}")
-    print(f"Boost salary: {adaptive_weights.get('salary', 0) * 100:.1f}%")
-    
-    is_valid, errors = validate_extended_profile(profile)
-    print(f"Validation: {'✅ OK' if is_valid else '❌ Erreurs'}")
-    if errors:
-        for error in errors:
-            print(f"  - {error}")
+# ================================
+# TRANSPORT INTELLIGENCE UTILS
+# ================================
 
+@dataclass
+class TransportCompatibilityResult:
+    """Résultat de compatibilité transport"""
+    method: TravelMode
+    time_minutes: int
+    cost_daily: float
+    comfort_score: float  # 0-1
+    reliability_score: float  # 0-1
+    is_compatible: bool
+    eco_friendly: bool
+
+class TransportIntelligenceScorer:
+    """Scorer avancé pour Transport Intelligence"""
+    
+    @staticmethod
+    def score_transport_method(
+        method: TravelMode,
+        time_minutes: int,
+        max_time: int,
+        cost_daily: float,
+        max_cost: float,
+        eco_preference: bool = False
+    ) -> TransportCompatibilityResult:
+        """Score un moyen de transport spécifique"""
+        
+        # Scores de base par méthode
+        base_scores = {
+            TravelMode.VOITURE: {"comfort": 0.9, "reliability": 0.8},
+            TravelMode.TRANSPORT_COMMUN: {"comfort": 0.6, "reliability": 0.7},
+            TravelMode.VELO: {"comfort": 0.5, "reliability": 0.6},
+            TravelMode.MARCHE: {"comfort": 0.3, "reliability": 0.9},
+            TravelMode.TROTTINETTE: {"comfort": 0.7, "reliability": 0.5},
+            TravelMode.COVOITURAGE: {"comfort": 0.8, "reliability": 0.7}
+        }
+        
+        comfort = base_scores.get(method, {"comfort": 0.5})["comfort"]
+        reliability = base_scores.get(method, {"reliability": 0.5})["reliability"]
+        
+        # Bonus écologique
+        is_eco = method in [TravelMode.VELO, TravelMode.MARCHE, TravelMode.TRANSPORT_COMMUN]
+        if eco_preference and is_eco:
+            comfort += 0.1
+            reliability += 0.1
+        
+        # Compatibilité
+        time_compatible = time_minutes <= max_time
+        cost_compatible = cost_daily <= max_cost
+        is_compatible = time_compatible and cost_compatible
+        
+        return TransportCompatibilityResult(
+            method=method,
+            time_minutes=time_minutes,
+            cost_daily=cost_daily,
+            comfort_score=min(1.0, comfort),
+            reliability_score=min(1.0, reliability),
+            is_compatible=is_compatible,
+            eco_friendly=is_eco
+        )
 
 class ContractFlexibilityScorer:
     """🎯 Scorer avancé flexibilité contractuelle V3.0"""
@@ -503,3 +588,28 @@ class ContractFlexibilityScorer:
         
         return False, contract_prefs
 
+if __name__ == "__main__":
+    # Test de base
+    profile = ExtendedMatchingProfile()
+    
+    # Test pondération adaptative
+    profile.listening_reason.primary_reason = ListeningReasonType.REMUNERATION_FAIBLE
+    adaptive_weights = profile.get_adaptive_weights()
+    
+    print("=== NEXTVISION V3.0 - Test Modèles ===")
+    print(f"Composants V3.0: {len(get_component_list())}")
+    print(f"Raison d'écoute: {profile.listening_reason.primary_reason.value}")
+    print(f"Poids adaptatifs: {adaptive_weights}")
+    print(f"Boost salary: {adaptive_weights.get('salary', 0) * 100:.1f}%")
+    
+    # Test Transport Intelligence
+    print("\n=== Transport Methods ===")
+    print(f"Méthodes disponibles: {TravelMode.get_all_methods()}")
+    print(f"Méthodes écologiques: {TravelMode.get_eco_methods()}")
+    print(f"Méthodes gratuites: {TravelMode.get_cost_free_methods()}")
+    
+    is_valid, errors = validate_extended_profile(profile)
+    print(f"\nValidation: {'✅ OK' if is_valid else '❌ Erreurs'}")
+    if errors:
+        for error in errors:
+            print(f"  - {error}")

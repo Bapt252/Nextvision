@@ -1,0 +1,958 @@
+[
+  {
+    "cv_filename": "Cv_Mohamed_Ouadhane.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Assistant Facturation.pdf",
+    "candidat_name": "Mohamed Ouadhane",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR   Fiche de poste Assistant Facturation",
+    "semantic_score": 0.4700000000000001,
+    "confidence": 0.5170000000000001,
+    "calculation_time_ms": 0.1468658447265625,
+    "correspondances": [
+      "gestion"
+    ],
+    "manquantes": [
+      "excel",
+      "comptabilité",
+      "vue",
+      "facturation"
+    ],
+    "bonus": [
+      "cegid",
+      "paie",
+      "go",
+      "comptable",
+      "rh"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.4,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.2,
+      "competences_matchees": [
+        "Comptabilité"
+      ],
+      "competences_manquantes": [
+        "Vue",
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Cv_Mohamed_Ouadhane.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Responsable Comptable -  Fi.pdf",
+    "candidat_name": "Mohamed Ouadhane",
+    "entreprise_name": "FICHE DE POSTE DE RESPONSA",
+    "poste_titre": "Bcom HR   Fiche de poste Responsable Comptable    Fi",
+    "semantic_score": 0.4650000000000001,
+    "confidence": 0.5115000000000002,
+    "calculation_time_ms": 0.1220703125,
+    "correspondances": [
+      "comptable",
+      "gestion"
+    ],
+    "manquantes": [
+      "comptabilité",
+      "finance",
+      "vue",
+      "excel",
+      "sage",
+      "word"
+    ],
+    "bonus": [
+      "go",
+      "cegid",
+      "rh",
+      "paie"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.375,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.25,
+      "competences_matchees": [
+        "Comptabilité"
+      ],
+      "competences_manquantes": [
+        "Vue",
+        "Sage"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Cv_Mohamed_Ouadhane.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+    "candidat_name": "Mohamed Ouadhane",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Générale 78",
+    "semantic_score": 0.48999999999999994,
+    "confidence": 0.5389999999999999,
+    "calculation_time_ms": 0.1049041748046875,
+    "correspondances": [
+      "comptable",
+      "gestion",
+      "paie"
+    ],
+    "manquantes": [
+      "vente",
+      "comptabilité",
+      "excel",
+      "finance",
+      "facturation",
+      "fiscal"
+    ],
+    "bonus": [
+      "go",
+      "cegid",
+      "rh"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.4444444444444444,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.2222222222222222,
+      "competences_matchees": [
+        "Comptabilité",
+        "Gestion"
+      ],
+      "competences_manquantes": [
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Cv_Mohamed_Ouadhane.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+    "candidat_name": "Mohamed Ouadhane",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Unique CAB AVOCAT",
+    "semantic_score": 0.5275,
+    "confidence": 0.58025,
+    "calculation_time_ms": 0.08106231689453125,
+    "correspondances": [
+      "comptable",
+      "gestion",
+      "rh"
+    ],
+    "manquantes": [
+      "comptabilité",
+      "finance",
+      "facturation",
+      "excel",
+      "fiscal"
+    ],
+    "bonus": [
+      "go",
+      "cegid",
+      "paie"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.5,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.375,
+      "competences_matchees": [
+        "Comptabilité",
+        "Gestion"
+      ],
+      "competences_manquantes": [
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Cv_Mohamed_Ouadhane.pdf",
+    "fdp_filename": "Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+    "candidat_name": "Mohamed Ouadhane",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR – Fiche de poste   ASSISTANT COMITE DE DIRECTION",
+    "semantic_score": 0.6900000000000001,
+    "confidence": 0.7590000000000001,
+    "calculation_time_ms": 0.04100799560546875,
+    "correspondances": [],
+    "manquantes": [
+      "compétences générales"
+    ],
+    "bonus": [
+      "gestion",
+      "cegid",
+      "paie",
+      "go",
+      "comptable",
+      "rh"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 1.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": []
+    }
+  },
+  {
+    "cv_filename": "AGBASSE Teddy_CV.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Assistant Facturation.pdf",
+    "candidat_name": "AGBASSE Teddy",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR   Fiche de poste Assistant Facturation",
+    "semantic_score": 0.29,
+    "confidence": 0.319,
+    "calculation_time_ms": 0.2808570861816406,
+    "correspondances": [],
+    "manquantes": [
+      "gestion",
+      "comptabilité",
+      "vue",
+      "excel",
+      "facturation"
+    ],
+    "bonus": [
+      "compétences générales"
+    ],
+    "evaluation": "❌ MATCH FAIBLE",
+    "details": {
+      "competences_score": 0.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": [
+        "Vue",
+        "Comptabilité",
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "AGBASSE Teddy_CV.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Responsable Comptable -  Fi.pdf",
+    "candidat_name": "AGBASSE Teddy",
+    "entreprise_name": "FICHE DE POSTE DE RESPONSA",
+    "poste_titre": "Bcom HR   Fiche de poste Responsable Comptable    Fi",
+    "semantic_score": 0.29,
+    "confidence": 0.319,
+    "calculation_time_ms": 0.07224082946777344,
+    "correspondances": [],
+    "manquantes": [
+      "gestion",
+      "comptabilité",
+      "finance",
+      "vue",
+      "excel",
+      "sage",
+      "comptable",
+      "word"
+    ],
+    "bonus": [
+      "compétences générales"
+    ],
+    "evaluation": "❌ MATCH FAIBLE",
+    "details": {
+      "competences_score": 0.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": [
+        "Vue",
+        "Comptabilité",
+        "Sage"
+      ]
+    }
+  },
+  {
+    "cv_filename": "AGBASSE Teddy_CV.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+    "candidat_name": "AGBASSE Teddy",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Générale 78",
+    "semantic_score": 0.29,
+    "confidence": 0.319,
+    "calculation_time_ms": 0.048160552978515625,
+    "correspondances": [],
+    "manquantes": [
+      "gestion",
+      "vente",
+      "comptabilité",
+      "paie",
+      "fiscal",
+      "excel",
+      "finance",
+      "comptable",
+      "facturation"
+    ],
+    "bonus": [
+      "compétences générales"
+    ],
+    "evaluation": "❌ MATCH FAIBLE",
+    "details": {
+      "competences_score": 0.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": [
+        "Comptabilité",
+        "Excel",
+        "Gestion"
+      ]
+    }
+  },
+  {
+    "cv_filename": "AGBASSE Teddy_CV.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+    "candidat_name": "AGBASSE Teddy",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Unique CAB AVOCAT",
+    "semantic_score": 0.29,
+    "confidence": 0.319,
+    "calculation_time_ms": 0.052928924560546875,
+    "correspondances": [],
+    "manquantes": [
+      "gestion",
+      "comptabilité",
+      "fiscal",
+      "excel",
+      "finance",
+      "comptable",
+      "facturation",
+      "rh"
+    ],
+    "bonus": [
+      "compétences générales"
+    ],
+    "evaluation": "❌ MATCH FAIBLE",
+    "details": {
+      "competences_score": 0.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": [
+        "Comptabilité",
+        "Excel",
+        "Gestion"
+      ]
+    }
+  },
+  {
+    "cv_filename": "AGBASSE Teddy_CV.pdf",
+    "fdp_filename": "Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+    "candidat_name": "AGBASSE Teddy",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR – Fiche de poste   ASSISTANT COMITE DE DIRECTION",
+    "semantic_score": 0.6900000000000001,
+    "confidence": 0.7590000000000001,
+    "calculation_time_ms": 0.04315376281738281,
+    "correspondances": [
+      "compétences générales"
+    ],
+    "manquantes": [],
+    "bonus": [],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 1.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": []
+    }
+  },
+  {
+    "cv_filename": "Rania Fokeladeh.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Assistant Facturation.pdf",
+    "candidat_name": "Rania Fokeladeh",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR   Fiche de poste Assistant Facturation",
+    "semantic_score": 0.4900000000000001,
+    "confidence": 0.5390000000000001,
+    "calculation_time_ms": 0.08678436279296875,
+    "correspondances": [
+      "gestion",
+      "comptabilité"
+    ],
+    "manquantes": [
+      "excel",
+      "vue",
+      "facturation"
+    ],
+    "bonus": [
+      "vente",
+      "paie",
+      "go",
+      "comptable",
+      "fiscal"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.4,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.4,
+      "competences_matchees": [
+        "Comptabilité"
+      ],
+      "competences_manquantes": [
+        "Vue",
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Rania Fokeladeh.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Responsable Comptable -  Fi.pdf",
+    "candidat_name": "Rania Fokeladeh",
+    "entreprise_name": "FICHE DE POSTE DE RESPONSA",
+    "poste_titre": "Bcom HR   Fiche de poste Responsable Comptable    Fi",
+    "semantic_score": 0.47750000000000004,
+    "confidence": 0.5252500000000001,
+    "calculation_time_ms": 0.08225440979003906,
+    "correspondances": [
+      "comptable",
+      "gestion",
+      "comptabilité"
+    ],
+    "manquantes": [
+      "finance",
+      "vue",
+      "excel",
+      "sage",
+      "word"
+    ],
+    "bonus": [
+      "fiscal",
+      "vente",
+      "go",
+      "paie"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.375,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.375,
+      "competences_matchees": [
+        "Comptabilité"
+      ],
+      "competences_manquantes": [
+        "Vue",
+        "Sage"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Rania Fokeladeh.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+    "candidat_name": "Rania Fokeladeh",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Générale 78",
+    "semantic_score": 0.601111111111111,
+    "confidence": 0.6612222222222222,
+    "calculation_time_ms": 0.07700920104980469,
+    "correspondances": [
+      "gestion",
+      "vente",
+      "comptabilité",
+      "paie",
+      "comptable",
+      "fiscal"
+    ],
+    "manquantes": [
+      "facturation",
+      "excel",
+      "finance"
+    ],
+    "bonus": [
+      "go"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 0.6666666666666666,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.4444444444444444,
+      "competences_matchees": [
+        "Comptabilité",
+        "Gestion"
+      ],
+      "competences_manquantes": [
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Rania Fokeladeh.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+    "candidat_name": "Rania Fokeladeh",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Unique CAB AVOCAT",
+    "semantic_score": 0.5275,
+    "confidence": 0.58025,
+    "calculation_time_ms": 0.07414817810058594,
+    "correspondances": [
+      "comptable",
+      "gestion",
+      "comptabilité",
+      "fiscal"
+    ],
+    "manquantes": [
+      "rh",
+      "facturation",
+      "excel",
+      "finance"
+    ],
+    "bonus": [
+      "vente",
+      "go",
+      "paie"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.5,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.375,
+      "competences_matchees": [
+        "Comptabilité",
+        "Gestion"
+      ],
+      "competences_manquantes": [
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Rania Fokeladeh.pdf",
+    "fdp_filename": "Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+    "candidat_name": "Rania Fokeladeh",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR – Fiche de poste   ASSISTANT COMITE DE DIRECTION",
+    "semantic_score": 0.6900000000000001,
+    "confidence": 0.7590000000000001,
+    "calculation_time_ms": 0.04792213439941406,
+    "correspondances": [],
+    "manquantes": [
+      "compétences générales"
+    ],
+    "bonus": [
+      "gestion",
+      "vente",
+      "comptabilité",
+      "paie",
+      "go",
+      "comptable",
+      "fiscal"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 1.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": []
+    }
+  },
+  {
+    "cv_filename": "Issac HOUNKPATIN.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Assistant Facturation.pdf",
+    "candidat_name": "Issac HOUNKPATIN",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR   Fiche de poste Assistant Facturation",
+    "semantic_score": 0.5900000000000001,
+    "confidence": 0.6490000000000001,
+    "calculation_time_ms": 0.09775161743164062,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "excel"
+    ],
+    "manquantes": [
+      "vue",
+      "facturation"
+    ],
+    "bonus": [
+      "comptable",
+      "go",
+      "sage",
+      "finance"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.6,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.6,
+      "competences_matchees": [
+        "Comptabilité",
+        "Excel"
+      ],
+      "competences_manquantes": [
+        "Vue"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Issac HOUNKPATIN.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Responsable Comptable -  Fi.pdf",
+    "candidat_name": "Issac HOUNKPATIN",
+    "entreprise_name": "FICHE DE POSTE DE RESPONSA",
+    "poste_titre": "Bcom HR   Fiche de poste Responsable Comptable    Fi",
+    "semantic_score": 0.6400000000000001,
+    "confidence": 0.7040000000000002,
+    "calculation_time_ms": 0.07200241088867188,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "finance",
+      "excel",
+      "sage",
+      "comptable"
+    ],
+    "manquantes": [
+      "vue",
+      "word"
+    ],
+    "bonus": [
+      "go"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 0.75,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.5,
+      "competences_matchees": [
+        "Comptabilité",
+        "Sage"
+      ],
+      "competences_manquantes": [
+        "Vue"
+      ]
+    }
+  },
+  {
+    "cv_filename": "Issac HOUNKPATIN.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+    "candidat_name": "Issac HOUNKPATIN",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Générale 78",
+    "semantic_score": 0.5455555555555556,
+    "confidence": 0.6001111111111112,
+    "calculation_time_ms": 0.06103515625,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "excel",
+      "finance",
+      "comptable"
+    ],
+    "manquantes": [
+      "fiscal",
+      "vente",
+      "facturation",
+      "paie"
+    ],
+    "bonus": [
+      "go",
+      "sage"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.5555555555555556,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.3333333333333333,
+      "competences_matchees": [
+        "Comptabilité",
+        "Excel",
+        "Gestion"
+      ],
+      "competences_manquantes": []
+    }
+  },
+  {
+    "cv_filename": "Issac HOUNKPATIN.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+    "candidat_name": "Issac HOUNKPATIN",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Unique CAB AVOCAT",
+    "semantic_score": 0.5775,
+    "confidence": 0.6352500000000001,
+    "calculation_time_ms": 0.053882598876953125,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "excel",
+      "finance",
+      "comptable"
+    ],
+    "manquantes": [
+      "fiscal",
+      "facturation",
+      "rh"
+    ],
+    "bonus": [
+      "go",
+      "sage"
+    ],
+    "evaluation": "⚠️ MATCH MOYEN",
+    "details": {
+      "competences_score": 0.625,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.375,
+      "competences_matchees": [
+        "Comptabilité",
+        "Excel",
+        "Gestion"
+      ],
+      "competences_manquantes": []
+    }
+  },
+  {
+    "cv_filename": "Issac HOUNKPATIN.pdf",
+    "fdp_filename": "Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+    "candidat_name": "Issac HOUNKPATIN",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR – Fiche de poste   ASSISTANT COMITE DE DIRECTION",
+    "semantic_score": 0.6900000000000001,
+    "confidence": 0.7590000000000001,
+    "calculation_time_ms": 0.048160552978515625,
+    "correspondances": [],
+    "manquantes": [
+      "compétences générales"
+    ],
+    "bonus": [
+      "gestion",
+      "comptabilité",
+      "sage",
+      "go",
+      "excel",
+      "finance",
+      "comptable"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 1.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": []
+    }
+  },
+  {
+    "cv_filename": "CV_DARMON_Charlotte.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Assistant Facturation.pdf",
+    "candidat_name": "DARMON Charlotte",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR   Fiche de poste Assistant Facturation",
+    "semantic_score": 0.6700000000000002,
+    "confidence": 0.7370000000000002,
+    "calculation_time_ms": 0.09489059448242188,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "vue",
+      "facturation"
+    ],
+    "manquantes": [
+      "excel"
+    ],
+    "bonus": [
+      "finance",
+      "paie",
+      "go",
+      "sage",
+      "comptable",
+      "fiscal",
+      "juridique"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 0.8,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.6,
+      "competences_matchees": [
+        "Vue",
+        "Comptabilité"
+      ],
+      "competences_manquantes": [
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "CV_DARMON_Charlotte.pdf",
+    "fdp_filename": "Bcom HR - Fiche de poste Responsable Comptable -  Fi.pdf",
+    "candidat_name": "DARMON Charlotte",
+    "entreprise_name": "FICHE DE POSTE DE RESPONSA",
+    "poste_titre": "Bcom HR   Fiche de poste Responsable Comptable    Fi",
+    "semantic_score": 0.6400000000000001,
+    "confidence": 0.7040000000000002,
+    "calculation_time_ms": 0.10609626770019531,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "finance",
+      "vue",
+      "sage",
+      "comptable"
+    ],
+    "manquantes": [
+      "word",
+      "excel"
+    ],
+    "bonus": [
+      "paie",
+      "go",
+      "facturation",
+      "fiscal",
+      "juridique"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 0.75,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.5,
+      "competences_matchees": [
+        "Vue",
+        "Comptabilité",
+        "Sage"
+      ],
+      "competences_manquantes": []
+    }
+  },
+  {
+    "cv_filename": "CV_DARMON_Charlotte.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Générale 78.docx",
+    "candidat_name": "DARMON Charlotte",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Générale 78",
+    "semantic_score": 0.6233333333333334,
+    "confidence": 0.6856666666666668,
+    "calculation_time_ms": 0.08916854858398438,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "paie",
+      "facturation",
+      "finance",
+      "comptable",
+      "fiscal"
+    ],
+    "manquantes": [
+      "vente",
+      "excel"
+    ],
+    "bonus": [
+      "juridique",
+      "go",
+      "vue",
+      "sage"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 0.7777777777777778,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.2222222222222222,
+      "competences_matchees": [
+        "Comptabilité",
+        "Gestion"
+      ],
+      "competences_manquantes": [
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "CV_DARMON_Charlotte.pdf",
+    "fdp_filename": "Bcom HR - Fiche de Poste Comptable Unique CAB AVOCAT.docx",
+    "candidat_name": "DARMON Charlotte",
+    "entreprise_name": "Entreprise Test",
+    "poste_titre": "Bcom HR   Fiche de Poste Comptable Unique CAB AVOCAT",
+    "semantic_score": 0.6150000000000001,
+    "confidence": 0.6765000000000002,
+    "calculation_time_ms": 0.07605552673339844,
+    "correspondances": [
+      "gestion",
+      "comptabilité",
+      "facturation",
+      "finance",
+      "comptable",
+      "fiscal"
+    ],
+    "manquantes": [
+      "excel",
+      "rh"
+    ],
+    "bonus": [
+      "paie",
+      "go",
+      "vue",
+      "sage",
+      "juridique"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 0.75,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.25,
+      "competences_matchees": [
+        "Comptabilité",
+        "Gestion"
+      ],
+      "competences_manquantes": [
+        "Excel"
+      ]
+    }
+  },
+  {
+    "cv_filename": "CV_DARMON_Charlotte.pdf",
+    "fdp_filename": "Bcom HR – Fiche de poste - ASSISTANT COMITE DE DIRECTION.docx",
+    "candidat_name": "DARMON Charlotte",
+    "entreprise_name": "Bcom HR",
+    "poste_titre": "Bcom HR – Fiche de poste   ASSISTANT COMITE DE DIRECTION",
+    "semantic_score": 0.6900000000000001,
+    "confidence": 0.7590000000000001,
+    "calculation_time_ms": 0.049114227294921875,
+    "correspondances": [],
+    "manquantes": [
+      "compétences générales"
+    ],
+    "bonus": [
+      "gestion",
+      "comptabilité",
+      "finance",
+      "paie",
+      "go",
+      "vue",
+      "facturation",
+      "sage",
+      "comptable",
+      "fiscal",
+      "juridique"
+    ],
+    "evaluation": "✅ BON MATCH",
+    "details": {
+      "competences_score": 1.0,
+      "poste_score": 0.5,
+      "secteur_score": 0.7,
+      "logiciels_score": 0.0,
+      "competences_matchees": [],
+      "competences_manquantes": []
+    }
+  }
+]

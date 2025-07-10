@@ -29,7 +29,7 @@ class ContractType(Enum):
     STAGE = "stage"
 '''
     
-    # Insérer après TransportMethod
+    # Insérer après TravelMode
     content = content.replace(
         'class ContractPreference(Enum):',
         contract_enum + '\nclass ContractPreference(Enum):'

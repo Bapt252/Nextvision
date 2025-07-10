@@ -1,0 +1,10 @@
+{
+  "backed_up_files": [
+    "nextvision/services/enhanced_commitment_bridge_v3_simplified.py",
+    "test_integration_unified.py",
+    "test_matching_parsing_complete.py",
+    "requirements-integration.txt"
+  ],
+  "backup_timestamp": "2025-07-10T12:19:23.635026",
+  "version_before": "3.0.1"
+}
