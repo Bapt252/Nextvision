@@ -37,6 +37,16 @@ from nextvision.services.transport_calculator import TransportCalculator
 from nextvision.services.google_maps_service import GoogleMapsService
 from nextvision.config.google_maps_config import get_google_maps_config
 
+# 🚀 Import SERVICE GPT DIRECT (NOUVEAU)
+from nextvision.services.gpt_direct_service import (
+    get_gpt_service,
+    parse_cv_direct,
+    parse_job_direct,
+    GPTDirectService,
+    CVData,
+    JobData
+)
+
 # Configuration logging
 logger = logging.getLogger(__name__)
 
@@ -56,6 +66,9 @@ transport_calculator = TransportCalculator(google_maps_service)
 transport_filtering_engine = TransportFilteringEngine(transport_calculator)
 location_scoring_engine = LocationScoringEngine(transport_calculator)
 
+# Service GPT Direct
+gpt_service = get_gpt_service()
+
 # Bridge Commitment-
 try:
     bridge_config = BridgeConfig()
@@ -71,7 +84,7 @@ class IntelligentMatchingService:
     ===============================================
     
     **Innovation** : Workflow automatique complet en une seule requête
-    - ✅ Parse CV + Job avec Commitment- Bridge
+    - ✅ Parse CV + Job avec GPT Direct Service
     - ✅ Transform avec Adaptateur Intelligent
     - ✅ Match avec Transport Intelligence intégré
     - ✅ Performance optimisée < 2000ms
@@ -94,7 +107,7 @@ class IntelligentMatchingService:
         🎯 TRAITEMENT INTELLIGENT MATCHING COMPLET
         
         **Workflow Automatique** :
-        1. Parse CV + Job (Commitment- Bridge)
+        1. Parse CV + Job (GPT Direct Service)
         2. Transform formats (Adaptateur Intelligent)
         3. Calculate matching (Transport Intelligence)
         4. Return unified result
@@ -109,10 +122,10 @@ class IntelligentMatchingService:
         self.logger.info(f"💼 Job file: {job_file.filename if job_file else 'None'}")
         
         try:
-            # === PHASE 1: PARSING WITH COMMITMENT BRIDGE ===
+            # === PHASE 1: PARSING WITH GPT DIRECT ===
             parsing_start = time.time()
             
-            cv_data, job_data = await self._parse_files_with_bridge(cv_file, job_file)
+            cv_data, job_data = await self._parse_files_with_gpt_direct(cv_file, job_file)
             
             parsing_time = (time.time() - parsing_start) * 1000
             self.logger.info(f"✅ Parsing completed in {parsing_time:.2f}ms")
@@ -210,7 +223,8 @@ class IntelligentMatchingService:
                     "api_version": "3.2.1",
                     "timestamp": datetime.now().isoformat(),
                     "endpoint": "/api/v3/intelligent-matching",
-                    "algorithm": "Adaptateur Intelligent + Transport Intelligence",
+                    "algorithm": "GPT Direct + Adaptateur Intelligent + Transport Intelligence",
+                    "gpt_service_status": "operational" if gpt_service else "fallback",
                     "bridge_status": "operational" if commitment_bridge else "fallback",
                     "files_processed": {
                         "cv_filename": cv_file.filename,
@@ -242,83 +256,76 @@ class IntelligentMatchingService:
                 }
             )
     
-    async def _parse_files_with_bridge(
+    async def _parse_files_with_gpt_direct(
         self, 
         cv_file: UploadFile, 
         job_file: Optional[UploadFile]
     ) -> tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
-        """🤖 Parse CV + Job avec Commitment Bridge RÉEL"""
+        """🚀 Parse CV + Job avec GPT Direct Service"""
         
         cv_data = {}
         job_data = None
         
-        # === CV PARSING ===
-        if commitment_bridge:
-            try:
-                # Lecture fichier CV
-                cv_content = await cv_file.read()
-                
-                async with commitment_bridge as bridge:
-                    # Parse CV RÉEL avec Commitment-
-                    cv_parsed = await bridge.parse_cv_with_commitment(cv_content)
-                    
-                    cv_data = {
-                        "name": cv_parsed.name,
-                        "email": cv_parsed.email,
-                        "phone": cv_parsed.phone,
-                        "skills": cv_parsed.skills,
-                        "years_of_experience": cv_parsed.years_of_experience,
-                        "education": cv_parsed.education,
-                        "job_titles": cv_parsed.job_titles,
-                        "companies": cv_parsed.companies,
-                        "location": cv_parsed.location,
-                        "summary": cv_parsed.summary,
-                        "objective": cv_parsed.objective,
-                        "languages": cv_parsed.languages,
-                        "certifications": cv_parsed.certifications
-                    }
-                    
-                    self.logger.info(f"✅ CV RÉEL parsé: {cv_parsed.name}")
-                
-            except Exception as e:
-                self.logger.warning(f"⚠️ Bridge CV parsing failed: {e}, using fallback")
-                cv_data = self._create_fallback_cv_data(cv_file)
-        else:
-            self.logger.info("📄 Using fallback CV parsing (no bridge)")
+        # === CV PARSING WITH GPT DIRECT ===
+        try:
+            # Lecture fichier CV
+            cv_content = await cv_file.read()
+            cv_content_str = cv_content.decode('utf-8', errors='ignore')
+            
+            # Parse CV avec GPT Direct
+            cv_parsed: CVData = await parse_cv_direct(cv_content_str)
+            
+            cv_data = {
+                "name": cv_parsed.name,
+                "email": cv_parsed.email,
+                "phone": cv_parsed.phone,
+                "skills": cv_parsed.skills,
+                "years_of_experience": cv_parsed.years_of_experience,
+                "education": cv_parsed.education,
+                "job_titles": cv_parsed.job_titles,
+                "companies": cv_parsed.companies,
+                "location": cv_parsed.location,
+                "summary": cv_parsed.summary,
+                "objective": cv_parsed.objective,
+                "languages": cv_parsed.languages,
+                "certifications": cv_parsed.certifications
+            }
+            
+            self.logger.info(f"✅ CV GPT Direct parsé: {cv_parsed.name}")
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ GPT Direct CV parsing failed: {e}, using fallback")
             cv_data = self._create_fallback_cv_data(cv_file)
         
-        # === JOB PARSING ===
-        if job_file and commitment_bridge:
+        # === JOB PARSING WITH GPT DIRECT ===
+        if job_file:
             try:
                 # Lecture fichier Job
                 job_content = await job_file.read()
+                job_content_str = job_content.decode('utf-8', errors='ignore')
                 
-                async with commitment_bridge as bridge:
-                    # Parse Job RÉEL avec Commitment-
-                    job_parsed = await bridge.parse_job_with_commitment(file_data=job_content)
-                    
-                    job_data = {
-                        "title": job_parsed.title,
-                        "company": job_parsed.company,
-                        "location": job_parsed.location,
-                        "contract_type": job_parsed.contract_type,
-                        "required_skills": job_parsed.required_skills,
-                        "preferred_skills": job_parsed.preferred_skills,
-                        "responsibilities": job_parsed.responsibilities,
-                        "requirements": job_parsed.requirements,
-                        "benefits": job_parsed.benefits,
-                        "salary_range": job_parsed.salary_range,
-                        "remote_policy": job_parsed.remote_policy
-                    }
-                    
-                    self.logger.info(f"✅ Job RÉEL parsé: {job_parsed.title}")
+                # Parse Job avec GPT Direct
+                job_parsed: JobData = await parse_job_direct(job_content_str)
+                
+                job_data = {
+                    "title": job_parsed.title,
+                    "company": job_parsed.company,
+                    "location": job_parsed.location,
+                    "contract_type": job_parsed.contract_type,
+                    "required_skills": job_parsed.required_skills,
+                    "preferred_skills": job_parsed.preferred_skills,
+                    "responsibilities": job_parsed.responsibilities,
+                    "requirements": job_parsed.requirements,
+                    "benefits": job_parsed.benefits,
+                    "salary_range": job_parsed.salary_range,
+                    "remote_policy": job_parsed.remote_policy
+                }
+                
+                self.logger.info(f"✅ Job GPT Direct parsé: {job_parsed.title}")
                 
             except Exception as e:
-                self.logger.warning(f"⚠️ Bridge Job parsing failed: {e}, using fallback")
+                self.logger.warning(f"⚠️ GPT Direct Job parsing failed: {e}, using fallback")
                 job_data = self._create_fallback_job_data(job_file)
-        elif job_file:
-            self.logger.info("💼 Using fallback Job parsing (no bridge)")
-            job_data = self._create_fallback_job_data(job_file)
         
         return cv_data, job_data
     
@@ -505,7 +512,7 @@ async def intelligent_matching_endpoint(
     
     ### Workflow Unifié Automatique :
     
-    1. **📄 Parse CV** → Utilise Commitment- Bridge RÉEL
+    1. **📄 Parse CV** → Utilise GPT Direct Service RÉEL
     2. **💼 Parse Job** → Parsing intelligent automatique  
     3. **🔄 Transform** → Adaptateur Intelligent (formats unifiés)
     4. **🎯 Match** → Matching Engine avec Transport Intelligence
@@ -517,7 +524,7 @@ async def intelligent_matching_endpoint(
     - 🔧 **Fiabilité** : Fallbacks intelligents à chaque étape
     
     ### Innovation Architecture :
-    - ✅ **Zéro redondance** : Réutilise infrastructure Commitment-
+    - ✅ **Zéro redondance** : Réutilise infrastructure GPT Direct
     - ✅ **Auto-adaptation** : Résout incompatibilités format automatiquement
     - ✅ **Transport Intelligence** : Google Maps intégré
     - ✅ **Pondération Adaptative** : Selon raison d'écoute candidat
@@ -529,7 +536,7 @@ async def intelligent_matching_endpoint(
     - `"Manque de perspectives d'évolution"` → Priorité motivations
     - `"Recherche nouveau défi"` → Pondération équilibrée
     
-    **RÉVOLUTION NEXTEN** : Bridge + IA + Géospatial = Workflow unifié parfait
+    **RÉVOLUTION NEXTEN** : GPT Direct + IA + Géospatial = Workflow unifié parfait
     """
     
     start_time = time.time()
@@ -600,6 +607,7 @@ async def health_check_v3():
         "timestamp": datetime.now().isoformat(),
         "features": {
             "intelligent_matching": True,
+            "gpt_direct_service": True,
             "adaptateur_intelligent": True,
             "transport_intelligence": True,
             "commitment_bridge": commitment_bridge is not None,
@@ -615,8 +623,13 @@ async def status_detailed_v3():
     
     # Test services
     bridge_status = "operational" if commitment_bridge else "fallback"
+    gpt_status = "operational" if gpt_service else "fallback"
     
     services_status = {
+        "gpt_direct_service": {
+            "status": gpt_status,
+            "available": gpt_service is not None
+        },
         "commitment_bridge": {
             "status": bridge_status,
             "available": commitment_bridge is not None
