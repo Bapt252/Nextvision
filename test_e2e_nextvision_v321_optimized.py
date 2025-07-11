@@ -162,6 +162,47 @@ class NextvisionE2ETestSuiteOptimized:
             }
         ]
     
+    def _generate_test_jobs(self) -> List[Dict]:
+        """Génère des offres d'emploi de test"""
+        return [
+            {
+                "title": "Comptable Général",
+                "description": "Poste de comptable général pour PME",
+                "required_experience": "2-5 ans",
+                "salary_range": "32000-38000",
+                "location": "Paris 15ème",
+                "required_level": "JUNIOR",
+                "skills": ["Comptabilité", "Sage"]
+            },
+            {
+                "title": "Chef Comptable",
+                "description": "Management d'équipe comptable",
+                "required_experience": "5-10 ans",
+                "salary_range": "50000-60000",
+                "location": "Lyon",
+                "required_level": "MANAGER",
+                "skills": ["Comptabilité", "Management"]
+            },
+            {
+                "title": "Directeur Administratif et Financier",
+                "description": "Direction financière groupe",
+                "required_experience": "10+ ans",
+                "salary_range": "80000-120000",
+                "location": "Paris La Défense",
+                "required_level": "EXECUTIVE",
+                "skills": ["Finance", "Direction", "Management"]
+            },
+            {
+                "title": "Assistant Comptable",
+                "description": "Support équipe comptabilité",
+                "required_experience": "0-2 ans",
+                "salary_range": "25000-30000",
+                "location": "Bordeaux",
+                "required_level": "ENTRY",
+                "skills": ["Comptabilité", "Saisie"]
+            }
+        ]
+    
     def _create_matching_request(self, candidate: Dict) -> Dict:
         """Crée une MatchingRequest selon le modèle API réel"""
         name_parts = candidate["name"].split()
