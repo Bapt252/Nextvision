@@ -3,7 +3,7 @@
 Algorithme de matching IA adaptatif pour NEXTEN + Bridge Commitment- + Transport Intelligence
 
 Author: NEXTEN Team
-Version: 2.0.0 - Google Maps Intelligence + REAL COMMITMENT BRIDGE
+Version: 3.2.1 - ENDPOINT INTELLIGENT v3 INTÉGRÉ + Google Maps Intelligence + REAL COMMITMENT BRIDGE
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Query
@@ -26,6 +26,9 @@ from nextvision.services.commitment_bridge import (
     BridgeRequest,
     BridgeConfig
 )
+
+# === IMPORT ENDPOINT INTELLIGENT v3.2.1 ===
+from nextvision.api.v3.intelligent_matching import router as v3_intelligent_router
 
 # === GOOGLE MAPS INTELLIGENCE IMPORTS (Prompt 2) ===
 from nextvision.services.google_maps_service import GoogleMapsService
@@ -77,6 +80,20 @@ app = FastAPI(
     description="""
     **Algorithme de matching IA adaptatif pour NEXTEN + Google Maps Intelligence**
     
+    ## 🚀 Innovation v3.2.1: ENDPOINT INTELLIGENT UNIFIÉ
+    
+    **RÉVOLUTION WORKFLOW** : 5 étapes manuelles → 1 étape automatique
+    
+    ### 🎯 Endpoint Principal : `/api/v3/intelligent-matching`
+    
+    **Workflow Automatique** :
+    1. **Parse** CV + Job (Commitment- Bridge RÉEL)
+    2. **Transform** formats (Adaptateur Intelligent automatique)
+    3. **Match** avec Transport Intelligence intégré
+    4. **Return** résultat unifié complet < 2000ms
+    
+    **Innovation Révolutionnaire** : Upload CV + Job → Résultat matching automatique
+    
     ## 🎯 Innovation v1.0: Pondération Adaptative Contextuelle
     
     L'algorithme ajuste automatiquement les poids selon le "pourquoi_ecoute" du candidat:
@@ -106,8 +123,11 @@ app = FastAPI(
     * **Workflow complet** : Parse → Filter → Match en une requête
     * **Architecture optimale** : Aucune duplication de code
     
+    ---
+    
+    **RÉVOLUTION NEXTEN** : Bridge + IA + Géospatial = Workflow parfait unifié
     """,
-    version="2.0.0"
+    version="3.2.1"
 )
 
 app.add_middleware(
@@ -117,6 +137,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# === INTÉGRATION ENDPOINT INTELLIGENT v3.2.1 ===
+app.include_router(v3_intelligent_router, tags=["🎯 Intelligent Matching v3.2.1"])
 
 # 🏗️ Modèles Pydantic simplifiés
 
@@ -519,12 +542,19 @@ async def root():
     """🏠 Root endpoint"""
     return {
         "service": "Nextvision",
-        "description": "Algorithme de matching IA adaptatif pour NEXTEN + Google Maps Intelligence",
-        "version": "2.0.0",
+        "description": "Algorithme de matching IA adaptatif pour NEXTEN + Google Maps Intelligence + ENDPOINT INTELLIGENT v3.2.1",
+        "version": "3.2.1",
         "status": "active",
         "innovations": {
+            "v3.2.1": "🚀 ENDPOINT INTELLIGENT : 5 étapes → 1 étape automatique",
             "v1.0": "Pondération Adaptative Contextuelle",
             "v2.0": "Google Maps Intelligence avec pré-filtrage géospatial"
+        },
+        "revolutionary_endpoint": {
+            "url": "/api/v3/intelligent-matching",
+            "description": "Upload CV + Job → Résultat matching automatique",
+            "performance": "< 2000ms",
+            "innovation": "Workflow unifié révolutionnaire"
         },
         "frontend_integration": "https://github.com/Bapt252/Commitment-",
         "bridge_integration": "Commitment- → Nextvision",
@@ -532,9 +562,11 @@ async def root():
         "health": "/api/v1/health",
         "integration_health": "/api/v1/integration/health",
         "google_maps_health": "/api/v2/maps/health",
+        "v3_health": "/api/v3/health",
         "adaptive_reasons_supported": list(ADAPTIVE_WEIGHTS_CONFIG.keys()),
         "transport_modes_supported": ["voiture", "transport_commun", "velo", "marche"],
         "performance_targets": {
+            "intelligent_matching": "< 2000ms",
             "matching_time": "< 0.68ms",
             "geospatial_time": "< 0.2ms", 
             "pre_filtering_rate": "1000 jobs < 2s"
@@ -547,10 +579,12 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "Nextvision",
-        "version": "2.0.0",
+        "version": "3.2.1",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "environment": "development",
         "features": {
+            "intelligent_matching_v3": True,
+            "workflow_unifie": True,
             "adaptive_weighting": True,
             "semantic_matching": True,
             "real_time_processing": True,
@@ -558,6 +592,11 @@ async def health_check():
             "google_maps_intelligence": True,
             "transport_pre_filtering": True,
             "location_scoring": True
+        },
+        "endpoints": {
+            "revolutionary": "/api/v3/intelligent-matching",
+            "classic_matching": "/api/v1/matching/candidate/{id}",
+            "transport": "/api/v2/transport/compatibility"
         }
     }
 
@@ -643,7 +682,7 @@ async def integration_health():
         return {
             "status": "unavailable",
             "service": "Nextvision Bridge",
-            "version": "2.0.0",
+            "version": "3.2.1",
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "bridge_status": "not_initialized",
             "error": "Commitment Bridge not available"
@@ -887,34 +926,36 @@ async def check_transport_compatibility(request: TransportCompatibilityRequest):
         raise HTTPException(status_code=500, detail=f"Erreur transport: {str(e)}")
 
 if __name__ == "__main__":
-    print("🎯 === NEXTVISION API v2.0 STARTUP ===")
-    print("🚀 Algorithme de matching IA adaptatif pour NEXTEN")
+    print("🎯 === NEXTVISION API v3.2.1 STARTUP - ENDPOINT INTELLIGENT INTÉGRÉ ===")
+    print("🚀 Innovation Révolutionnaire : WORKFLOW UNIFIÉ 5 étapes → 1 étape automatique")
     print("🌉 Bridge Commitment- → Nextvision INTÉGRÉ")
     print("🗺️ Google Maps Intelligence OPÉRATIONNEL")
     print("📚 Documentation: http://localhost:8001/docs")
+    print("")
+    print("🎯 === ENDPOINT RÉVOLUTIONNAIRE ===")
+    print("  🚀 INTELLIGENT MATCHING: http://localhost:8001/api/v3/intelligent-matching")
+    print("     → Upload CV + Job → Résultat matching automatique (< 2000ms)")
     print("")
     print("❤️ Health Checks:")
     print("  • Core API: http://localhost:8001/api/v1/health")
     print("  • Bridge: http://localhost:8001/api/v1/integration/health")
     print("  • Google Maps: http://localhost:8001/api/v2/maps/health")
+    print("  • Intelligent v3: http://localhost:8001/api/v3/health")
     print("")
-    print("🎯 Fonctionnalités v1.0:")
+    print("🎯 Fonctionnalités v3.2.1:")
+    print("  • Workflow Unifié: RÉVOLUTIONNAIRE")
+    print("  • Adaptateur Intelligent: OPÉRATIONNEL")
+    print("  • Transport Intelligence: INTÉGRÉ")
     print("  • Pondération Adaptative: ACTIVE")
     print("  • Bridge Commitment-: OPÉRATIONNEL")
     print("")
-    print("🗺️ Fonctionnalités v2.0:")
-    print("  • Google Maps Intelligence: ACTIVE")
-    print("  • Transport Pre-filtering: OPÉRATIONNEL")
-    print("  • Location Scoring: ENRICHI")
-    print("  • Performance: 1000 jobs < 2s")
-    print("  • Cache Multi-niveau: ACTIF")
-    print("")
-    print("🧪 Endpoints RÉELS avec Commitment-:")
+    print("🧪 Endpoints disponibles:")
+    print("  • Intelligent Matching: /api/v3/intelligent-matching")
     print("  • CV Parsing RÉEL: /api/v2/conversion/commitment/enhanced")
     print("  • FDP Parsing RÉEL: /api/v2/jobs/parse")
     print("  • Transport: /api/v2/transport/compatibility")
     print("")
-    print("🔗 Révolution NEXTEN: Bridge + IA + Géospatial")
-    print("===============================================")
+    print("🔗 RÉVOLUTION NEXTEN: Bridge + IA + Géospatial + Workflow Unifié")
+    print("=================================================================")
     
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
