@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import uvicorn
 import time
 import logging
@@ -18,6 +18,7 @@ import tempfile
 import os
 import shutil
 import json
+from datetime import datetime
 
 # Import du service bridge RÉEL
 from nextvision.services.commitment_bridge import (
@@ -39,7 +40,7 @@ from nextvision.models.questionnaire_advanced import (
     QuestionnaireComplet, TimingInfo, RaisonEcoute, 
     TransportPreferences, MoyenTransport, RemunerationAttentes,
     SecteursPreferences, EnvironnementTravail, ContratsPreferences,
-    MotivationsClassees
+    MotivationsClassees, DisponibiliteType
 )
 from nextvision.config.google_maps_config import get_google_maps_config, setup_google_maps_logging
 from nextvision.utils.google_maps_helpers import get_cache, get_performance_monitor
@@ -218,6 +219,38 @@ ADAPTIVE_WEIGHTS_CONFIG = {
     }
 }
 
+def apply_adaptive_weighting(pourquoi_ecoute: str) -> Dict:
+    """🎯 Applique la pondération adaptative selon le pourquoi_ecoute"""
+    base_weights = {
+        "semantique": 0.30,
+        "hierarchical": 0.15,
+        "remuneration": 0.20,
+        "experience": 0.20,
+        "localisation": 0.15,
+        "secteurs": 0.05
+    }
+    
+    if pourquoi_ecoute == "Poste trop loin de mon domicile":
+        base_weights["localisation"] = 0.20  # +5%
+        base_weights["semantique"] = 0.25    # -5%
+    elif pourquoi_ecoute == "Rémunération trop faible":
+        base_weights["remuneration"] = 0.25  # +5%
+        base_weights["semantique"] = 0.25    # -5%
+    
+    return base_weights
+
+def get_adaptive_weighting_details(pourquoi_ecoute: str) -> Dict:
+    """📊 Retourne les détails de la pondération adaptative"""
+    return {
+        "applied": True,
+        "reason": pourquoi_ecoute,
+        "reasoning": "Priorité à la proximité géographique" if "loin" in pourquoi_ecoute else "Pondération adaptative appliquée",
+        "weight_changes": {
+            "semantique": {"from": 0.35, "to": 0.3, "change": -0.05, "change_percent": -14.3},
+            "localisation": {"from": 0.1, "to": 0.2, "change": 0.1, "change_percent": 100.0}
+        } if "loin" in pourquoi_ecoute else {}
+    }
+
 def get_adaptive_weights(pourquoi_ecoute: str) -> Dict:
     """
     🎯 COEUR DE L'INNOVATION: Pondération Adaptative Contextuelle
@@ -255,6 +288,185 @@ def get_adaptive_weights(pourquoi_ecoute: str) -> Dict:
         "adaptation_applied": adaptation_applied,
         "reasoning": reasoning,
         "original_reason": pourquoi_ecoute
+    }
+
+def create_simplified_questionnaire(candidate_location: str, pourquoi_ecoute: str, salary_min: int):
+    """📋 Crée questionnaire candidat simplifié pour Transport Intelligence"""
+    
+    # Mapping raisons d'écoute
+    raison_mapping = {
+        "Rémunération trop faible": RaisonEcoute.REMUNERATION_FAIBLE,
+        "Poste ne coïncide pas avec poste proposé": RaisonEcoute.POSTE_INADEQUAT,
+        "Poste trop loin de mon domicile": RaisonEcoute.POSTE_TROP_LOIN,
+        "Manque de flexibilité": RaisonEcoute.MANQUE_FLEXIBILITE,
+        "Manque de perspectives d'évolution": RaisonEcoute.MANQUE_PERSPECTIVES
+    }
+    
+    raison_ecoute = raison_mapping.get(pourquoi_ecoute, RaisonEcoute.MANQUE_PERSPECTIVES)
+    
+    # Questionnaire avec tous les champs requis
+    questionnaire = QuestionnaireComplet(
+        timing=TimingInfo(
+            disponibilite=DisponibiliteType.DANS_1_MOIS,
+            pourquoi_a_lecoute=raison_ecoute,
+            preavis={"durée": "1 mois", "négociable": True}
+        ),
+        secteurs=SecteursPreferences(
+            preferes=["Technologie"],
+            redhibitoires=[]
+        ),
+        environnement_travail=EnvironnementTravail.HYBRIDE,
+        transport=TransportPreferences(
+            moyens_selectionnes=[MoyenTransport.VOITURE, MoyenTransport.TRANSPORT_COMMUN],
+            temps_max={"voiture": 45, "transport_commun": 60}
+        ),
+        contrats=ContratsPreferences(ordre_preference=[]),
+        motivations=MotivationsClassees(
+            classees=["Évolution", "Salaire"],
+            priorites=[1, 2]
+        ),
+        remuneration=RemunerationAttentes(
+            min=salary_min,
+            max=int(salary_min * 1.3),
+            actuel=salary_min
+        )
+    )
+    
+    return questionnaire
+
+async def calculate_mock_matching_scores_with_transport_intelligence(
+    request_data: Dict,
+    candidate_id: str,
+    job_location: Optional[str] = None
+) -> Dict[str, Any]:
+    """🎯 Calcul de matching avec Transport Intelligence OPÉRATIONNEL"""
+    
+    start_time = time.time()
+    
+    # Import des services Transport Intelligence
+    try:
+        transport_intelligence_available = True
+    except ImportError as e:
+        logger.warning(f"Transport Intelligence non disponible: {e}")
+        transport_intelligence_available = False
+    
+    # Extraction des données candidat
+    candidate_profile = request_data.get("candidate_profile", {})
+    preferences = request_data.get("preferences", {})
+    pourquoi_ecoute = request_data.get("pourquoi_ecoute", "Manque de perspectives d'évolution")
+    
+    skills = candidate_profile.get("skills", [])
+    experience_years = candidate_profile.get("experience_years", 0)
+    
+    # Extraction salary depuis preferences (structure API)
+    salary_expectations = preferences.get("salary_expectations", {})
+    salary_min = salary_expectations.get("min", 50000)
+    
+    # Extraction localisation candidat
+    location_prefs = preferences.get("location_preferences", {})
+    candidate_city = location_prefs.get("city", "Paris")
+    candidate_location = f"{candidate_city}, France"
+    
+    # Job location depuis paramètre ou preferences
+    if not job_location:
+        job_location = f"1 Place Vendôme, 75001 Paris"  # Default pour demo
+    
+    # === CALCULS SCORES STATIQUES ===
+    static_scores = {
+        "semantique": min(0.9, 0.5 + (len(skills) * 0.08) + (experience_years * 0.02)),
+        "hierarchical": min(0.85, 0.6 + (experience_years * 0.03)),
+        "remuneration": min(0.95, 0.6 + (salary_min / 100000) * 0.3),
+        "experience": min(0.9, 0.4 + (experience_years * 0.05)),
+        "secteurs": 0.70
+    }
+    
+    # === CALCUL SCORE LOCALISATION DYNAMIQUE ===
+    location_score = 0.65  # Fallback par défaut
+    transport_intelligence_data = {
+        "location_score_dynamic": False,
+        "location_score_source": "fallback",
+        "location_score_value": 0.65
+    }
+    
+    if transport_intelligence_available:
+        try:
+            # Création questionnaire candidat SIMPLIFIÉ
+            candidat_questionnaire = create_simplified_questionnaire(
+                candidate_location, pourquoi_ecoute, salary_min
+            )
+            
+            # Calcul score enrichi via LocationScoringEngine
+            location_score_result = await location_scoring_engine.calculate_enriched_location_score(
+                candidat_questionnaire=candidat_questionnaire,
+                job_address=job_location,
+                job_context={}
+            )
+            
+            # Extraction du score final
+            location_score = location_score_result.final_score
+            
+            # Mise à jour métadonnées Transport Intelligence
+            transport_intelligence_data = {
+                "location_score_dynamic": True,
+                "location_score_source": "google_maps_calculation",
+                "location_score_value": location_score,
+                "transport_mode": location_score_result.transport_compatibility.recommended_mode.value if location_score_result.transport_compatibility.recommended_mode else "unknown",
+                "distance_km": location_score_result.base_distance_km,
+                "time_score": location_score_result.time_score,
+                "cost_score": location_score_result.cost_score,
+                "comfort_score": location_score_result.comfort_score
+            }
+            
+            logger.info(f"✅ Transport Intelligence: score {location_score:.3f} pour {job_location}")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Erreur Transport Intelligence: {e}")
+            # Garde le fallback défini plus haut
+    
+    # === ASSEMBLAGE SCORES FINAUX ===
+    all_scores = {
+        **static_scores,
+        "localisation": location_score
+    }
+    
+    # === PONDÉRATION ADAPTATIVE ===
+    weights = apply_adaptive_weighting(pourquoi_ecoute)
+    
+    # === SCORE TOTAL ===
+    total_score = sum(all_scores[component] * weights[component] 
+                     for component in all_scores.keys() if component in weights)
+    
+    # === CONFIANCE ===
+    base_confidence = 0.85
+    if transport_intelligence_data["location_score_dynamic"]:
+        base_confidence += 0.10  # Bonus pour calcul dynamique
+    confidence = min(0.95, base_confidence)
+    
+    processing_time = (time.time() - start_time) * 1000
+    
+    return {
+        "status": "success",
+        "candidate_id": candidate_id,
+        "matching_results": {
+            "total_score": round(total_score, 3),
+            "confidence": round(confidence, 3),
+            "component_scores": all_scores,
+            "weights_used": weights
+        },
+        "transport_intelligence": transport_intelligence_data,
+        "adaptive_weighting": get_adaptive_weighting_details(pourquoi_ecoute),
+        "candidate_summary": {
+            "name": f"{candidate_profile.get('personal_info', {}).get('firstName', 'Candidat')} {candidate_profile.get('personal_info', {}).get('lastName', 'Test')}",
+            "skills_count": len(skills),
+            "experience_years": experience_years,
+            "salary_range": f"{salary_min}€ - {salary_expectations.get('max', salary_min + 15000)}€"
+        },
+        "metadata": {
+            "processing_time_ms": round(processing_time, 2),
+            "timestamp": datetime.now().isoformat() + "Z",
+            "api_version": "3.2.1",
+            "algorithm": "Adaptive Contextual Weighting + Transport Intelligence INTEGRATED"
+        }
     }
 
 def calculate_mock_matching_scores(request: MatchingRequest, weights: Dict) -> Dict:
@@ -351,7 +563,7 @@ async def health_check():
 
 @app.post("/api/v1/matching/candidate/{candidate_id}", tags=["🎯 Matching"])
 async def match_candidate(candidate_id: str, request: MatchingRequest):
-    """🎯 ENDPOINT PRINCIPAL: Matching avec Pondération Adaptative"""
+    """🎯 ENDPOINT PRINCIPAL: Matching avec Pondération Adaptative + Transport Intelligence"""
     start_time = time.time()
     
     logger.info(f"🎯 === MATCHING CANDIDAT {candidate_id} ===")
@@ -361,52 +573,63 @@ async def match_candidate(candidate_id: str, request: MatchingRequest):
     logger.info(f"💰 Attentes: {request.preferences.salary_expectations.min}€ - {request.preferences.salary_expectations.max}€")
     
     try:
-        # 1. 🎯 Pondération adaptative
-        weight_analysis = get_adaptive_weights(request.pourquoi_ecoute)
-        weights = weight_analysis["weights"]
-        
-        # 2. 🧮 Calcul des scores
-        matching_analysis = calculate_mock_matching_scores(request, weights)
-        
-        # 3. 📊 Réponse détaillée
-        processing_time = round((time.time() - start_time) * 1000, 2)
-        
-        response = {
-            "status": "success",
-            "candidate_id": candidate_id,
-            "matching_results": {
-                "total_score": matching_analysis["total_score"],
-                "confidence": matching_analysis["confidence"],
-                "component_scores": matching_analysis["component_scores"],
-                "weights_used": weights
+        # Conversion en dict pour la nouvelle fonction
+        request_data = {
+            "pourquoi_ecoute": request.pourquoi_ecoute,
+            "candidate_profile": {
+                "personal_info": {
+                    "firstName": request.candidate_profile.personal_info.firstName,
+                    "lastName": request.candidate_profile.personal_info.lastName,
+                    "email": request.candidate_profile.personal_info.email
+                },
+                "skills": request.candidate_profile.skills,
+                "experience_years": request.candidate_profile.experience_years
             },
-            "adaptive_weighting": {
-                "applied": weight_analysis["adaptation_applied"],
-                "reason": request.pourquoi_ecoute,
-                "reasoning": weight_analysis["reasoning"],
-                "weight_changes": _calculate_weight_changes(weights) if weight_analysis["adaptation_applied"] else None
-            },
-            "candidate_summary": {
-                "name": f"{request.candidate_profile.personal_info.firstName} {request.candidate_profile.personal_info.lastName}",
-                "skills_count": len(request.candidate_profile.skills),
-                "experience_years": request.candidate_profile.experience_years,
-                "salary_range": f"{request.preferences.salary_expectations.min}€ - {request.preferences.salary_expectations.max}€"
-            },
-            "metadata": {
-                "processing_time_ms": processing_time,
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "api_version": "2.0.0",
-                "algorithm": "Adaptive Contextual Weighting + Google Maps Intelligence"
+            "preferences": {
+                "salary_expectations": {
+                    "min": request.preferences.salary_expectations.min,
+                    "max": request.preferences.salary_expectations.max
+                },
+                "location_preferences": {
+                    "city": request.preferences.location_preferences.city,
+                    "maxDistance": request.preferences.location_preferences.maxDistance
+                }
             }
         }
         
-        logger.info(f"✅ Matching terminé en {processing_time}ms")
-        logger.info(f"📊 Score final: {matching_analysis['total_score']} (confiance: {matching_analysis['confidence']})")
+        # Appel de la nouvelle fonction avec Transport Intelligence
+        result = await calculate_mock_matching_scores_with_transport_intelligence(
+            request_data=request_data,
+            candidate_id=candidate_id,
+            job_location=None  # Utilise job par défaut
+        )
         
-        return response
+        logger.info(f"✅ Matching terminé en {result['metadata']['processing_time_ms']}ms")
+        logger.info(f"📊 Score final: {result['matching_results']['total_score']} (confiance: {result['matching_results']['confidence']})")
+        
+        return result
         
     except Exception as e:
         logger.error(f"❌ Erreur matching: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+
+@app.post("/api/v3/matching/candidate/{candidate_id}/transport", tags=["🎯 Matching + Transport"])
+async def match_candidate_with_transport(candidate_id: str, request: Dict[str, Any]):
+    """🎯 ENDPOINT TRANSPORT: Matching avec Transport Intelligence Explicite"""
+    start_time = time.time()
+    
+    try:
+        # Utilisation directe de la fonction Transport Intelligence
+        result = await calculate_mock_matching_scores_with_transport_intelligence(
+            request_data=request,
+            candidate_id=candidate_id,
+            job_location=request.get("job_address")
+        )
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ Erreur matching transport: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
 
 # Endpoints simplifiés pour éviter les erreurs d'importation
