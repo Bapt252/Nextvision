@@ -5,6 +5,7 @@ Structures de données enrichies pour questionnaires complets des candidats
 Author: NEXTEN Team
 Version: 1.0.0
 Source: https://github.com/Bapt252/Commitment-
+
 """
 
 from pydantic import BaseModel, Field, validator
@@ -28,6 +29,8 @@ class RaisonEcoute(str, Enum):
     POSTE_TROP_LOIN = "Poste trop loin de mon domicile"
     MANQUE_FLEXIBILITE = "Manque de flexibilité"
     MANQUE_PERSPECTIVES = "Manque de perspectives d'évolution"
+    NOUVEAU_DEFI = "Recherche nouveau défi"
+    AMELIORATION_CONDITIONS = "Amélioration conditions"
 
 class EnvironnementTravail(str, Enum):
     """🏢 Types d'environnement de travail"""
