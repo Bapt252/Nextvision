@@ -12,7 +12,7 @@ import json
 import hashlib
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
-import nextvision_logging as logging
+import logging
 from urllib.parse import urlencode
 
 from ..models.transport_models import (
