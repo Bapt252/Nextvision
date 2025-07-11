@@ -7,7 +7,7 @@ Version: 2.0.0 - Google Maps Intelligence
 Integration: Pondération adaptative existante + Transport Intelligence
 """
 
-import nextvision_logging as logging
+import logging
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 
