@@ -4,7 +4,7 @@ Version sans import circulaire pour résoudre les problèmes d'intégration
 """
 
 import json
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Union, Any, Tuple
 from datetime import datetime
 from dataclasses import dataclass

@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Any, Optional, Callable, AsyncGenerator, Union
-import logging
+import nextvision_logging as logging
 import math
 from concurrent.futures import ThreadPoolExecutor
 

@@ -14,7 +14,7 @@ Version: 1.0.0 - Production Ready
 
 import asyncio
 import json
-import logging
+import nextvision_logging as logging
 import time
 from typing import Dict, List, Optional, Any, Union, Tuple
 from datetime import datetime, timedelta

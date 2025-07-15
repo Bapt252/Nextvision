@@ -12,7 +12,7 @@ Version: 2.0.0 - BiDirectional Matching Engine
 """
 
 from typing import Dict, List, Optional, Tuple
-import logging
+import nextvision_logging as logging
 import time
 import asyncio
 from datetime import datetime

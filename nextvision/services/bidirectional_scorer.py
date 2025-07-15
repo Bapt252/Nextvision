@@ -16,7 +16,7 @@ Version: 2.0.0 - Bidirectional Scoring
 """
 
 from typing import Dict, List, Tuple, Optional
-import logging
+import nextvision_logging as logging
 import time
 import re
 from dataclasses import dataclass

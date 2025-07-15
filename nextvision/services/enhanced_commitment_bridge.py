@@ -16,7 +16,7 @@ Version: 2.0.0 - Enhanced Bridge with Auto-Fix Intelligence
 
 import json
 import re
-import logging
+import nextvision_logging as logging
 import asyncio
 import time  # 🔧 FIX: Import time manquant
 from typing import Dict, List, Optional, Union, Any, Tuple

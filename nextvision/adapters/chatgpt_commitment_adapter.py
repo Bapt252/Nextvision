@@ -13,7 +13,7 @@ Version: 2.0.0 - ChatGPT Integration
 
 import json
 import re
-import logging
+import nextvision_logging as logging
 import time  # 🔧 FIX: Import time manquant pour time.time()
 from typing import Dict, List, Optional, Union, Any
 from datetime import datetime

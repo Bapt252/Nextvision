@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Union
 import asyncio
 import time
-import logging
+import nextvision_logging as logging
 from datetime import datetime
 
 # Import des modèles et services bidirectionnels

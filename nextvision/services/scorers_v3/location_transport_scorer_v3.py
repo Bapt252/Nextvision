@@ -11,7 +11,7 @@ Architecture: GoogleMapsService + TransportCalculator + nouvelles données
 """
 
 import asyncio
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, timedelta
 import hashlib

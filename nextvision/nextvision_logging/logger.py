@@ -2,7 +2,7 @@
 Logger simple pour Nextvision V3.0
 """
 
-import logging
+import nextvision_logging as logging
 import sys
 from typing import Optional
 

@@ -9,7 +9,7 @@ Version: 2.0.0 - Enhanced Bridge Integration
 """
 
 import json
-import logging
+import nextvision_logging as logging
 import asyncio
 import time
 from typing import Dict, List, Optional, Union, Any

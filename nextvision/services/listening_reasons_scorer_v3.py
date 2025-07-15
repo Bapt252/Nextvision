@@ -11,7 +11,7 @@ Author: NEXTEN Development Team
 Version: 3.0 - PRIORITÉ ABSOLUE
 """
 
-import logging
+import nextvision_logging as logging
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from datetime import datetime

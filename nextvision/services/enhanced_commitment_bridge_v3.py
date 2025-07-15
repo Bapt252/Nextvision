@@ -13,7 +13,7 @@ Version: 3.0.0 - Extended Questionnaire Bridge with V3.0 Components
 """
 
 import json
-import logging
+import nextvision_logging as logging
 import asyncio
 import time
 from typing import Dict, List, Optional, Union, Any, Tuple
