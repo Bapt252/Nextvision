@@ -20,7 +20,7 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from datetime import datetime
 import os
-import openai
+from openai import OpenAI
 
 # Configuration logging
 logger = logging.getLogger(__name__)
@@ -72,12 +72,13 @@ class GPTDirectService:
     def __init__(self, api_key: Optional[str] = None):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         
-        # Configuration OpenAI
+        # Configuration OpenAI v1.x
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         if self.api_key:
-            openai.api_key = self.api_key
+            self.client = OpenAI(api_key=self.api_key)
             self.logger.info("✅ OpenAI API key configured")
         else:
+            self.client = None
             self.logger.warning("⚠️ No OpenAI API key found, fallback mode only")
     
     async def parse_cv_direct(self, cv_content: str) -> CVData:
@@ -90,7 +91,7 @@ class GPTDirectService:
         start_time = time.time()
         
         try:
-            if not self.api_key:
+            if not self.client:
                 self.logger.info("📄 No API key, using fallback CV parsing")
                 return self._create_fallback_cv_data(cv_content)
             
@@ -116,7 +117,7 @@ class GPTDirectService:
             CV à analyser :
             """ + cv_content[:3000]  # Limite pour éviter token overflow
             
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "Tu es un expert en extraction de données CV. Réponds uniquement en JSON valide."},
@@ -126,14 +127,21 @@ class GPTDirectService:
                 max_tokens=1000
             )
             
-            # Parse réponse GPT
+            # Parse réponse GPT (nouvelle API v1.x)
             gpt_response = response.choices[0].message.content.strip()
+            
+            # Debug log pour voir la réponse GPT
+            self.logger.info(f"🔍 GPT Response preview: {gpt_response[:200]}...")
             
             # Nettoyage réponse (enlever markdown si présent)
             if gpt_response.startswith("```json"):
                 gpt_response = gpt_response[7:-3]
             elif gpt_response.startswith("```"):
                 gpt_response = gpt_response[3:-3]
+            
+            # Vérification que la réponse n'est pas vide
+            if not gpt_response or gpt_response.isspace():
+                raise ValueError("Empty GPT response")
             
             cv_data_dict = json.loads(gpt_response)
             
@@ -151,6 +159,7 @@ class GPTDirectService:
         except Exception as e:
             processing_time = (time.time() - start_time) * 1000
             self.logger.warning(f"⚠️ GPT CV parsing failed ({processing_time:.2f}ms): {e}")
+            self.logger.debug(f"📄 CV content preview: {cv_content[:200]}...")
             return self._create_fallback_cv_data(cv_content)
     
     async def parse_job_direct(self, job_content: str) -> JobData:
@@ -163,7 +172,7 @@ class GPTDirectService:
         start_time = time.time()
         
         try:
-            if not self.api_key:
+            if not self.client:
                 self.logger.info("💼 No API key, using fallback job parsing")
                 return self._create_fallback_job_data(job_content)
             
@@ -187,7 +196,7 @@ class GPTDirectService:
             Offre d'emploi à analyser :
             """ + job_content[:3000]  # Limite pour éviter token overflow
             
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "Tu es un expert en extraction de données d'offres d'emploi. Réponds uniquement en JSON valide."},
@@ -197,14 +206,21 @@ class GPTDirectService:
                 max_tokens=1000
             )
             
-            # Parse réponse GPT
+            # Parse réponse GPT (nouvelle API v1.x)
             gpt_response = response.choices[0].message.content.strip()
+            
+            # Debug log pour voir la réponse GPT
+            self.logger.info(f"🔍 GPT Response preview: {gpt_response[:200]}...")
             
             # Nettoyage réponse (enlever markdown si présent)
             if gpt_response.startswith("```json"):
                 gpt_response = gpt_response[7:-3]
             elif gpt_response.startswith("```"):
                 gpt_response = gpt_response[3:-3]
+            
+            # Vérification que la réponse n'est pas vide
+            if not gpt_response or gpt_response.isspace():
+                raise ValueError("Empty GPT response")
             
             job_data_dict = json.loads(gpt_response)
             
@@ -222,6 +238,7 @@ class GPTDirectService:
         except Exception as e:
             processing_time = (time.time() - start_time) * 1000
             self.logger.warning(f"⚠️ GPT Job parsing failed ({processing_time:.2f}ms): {e}")
+            self.logger.debug(f"💼 Job content preview: {job_content[:200]}...")
             return self._create_fallback_job_data(job_content)
     
     def _validate_cv_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
