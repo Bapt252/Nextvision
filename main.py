@@ -20,6 +20,10 @@ import shutil
 import json
 from datetime import datetime
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
 # Import du service bridge RÉEL
 from nextvision.services.commitment_bridge import (
     CommitmentNextvisionBridge,
