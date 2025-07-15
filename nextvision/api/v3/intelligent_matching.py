@@ -24,6 +24,15 @@ import json
 import tempfile
 import os
 from datetime import datetime
+import io
+
+# Import for file processing
+try:
+    import PyPDF2
+    from docx import Document
+    PDF_PROCESSING_AVAILABLE = True
+except ImportError:
+    PDF_PROCESSING_AVAILABLE = False
 
 # Import Adaptateur Intelligent
 from nextvision.adapters.parsing_to_matching_adapter import (
@@ -97,6 +106,55 @@ try:
 except Exception as e:
     logger.warning(f"⚠️ Commitment Bridge initialization failed: {e}")
     commitment_bridge = None
+
+def extract_text_from_file(file_content: bytes, filename: str) -> str:
+    """📄 Extract text from PDF/DOCX files"""
+    try:
+        extension = os.path.splitext(filename)[1].lower()
+        
+        if extension == '.pdf':
+            if not PDF_PROCESSING_AVAILABLE:
+                logger.warning("⚠️ PyPDF2 not available, using raw content")
+                return file_content.decode('utf-8', errors='ignore')
+            
+            # Extract text from PDF
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+            
+            logger.info(f"✅ PDF text extracted: {len(text)} characters")
+            return text
+            
+        elif extension in ['.docx', '.doc']:
+            if not PDF_PROCESSING_AVAILABLE:
+                logger.warning("⚠️ python-docx not available, using raw content")
+                return file_content.decode('utf-8', errors='ignore')
+            
+            # Extract text from DOCX
+            doc = Document(io.BytesIO(file_content))
+            text = ""
+            for paragraph in doc.paragraphs:
+                text += paragraph.text + "\n"
+            
+            logger.info(f"✅ DOCX text extracted: {len(text)} characters")
+            return text
+            
+        elif extension == '.txt':
+            # Plain text file
+            text = file_content.decode('utf-8', errors='ignore')
+            logger.info(f"✅ TXT content loaded: {len(text)} characters")
+            return text
+            
+        else:
+            # Fallback: try to decode as text
+            logger.warning(f"⚠️ Unknown extension {extension}, trying UTF-8 decode")
+            return file_content.decode('utf-8', errors='ignore')
+            
+    except Exception as e:
+        logger.error(f"❌ Text extraction failed for {filename}: {e}")
+        # Last resort fallback
+        return file_content.decode('utf-8', errors='ignore')
 
 class IntelligentMatchingService:
     """
@@ -295,7 +353,7 @@ class IntelligentMatchingService:
         cv_file: UploadFile, 
         job_file: Optional[UploadFile]
     ) -> tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
-        """🚀 Parse CV + Job avec GPT Direct Service"""
+        """🚀 Parse CV + Job avec GPT Direct Service + Text Extraction"""
         
         cv_data = {}
         job_data = None
@@ -304,7 +362,14 @@ class IntelligentMatchingService:
         try:
             # Lecture fichier CV
             cv_content = await cv_file.read()
-            cv_content_str = cv_content.decode('utf-8', errors='ignore')
+            
+            # 🔧 EXTRACTION TEXTE SELON FORMAT
+            cv_content_str = extract_text_from_file(cv_content, cv_file.filename)
+            
+            if not cv_content_str or len(cv_content_str.strip()) < 10:
+                raise ValueError(f"No readable text extracted from CV: {cv_file.filename}")
+            
+            self.logger.info(f"📄 CV text extracted: {len(cv_content_str)} characters from {cv_file.filename}")
             
             # Parse CV avec GPT Direct
             cv_parsed: CVData = await parse_cv_direct(cv_content_str)
@@ -328,7 +393,8 @@ class IntelligentMatchingService:
             self.logger.info(f"✅ CV GPT Direct parsé: {cv_parsed.name}")
             
         except Exception as e:
-            self.logger.warning(f"⚠️ GPT Direct CV parsing failed: {e}, using fallback")
+            self.logger.error(f"❌ GPT Direct CV parsing failed: {e}")
+            self.logger.error(f"📄 CV file: {cv_file.filename}, size: {cv_file.size}")
             cv_data = self._create_fallback_cv_data(cv_file)
         
         # === JOB PARSING WITH GPT DIRECT ===
@@ -336,7 +402,14 @@ class IntelligentMatchingService:
             try:
                 # Lecture fichier Job
                 job_content = await job_file.read()
-                job_content_str = job_content.decode('utf-8', errors='ignore')
+                
+                # 🔧 EXTRACTION TEXTE SELON FORMAT
+                job_content_str = extract_text_from_file(job_content, job_file.filename)
+                
+                if not job_content_str or len(job_content_str.strip()) < 10:
+                    raise ValueError(f"No readable text extracted from Job: {job_file.filename}")
+                
+                self.logger.info(f"💼 Job text extracted: {len(job_content_str)} characters from {job_file.filename}")
                 
                 # Parse Job avec GPT Direct
                 job_parsed: JobData = await parse_job_direct(job_content_str)
@@ -358,7 +431,8 @@ class IntelligentMatchingService:
                 self.logger.info(f"✅ Job GPT Direct parsé: {job_parsed.title}")
                 
             except Exception as e:
-                self.logger.warning(f"⚠️ GPT Direct Job parsing failed: {e}, using fallback")
+                self.logger.error(f"❌ GPT Direct Job parsing failed: {e}")
+                self.logger.error(f"💼 Job file: {job_file.filename}, size: {job_file.size}")
                 job_data = self._create_fallback_job_data(job_file)
         
         return cv_data, job_data
@@ -866,6 +940,11 @@ async def status_detailed_v3():
         "google_maps_service": {
             "status": "operational",
             "available": google_maps_service is not None
+        },
+        "file_processing": {
+            "status": "operational" if PDF_PROCESSING_AVAILABLE else "limited",
+            "pdf_support": PDF_PROCESSING_AVAILABLE,
+            "docx_support": PDF_PROCESSING_AVAILABLE
         }
     }
     
