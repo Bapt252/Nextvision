@@ -13,6 +13,9 @@ python-dotenv>=1.0.0
 asyncio>=3.4.3
 typing-extensions>=4.8.0
 
+# === OpenAI GPT Integration ===
+openai>=1.0.0
+
 # === GOOGLE MAPS INTELLIGENCE (Prompt 2) ===
 # API & HTTP Client
 aiohttp>=3.9.0
