@@ -10,13 +10,24 @@ Version: 3.2.1 Optimized
 """
 
 # 🚀 SERVICE PRINCIPAL: GPT Direct unifié
-from .gpt_direct_service import (
-    GPTDirectService,
+# 🔧 TEMPORAIREMENT COMMENTÉ pour éviter problème import OpenAI
+# from .gpt_direct_service import (
+#     GPTDirectService,
+#     CVData,
+#     JobData,
+#     get_gpt_service,
+#     parse_cv_direct,
+#     parse_job_direct
+# )
+
+# 🆕 Utilisation du service optimisé à la place (fonctionne correctement)
+from .gpt_direct_service_optimized import (
+    GPTDirectServiceOptimized,
     CVData,
     JobData,
-    get_gpt_service,
-    parse_cv_direct,
-    parse_job_direct
+    get_gpt_service_optimized as get_gpt_service,
+    parse_cv_direct_optimized as parse_cv_direct,
+    parse_job_direct_optimized as parse_job_direct
 )
 
 # 🌉 Bridge Commitment (service principal conservé)
@@ -44,8 +55,8 @@ except ImportError:
     ADVANCED_SCORERS_AVAILABLE = False
 
 __all__ = [
-    # 🚀 Services GPT Direct (PRINCIPAL)
-    "GPTDirectService",
+    # 🚀 Services GPT Direct (PRINCIPAL) - via optimized service
+    "GPTDirectServiceOptimized",
     "CVData", 
     "JobData",
     "get_gpt_service",
@@ -93,12 +104,14 @@ def get_services_status():
     """📊 Status de tous les services disponibles"""
     return {
         "gpt_direct": True,
+        "gpt_direct_optimized": True,  # 🆕 Utilisation du service optimisé
         "commitment_bridge": True,
         "transport_intelligence": True,
         "matching_services": MATCHING_SERVICES_AVAILABLE,
         "advanced_scorers": ADVANCED_SCORERS_AVAILABLE,
         "version": "3.2.1",
-        "architecture": "optimized"
+        "architecture": "optimized",
+        "note": "Using gpt_direct_service_optimized (OpenAI import issue bypassed)"
     }
 
 __version__ = "3.2.1"
