@@ -20,6 +20,7 @@ Cost Reduction : 90% (GPT-3.5 vs GPT-4)
 Author: NEXTEN Team
 Version: 3.2.1 - Enhanced Experiences
 Innovation: Parsing granulaire → Matching ultra-précis
+
 """
 
 import logging
@@ -66,6 +67,22 @@ class JobData:
     benefits: List[str]
     salary_range: Dict[str, int]
     remote_policy: str
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """🔄 Conversion en dictionnaire pour compatibilité Enhanced"""
+        return {
+            "title": self.title,
+            "company": self.company,
+            "location": self.location,
+            "contract_type": self.contract_type,
+            "required_skills": self.required_skills,
+            "preferred_skills": self.preferred_skills,
+            "responsibilities": self.responsibilities,
+            "requirements": self.requirements,
+            "benefits": self.benefits,
+            "salary_range": self.salary_range,
+            "remote_policy": self.remote_policy
+        }
 
 # 🆕 ENHANCED STRUCTURES - v3.2.1
 @dataclass
