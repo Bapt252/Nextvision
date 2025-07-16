@@ -31,7 +31,14 @@ from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
 import os
-from openai import OpenAI
+
+# 🔧 IMPORT CONDITIONNEL OPENAI (fix pour problème import)
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OpenAI = None
+    OPENAI_AVAILABLE = False
 
 # Configuration logging
 logger = logging.getLogger(__name__)
@@ -237,14 +244,17 @@ class GPTDirectServiceOptimized:
     def __init__(self, api_key: Optional[str] = None):
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         
-        # Configuration OpenAI v1.x
+        # 🔧 Configuration OpenAI v1.x avec vérification disponibilité
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
-        if self.api_key:
+        if self.api_key and OPENAI_AVAILABLE:
             self.client = OpenAI(api_key=self.api_key)
             self.logger.info("✅ OpenAI API key configured (optimized + enhanced)")
         else:
             self.client = None
-            self.logger.warning("⚠️ No OpenAI API key found, fallback mode only")
+            if not OPENAI_AVAILABLE:
+                self.logger.warning("⚠️ OpenAI not available - using fallback mode only")
+            else:
+                self.logger.warning("⚠️ No OpenAI API key found - using fallback mode only")
     
     # 🆕 NOUVELLE MÉTHODE PARSING ENRICHI
     async def parse_cv_with_detailed_experiences(self, cv_content: str) -> EnhancedCVData:
@@ -264,7 +274,7 @@ class GPTDirectServiceOptimized:
         
         try:
             if not self.client:
-                self.logger.info("📄 No API key, using enhanced fallback")
+                self.logger.info("📄 No OpenAI client available, using enhanced fallback")
                 return self._create_enhanced_fallback_cv_data(cv_content)
             
             # === PROMPT ENRICHI POUR EXPÉRIENCES DÉTAILLÉES ===
@@ -423,9 +433,10 @@ CV CONTENT:
                 "parsed_at": datetime.now().isoformat(),
                 "experiences_count": len(experiences),
                 "parsing_success": True,
-                "source": "gpt_enhanced_optimized",
-                "model": "gpt-3.5-turbo",
-                "version": "3.2.1"
+                "source": "gpt_enhanced_optimized" if self.client else "enhanced_fallback",
+                "model": "gpt-3.5-turbo" if self.client else "fallback",
+                "version": "3.2.1",
+                "openai_available": OPENAI_AVAILABLE
             }
         )
         
@@ -487,7 +498,8 @@ CV CONTENT:
                 "parsing_success": False,
                 "source": "enhanced_fallback",
                 "version": "3.2.1",
-                "fallback_reason": "GPT parsing failed"
+                "fallback_reason": "OpenAI not available" if not OPENAI_AVAILABLE else "GPT parsing failed",
+                "openai_available": OPENAI_AVAILABLE
             }
         )
     
@@ -512,7 +524,7 @@ CV CONTENT:
         
         try:
             if not self.client:
-                self.logger.info("📄 No API key, using enhanced fallback parsing")
+                self.logger.info("📄 No OpenAI client available, using enhanced fallback parsing")
                 enhanced_cv_data = self._create_enhanced_fallback_cv_data(cv_content)
                 job_data = self._create_fallback_job_data(job_content) if job_content else None
                 return enhanced_cv_data, job_data
@@ -575,7 +587,7 @@ CV CONTENT:
         
         try:
             if not self.client:
-                self.logger.info("📄 No API key, using fallback parsing")
+                self.logger.info("📄 No OpenAI client available, using fallback parsing")
                 cv_data = self._create_fallback_cv_data(cv_content)
                 job_data = self._create_fallback_job_data(job_content) if job_content else None
                 return cv_data, job_data
@@ -634,6 +646,10 @@ CV CONTENT:
         start_time = time.time()
         
         try:
+            if not self.client:
+                self.logger.info("📄 No OpenAI client available, using fallback CV parsing")
+                return self._create_fallback_cv_data(cv_content)
+            
             # === PROMPT ULTRA-OPTIMISÉ ===
             prompt = f"""Extract CV data as JSON:
 {{
@@ -702,6 +718,10 @@ CV:
         start_time = time.time()
         
         try:
+            if not self.client:
+                self.logger.info("💼 No OpenAI client available, using fallback job parsing")
+                return self._create_fallback_job_data(job_content)
+            
             # === PROMPT ULTRA-OPTIMISÉ ===
             prompt = f"""Extract job data as JSON:
 {{
@@ -926,6 +946,7 @@ def get_gpt_service_optimized_status() -> Dict[str, Any]:
     return {
         "service": "GPT Direct Service Enhanced",
         "version": "3.2.1-enhanced",
+        "openai_available": OPENAI_AVAILABLE,
         "optimizations": {
             "gpt_model": "gpt-3.5-turbo (vs gpt-4)",
             "parallel_processing": True,
@@ -953,6 +974,7 @@ def get_gpt_service_optimized_status() -> Dict[str, Any]:
             "parallel_enhanced": "parse_both_parallel_enhanced"
         },
         "api_key_configured": service.api_key is not None,
+        "client_available": service.client is not None,
         "timestamp": datetime.now().isoformat(),
         "fallback_available": True
     }
@@ -962,6 +984,7 @@ def get_enhanced_service_status() -> Dict[str, Any]:
     return {
         "service": "Enhanced Experiences Service",
         "version": "3.2.1",
+        "openai_available": OPENAI_AVAILABLE,
         "features": {
             "detailed_experiences": True,
             "granular_missions": True,
@@ -973,7 +996,7 @@ def get_enhanced_service_status() -> Dict[str, Any]:
             "achievement_patterns": True
         },
         "performance": {
-            "model": "gpt-3.5-turbo",
+            "model": "gpt-3.5-turbo" if OPENAI_AVAILABLE else "fallback",
             "max_tokens": 1500,
             "target_time": "< 30s",
             "data_richness": "+400%",
