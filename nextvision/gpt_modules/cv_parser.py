@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-🚀 NEXTVISION GPT PARSER v4.0 - VERSION ISOLÉE
-Parser GPT sans conflit de modules
+🚀 NEXTVISION GPT PARSER v4.1 - OpenAI v1.x Compatible
+Parser GPT avec support OpenAI v1.x complet
 """
 
 import os
@@ -13,6 +13,15 @@ import time
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from pathlib import Path
+
+# OpenAI v1.x Import avec gestion d'erreurs
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+    print("✅ OpenAI v1.x detected and imported successfully")
+except ImportError as e:
+    OPENAI_AVAILABLE = False
+    print(f"⚠️ OpenAI not available - using fallback mode only: {e}")
 
 @dataclass
 class ParsedProfile:
@@ -30,21 +39,147 @@ class ParsedProfile:
         return asdict(self)
 
 class NextvisionGPTParser:
-    """Parser GPT Nextvision isolé"""
+    """Parser GPT Nextvision avec OpenAI v1.x"""
     
     def __init__(self, openai_api_key: Optional[str] = None):
         self.openai_api_key = openai_api_key or os.getenv('OPENAI_API_KEY')
-        self.parser_version = "4.0.1"
-        self.integration_id = "nextvision-python-isolé"
+        self.parser_version = "4.1.0"
+        self.integration_id = "nextvision-openai-v1x"
         
-        print(f"🚀 NextvisionGPTParser v{self.parser_version} initialisé")
+        # Initialisation du client OpenAI v1.x
+        self.openai_client = None
+        if OPENAI_AVAILABLE and self.openai_api_key:
+            try:
+                self.openai_client = OpenAI(api_key=self.openai_api_key)
+                print(f"✅ OpenAI v1.x client initialized successfully")
+            except Exception as e:
+                print(f"⚠️ OpenAI client initialization failed: {e}")
+                self.openai_client = None
+        
+        print(f"🚀 NextvisionGPTParser v{self.parser_version} initialized")
         
         self.parsing_stats = {
             'total_parsed': 0,
             'openai_success': 0,
             'fallback_used': 0,
-            'errors': 0
+            'errors': 0,
+            'openai_available': OPENAI_AVAILABLE,
+            'client_initialized': self.openai_client is not None
         }
+
+    def parse_cv_with_openai(self, cv_content: str) -> Optional[ParsedProfile]:
+        """Parse CV avec OpenAI v1.x"""
+        if not self.openai_client:
+            return None
+            
+        try:
+            prompt = f"""
+            Analysez ce CV et extrayez les informations selon cette structure JSON exacte:
+            
+            {{
+                "informations_personnelles": {{
+                    "nom_complet": "string",
+                    "prenom": "string",
+                    "nom_famille": "string",
+                    "age": "string",
+                    "email": "string",
+                    "telephone": "string",
+                    "ville": "string",
+                    "pays": "string",
+                    "titre_recherche": "string"
+                }},
+                "experiences_professionnelles": [
+                    {{
+                        "ordre": 1,
+                        "poste": "string",
+                        "entreprise": "string",
+                        "type_contrat": "string",
+                        "date_debut": "string",
+                        "date_fin": "string",
+                        "duree": "string",
+                        "lieu": "string",
+                        "secteur": "string",
+                        "description_complete": "string",
+                        "missions": ["string"],
+                        "technologies": ["string"]
+                    }}
+                ],
+                "formations_education": [
+                    {{
+                        "ordre": 1,
+                        "type": "string",
+                        "intitule_complet": "string",
+                        "etablissement": "string",
+                        "ville": "string",
+                        "annee_fin": "string"
+                    }}
+                ],
+                "competences_detaillees": {{
+                    "techniques_informatiques": ["string"],
+                    "logiciels_maitrise": ["string"],
+                    "competences_metier": ["string"],
+                    "soft_skills": ["string"],
+                    "competences_sectorielles": ["string"]
+                }},
+                "langues": [
+                    {{
+                        "langue": "string",
+                        "niveau_global": "string"
+                    }}
+                ],
+                "informations_complementaires": {{
+                    "mobilite_geographique": ["string"],
+                    "centres_interet": ["string"],
+                    "secteurs_preferences": {{
+                        "preferes": ["string"],
+                        "acceptables": ["string"],
+                        "redhibitoires": ["string"]
+                    }}
+                }},
+                "analyse_cv": {{
+                    "anciennete_professionnelle": "string",
+                    "secteurs_experiences": ["string"],
+                    "profil_type": "string",
+                    "niveau_hierarchique": "ENTRY|ASSOCIATE|MID|SENIOR|MANAGER|EXECUTIVE"
+                }}
+            }}
+            
+            CV à analyser:
+            {cv_content}
+            
+            Répondez uniquement avec le JSON, sans autre texte.
+            """
+            
+            response = self.openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "Vous êtes un expert en analyse de CV. Répondez uniquement avec du JSON valide."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=2000,
+                temperature=0.3
+            )
+            
+            parsed_data = json.loads(response.choices[0].message.content)
+            
+            # Ajout des métadonnées
+            parsed_data['parsing_metadata'] = {
+                'parser_version': self.parser_version,
+                'integration_id': self.integration_id,
+                'parsing_timestamp': time.time(),
+                'is_fallback': False,
+                'openai_model': 'gpt-3.5-turbo'
+            }
+            
+            profile = ParsedProfile(**parsed_data)
+            self.parsing_stats['openai_success'] += 1
+            
+            return profile
+            
+        except Exception as e:
+            print(f"❌ OpenAI parsing error: {e}")
+            self.parsing_stats['errors'] += 1
+            return None
 
     def _get_fallback_profile(self) -> ParsedProfile:
         """Profil de fallback Dorothée Lim"""
@@ -116,22 +251,49 @@ class NextvisionGPTParser:
                 'parser_version': self.parser_version,
                 'integration_id': self.integration_id,
                 'parsing_timestamp': time.time(),
-                'is_fallback': True
+                'is_fallback': True,
+                'openai_available': OPENAI_AVAILABLE
             }
         )
 
+    def parse_cv(self, cv_content: str) -> ParsedProfile:
+        """Parse CV avec OpenAI v1.x ou fallback"""
+        self.parsing_stats['total_parsed'] += 1
+        
+        # Essai avec OpenAI v1.x
+        if self.openai_client:
+            profile = self.parse_cv_with_openai(cv_content)
+            if profile:
+                return profile
+        
+        # Fallback
+        print("⚠️ Using fallback profile (Dorothée Lim)")
+        self.parsing_stats['fallback_used'] += 1
+        return self._get_fallback_profile()
+
     def get_parsing_statistics(self) -> Dict[str, Any]:
+        """Statistiques détaillées du parsing"""
+        total = self.parsing_stats['total_parsed']
+        success_rate = (self.parsing_stats['openai_success'] / total * 100) if total > 0 else 0
+        
         return {
             **self.parsing_stats,
-            'success_rate': 100.0,
-            'parser_version': self.parser_version
+            'success_rate': round(success_rate, 2),
+            'parser_version': self.parser_version,
+            'status': 'OpenAI v1.x Ready' if self.openai_client else 'Fallback Mode'
         }
 
 def main():
-    print("🚀 Test CV Parser isolé")
+    """Test du parser"""
+    print("🚀 Test CV Parser OpenAI v1.x")
     parser = NextvisionGPTParser()
-    profile = parser._get_fallback_profile()
-    print(f"✅ {profile.informations_personnelles['nom_complet']}")
+    
+    # Test avec contenu factice
+    test_cv = "Jean Dupont, Développeur Python, 5 ans d'expérience..."
+    profile = parser.parse_cv(test_cv)
+    
+    print(f"✅ Profil parsé: {profile.informations_personnelles['nom_complet']}")
+    print(f"📊 Statistiques: {parser.get_parsing_statistics()}")
 
 if __name__ == "__main__":
     main()
