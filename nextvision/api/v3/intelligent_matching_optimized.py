@@ -278,6 +278,12 @@ class IntelligentMatchingServiceOptimized:
             # === ASSEMBLAGE RÉSULTAT FINAL OPTIMISÉ ===
             total_time = (time.time() - start_time) * 1000
             
+            # 🔧 CRÉATION CANDIDATE SUMMARY ENRICHI AVEC DONNÉES CV ORIGINALES
+            candidate_summary = self._create_enriched_candidate_summary(
+                matching_request=matching_request,
+                cv_data=cv_data
+            )
+            
             final_result = {
                 "status": "success",
                 "message": "Intelligent matching completed successfully with Phase 1 optimizations + motivations",
@@ -299,25 +305,7 @@ class IntelligentMatchingServiceOptimized:
                     "transformations_count": len(adaptation_result.adaptations_applied),
                     "validation_errors": adaptation_result.validation_errors
                 },
-                "candidate_summary": {
-                    "name": f"{matching_request.candidate_profile.personal_info.firstName} {matching_request.candidate_profile.personal_info.lastName}",
-                    "firstName": getattr(matching_request.candidate_profile.personal_info, 'firstName', ''),
-                    "lastName": getattr(matching_request.candidate_profile.personal_info, 'lastName', ''),
-                    "email": getattr(matching_request.candidate_profile.personal_info, 'email', ''),
-                    "phone": getattr(matching_request.candidate_profile.personal_info, 'phone', ''),
-                    "skills": getattr(matching_request.candidate_profile, 'skills', []),
-                    "skills_count": len(matching_request.candidate_profile.skills),
-                    "experience_years": matching_request.candidate_profile.experience_years,
-                    "job_titles": getattr(matching_request.candidate_profile, 'job_titles', []),
-                    "companies": getattr(matching_request.candidate_profile, 'companies', []),
-                    "education": getattr(matching_request.candidate_profile, 'education', ''),
-                    "languages": getattr(matching_request.candidate_profile, 'languages', []),
-                    "certifications": getattr(matching_request.candidate_profile, 'certifications', []),
-                    "summary": getattr(matching_request.candidate_profile, 'summary', ''),
-                    "objective": getattr(matching_request.candidate_profile, 'objective', ''),
-                    "location": matching_request.preferences.location_preferences.city,
-                    "salary_range": f"{matching_request.preferences.salary_expectations.min}€ - {matching_request.preferences.salary_expectations.max}€"
-                },
+                "candidate_summary": candidate_summary,  # 🆕 DONNÉES ENRICHIES
                 "job_summary": {
                     "has_job_data": job_data is not None,
                     "job_title": matching_request.job_requirements.title if matching_request.job_requirements else "Job à définir",
@@ -382,6 +370,67 @@ class IntelligentMatchingServiceOptimized:
                     "timestamp": datetime.now().isoformat()
                 }
             )
+    
+    def _create_enriched_candidate_summary(
+        self,
+        matching_request,
+        cv_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        🎯 CRÉATION CANDIDATE SUMMARY ENRICHI AVEC TOUTES LES DONNÉES CV
+        
+        **Innovation** : Combine données adaptateur + données CV originales
+        pour exposer TOUTES les informations extraites par GPT
+        """
+        
+        # Données de base depuis l'adaptateur (toujours disponibles)
+        base_data = {
+            "name": f"{matching_request.candidate_profile.personal_info.firstName} {matching_request.candidate_profile.personal_info.lastName}",
+            "firstName": matching_request.candidate_profile.personal_info.firstName,
+            "lastName": matching_request.candidate_profile.personal_info.lastName,
+            "email": matching_request.candidate_profile.personal_info.email,
+            "phone": getattr(matching_request.candidate_profile.personal_info, 'phone', ''),
+            "skills": matching_request.candidate_profile.skills,
+            "skills_count": len(matching_request.candidate_profile.skills),
+            "experience_years": matching_request.candidate_profile.experience_years,
+            "education": getattr(matching_request.candidate_profile, 'education', ''),
+            "location": matching_request.preferences.location_preferences.city,
+            "salary_range": f"{matching_request.preferences.salary_expectations.min}€ - {matching_request.preferences.salary_expectations.max}€"
+        }
+        
+        # 🆕 DONNÉES ENRICHIES depuis CV original (extraction complète GPT)
+        enriched_data = {
+            "job_titles": cv_data.get("job_titles", []),
+            "companies": cv_data.get("companies", []),
+            "languages": cv_data.get("languages", []),
+            "certifications": cv_data.get("certifications", []),
+            "summary": cv_data.get("summary", ""),
+            "objective": cv_data.get("objective", ""),
+            
+            # Données additionnelles disponibles dans cv_data
+            "current_role": cv_data.get("current_role", ""),
+            "industry": cv_data.get("industry", ""),
+            "contract_preferences": cv_data.get("contract_preferences", []),
+            "remote_preferences": cv_data.get("remote_preferences", ""),
+            "availability": cv_data.get("availability", ""),
+            "linkedin_url": cv_data.get("linkedin_url", ""),
+            "portfolio_url": cv_data.get("portfolio_url", ""),
+            "github_url": cv_data.get("github_url", ""),
+            
+            # Métadonnées parsing
+            "parsing_source": "gpt_optimized_parallel" if cv_data.get("name") != "Candidat Test" else "fallback",
+            "data_completeness": "full" if cv_data.get("name") != "Candidat Test" else "fallback"
+        }
+        
+        # Combinaison des données
+        complete_summary = {**base_data, **enriched_data}
+        
+        # Log pour debug
+        self.logger.info(f"📊 Candidate summary enrichi créé: {complete_summary.get('name', 'N/A')}")
+        self.logger.info(f"🔍 Source parsing: {enriched_data.get('parsing_source', 'unknown')}")
+        self.logger.info(f"📋 Données disponibles: {len([k for k, v in complete_summary.items() if v])}/{len(complete_summary)}")
+        
+        return complete_summary
     
     async def _parse_files_with_gpt_optimized_parallel(
         self, 
@@ -471,8 +520,8 @@ class IntelligentMatchingServiceOptimized:
         except Exception as e:
             self.logger.error(f"❌ Optimized parallel parsing failed: {e}")
             
-            # Fallback complet
-            cv_data = self._create_fallback_cv_data(cv_file)
+            # Fallback complet avec données enrichies
+            cv_data = self._create_enriched_fallback_cv_data(cv_file)
             job_data = self._create_fallback_job_data(job_file) if job_file else None
             return cv_data, job_data
     
@@ -771,22 +820,30 @@ class IntelligentMatchingServiceOptimized:
         
         return details
     
-    def _create_fallback_cv_data(self, cv_file: UploadFile) -> Dict[str, Any]:
-        """🛡️ Fallback CV data si parsing échoue"""
+    def _create_enriched_fallback_cv_data(self, cv_file: UploadFile) -> Dict[str, Any]:
+        """🛡️ Fallback CV data ENRICHI si parsing échoue"""
         return {
             "name": "Candidat Test",
             "email": "candidat@example.com",
-            "phone": "",
-            "skills": ["Compétence générale"],
+            "phone": "+33 6 12 34 56 78",
+            "skills": ["Compétence générale", "Bureautique", "Communication"],
             "years_of_experience": 2,
-            "education": "Formation",
-            "job_titles": ["Poste actuel"],
-            "companies": ["Entreprise"],
+            "education": "Formation supérieure",
+            "job_titles": ["Poste actuel", "Poste précédent"],
+            "companies": ["Entreprise actuelle", "Entreprise précédente"],
             "location": "Paris, France",
-            "summary": f"CV parsé depuis {cv_file.filename}",
-            "objective": "Recherche nouveau poste",
-            "languages": ["Français"],
-            "certifications": []
+            "summary": f"Professionnel expérimenté - CV parsé depuis {cv_file.filename}",
+            "objective": "Recherche nouveau poste correspondant à mes compétences",
+            "languages": ["Français", "Anglais"],
+            "certifications": ["Formation professionnelle"],
+            "current_role": "Poste actuel",
+            "industry": "Secteur d'activité",
+            "contract_preferences": ["CDI", "Freelance"],
+            "remote_preferences": "Hybride",
+            "availability": "Disponible sous préavis",
+            "linkedin_url": "",
+            "portfolio_url": "",
+            "github_url": ""
         }
     
     def _create_fallback_job_data(self, job_file: UploadFile) -> Dict[str, Any]:
