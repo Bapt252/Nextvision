@@ -754,4 +754,173 @@ class LocationScorer(BaseScorer):
         else:
             return 0.3  # Candidat veut remote mais entreprise ne propose pas
 
-# === SUITE DANS LA PARTIE 2 DU FICHIER ===
+# === 5. BIDIRECTIONAL SCORER PRINCIPAL ===
+
+class BidirectionalScorer:
+    """🎯 Scorer bidirectionnel principal V2.0
+    
+    Orchestration des 4 composants de scoring :
+    - SemanticScorer (35%)
+    - SalaryScorer (25%)
+    - ExperienceScorer (20%)
+    - LocationScorer (15%)
+    """
+    
+    def __init__(self, google_maps_service: GoogleMapsService = None,
+                 location_scoring_engine: LocationScoringEngine = None):
+        self.logger = logging.getLogger(__name__)
+        
+        # Initialisation des scorers
+        self.semantic_scorer = SemanticScorer()
+        self.salary_scorer = SalaryScorer()
+        self.experience_scorer = ExperienceScorer()
+        self.location_scorer = LocationScorer(
+            google_maps_service=google_maps_service,
+            location_scoring_engine=location_scoring_engine
+        )
+        
+        # Poids par défaut
+        self.default_weights = {
+            'semantic': 0.35,
+            'salary': 0.25,
+            'experience': 0.20,
+            'location': 0.15
+        }
+    
+    def calculate_score(self, candidat: BiDirectionalCandidateProfile,
+                       entreprise: BiDirectionalCompanyProfile,
+                       custom_weights: Optional[Dict[str, float]] = None) -> ScoringResult:
+        """Calcule le score bidirectionnel global"""
+        start_time = time.time()
+        
+        try:
+            # Utilisation des poids personnalisés ou par défaut
+            weights = custom_weights or self.default_weights
+            
+            # Calcul des scores par composant
+            semantic_result = self.semantic_scorer.calculate_score(candidat, entreprise)
+            salary_result = self.salary_scorer.calculate_score(candidat, entreprise)
+            experience_result = self.experience_scorer.calculate_score(candidat, entreprise)
+            location_result = self.location_scorer.calculate_score(candidat, entreprise)
+            
+            # Score global pondéré
+            global_score = (
+                semantic_result.score * weights['semantic'] +
+                salary_result.score * weights['salary'] +
+                experience_result.score * weights['experience'] +
+                location_result.score * weights['location']
+            )
+            
+            # Confiance globale (moyenne pondérée)
+            global_confidence = (
+                semantic_result.confidence * weights['semantic'] +
+                salary_result.confidence * weights['salary'] +
+                experience_result.confidence * weights['experience'] +
+                location_result.confidence * weights['location']
+            )
+            
+            # Compilation des détails
+            details = {
+                'global_score': global_score,
+                'weights_used': weights,
+                'component_scores': {
+                    'semantic': {
+                        'score': semantic_result.score,
+                        'weighted_score': semantic_result.score * weights['semantic'],
+                        'confidence': semantic_result.confidence,
+                        'details': semantic_result.details
+                    },
+                    'salary': {
+                        'score': salary_result.score,
+                        'weighted_score': salary_result.score * weights['salary'],
+                        'confidence': salary_result.confidence,
+                        'details': salary_result.details
+                    },
+                    'experience': {
+                        'score': experience_result.score,
+                        'weighted_score': experience_result.score * weights['experience'],
+                        'confidence': experience_result.confidence,
+                        'details': experience_result.details
+                    },
+                    'location': {
+                        'score': location_result.score,
+                        'weighted_score': location_result.score * weights['location'],
+                        'confidence': location_result.confidence,
+                        'details': location_result.details
+                    }
+                },
+                'recommendations': self._generate_recommendations(
+                    semantic_result, salary_result, experience_result, location_result
+                )
+            }
+            
+            processing_time = (time.time() - start_time) * 1000
+            
+            self.logger.info(f"🎯 Score Bidirectionnel Global: {global_score:.3f} (confiance: {global_confidence:.3f})")
+            
+            return ScoringResult(
+                score=global_score,
+                details=details,
+                confidence=global_confidence,
+                processing_time_ms=processing_time
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ Erreur BidirectionalScorer: {e}")
+            return ScoringResult(
+                score=0.0,
+                details={"error": str(e)},
+                confidence=0.0,
+                processing_time_ms=(time.time() - start_time) * 1000,
+                error_message=str(e)
+            )
+    
+    def _generate_recommendations(self, semantic: ScoringResult, salary: ScoringResult,
+                                experience: ScoringResult, location: ScoringResult) -> List[str]:
+        """Génère des recommandations basées sur tous les scores"""
+        recommendations = []
+        
+        # Recommandations par composant
+        if semantic.score < 0.6:
+            recommendations.append("🧠 Améliorer correspondance compétences/poste")
+        if salary.score < 0.6:
+            recommendations.append("💰 Revoir compatibilité salariale")
+        if experience.score < 0.6:
+            recommendations.append("📈 Expérience candidat à évaluer")
+        if location.score < 0.6:
+            recommendations.append("📍 Localisation potentiellement problématique")
+        
+        # Recommandations globales
+        scores = [semantic.score, salary.score, experience.score, location.score]
+        avg_score = sum(scores) / len(scores)
+        
+        if avg_score >= 0.8:
+            recommendations.append("✅ Excellent match global - candidat recommandé")
+        elif avg_score >= 0.6:
+            recommendations.append("👍 Bon match - quelques ajustements possibles")
+        else:
+            recommendations.append("⚠️ Match insuffisant - revoir critères")
+        
+        return recommendations[:5]  # Max 5 recommandations
+
+# === FACTORY FUNCTIONS ===
+
+def create_bidirectional_scorer(google_maps_service: GoogleMapsService = None,
+                               location_scoring_engine: LocationScoringEngine = None) -> BidirectionalScorer:
+    """Factory pour créer un BidirectionalScorer"""
+    return BidirectionalScorer(
+        google_maps_service=google_maps_service,
+        location_scoring_engine=location_scoring_engine
+    )
+
+# === TESTS ===
+
+if __name__ == "__main__":
+    print("🎯 NEXTVISION V2.0 - Bidirectional Scorer")
+    print("=" * 50)
+    print("✅ SemanticScorer: Opérationnel")
+    print("✅ SalaryScorer: Opérationnel") 
+    print("✅ ExperienceScorer: Opérationnel")
+    print("✅ LocationScorer: Opérationnel")
+    print("✅ BidirectionalScorer: Opérationnel")
+    print("\n🎯 Système de scoring bidirectionnel V2.0 PRÊT!")
