@@ -1,14 +1,15 @@
 """
-🚀 Nextvision V3.0 - BidirectionalScorer Enhanced (PROMPT 7)
-Intégration des nouveaux scorers timing & contrats & environnement
+🚀 Nextvision V3.0 - BidirectionalScorer Enhanced (PROMPT 7 + SALARY PROGRESSION)
+Intégration des nouveaux scorers timing & contrats & environnement + SALARY PROGRESSION
 
 Ajout des scorers :
 - AvailabilityTimingScorer
 - ContractTypesScorer  
 - WorkEnvironmentScorer
+- SalaryProgressionScorer ✨ NOUVEAU (3% poids)
 
 Author: NEXTEN Team
-Version: 3.0.0 - Enhanced with new scorers
+Version: 3.0.0 - Enhanced with Salary Progression Scorer
 """
 
 import logging
@@ -21,7 +22,8 @@ from nextvision.services.scorers_v3 import (
     LocationTransportScorerV3,
     AvailabilityTimingScorer,
     ContractTypesScorer,
-    WorkEnvironmentScorer
+    WorkEnvironmentScorer,
+    SalaryProgressionScorer  # ✨ NOUVEAU
 )
 
 # Import des modèles V3.0
@@ -52,7 +54,7 @@ class EnhancedBidirectionalScorerV3:
     
     Intègre tous les scorers V3.0 :
     - V2.0 : Semantic, Salary, Experience, Location (mise à jour)
-    - V3.0 : Timing, Contract, Environment (nouveaux)
+    - V3.0 : Timing, Contract, Environment, SalaryProgression (nouveaux)
     
     Performance target : <175ms (vs 150ms V2.0)
     """
@@ -73,6 +75,7 @@ class EnhancedBidirectionalScorerV3:
         self.availability_timing_scorer = AvailabilityTimingScorer()
         self.contract_types_scorer = ContractTypesScorer()
         self.work_environment_scorer = WorkEnvironmentScorer()
+        self.salary_progression_scorer = SalaryProgressionScorer()  # ✨ NOUVEAU
         
         # Configuration performance
         self.performance_config = {
@@ -235,6 +238,13 @@ class EnhancedBidirectionalScorerV3:
                 lambda: self.work_environment_scorer.calculate_work_environment_score(
                     candidate, company
                 )
+            ),
+            # ✨ NOUVEAU : SalaryProgressionScorer
+            self._safe_score_calculation(
+                "salary_progression",
+                lambda: self.salary_progression_scorer.calculate_salary_progression_score(
+                    candidate, company, {"context": "bidirectional_matching"}
+                )
             )
         ]
         
@@ -318,6 +328,16 @@ class EnhancedBidirectionalScorerV3:
             logger.error(f"Erreur environment: {e}")
             scores["work_environment"] = self._create_fallback_score_result("environment", 0.7)
         
+        # ✨ NOUVEAU : SalaryProgressionScorer
+        try:
+            progression_result = self.salary_progression_scorer.calculate_salary_progression_score(
+                candidate, company, {"context": "bidirectional_matching"}
+            )
+            scores["salary_progression"] = progression_result
+        except Exception as e:
+            logger.error(f"Erreur salary_progression: {e}")
+            scores["salary_progression"] = self._create_fallback_score_result("salary_progression", 0.6)
+        
         # Location/Transport (peut être complexe)
         try:
             location_result = await self.location_transport_scorer.calculate_location_transport_score_v3(
@@ -338,7 +358,8 @@ class EnhancedBidirectionalScorerV3:
             ("location_transport", scores["location_transport"]),
             ("availability_timing", scores["availability_timing"]),
             ("contract_types", scores["contract_types"]),
-            ("work_environment", scores["work_environment"])
+            ("work_environment", scores["work_environment"]),
+            ("salary_progression", scores["salary_progression"])  # ✨ NOUVEAU
         ])
     
     async def _safe_score_calculation(self, component_name: str, calculation_func) -> tuple:
@@ -404,8 +425,9 @@ class EnhancedBidirectionalScorerV3:
             work_modality_score=scores_dict.get("work_environment", 0.5),
             work_modality_details=details_dict.get("work_environment", {}),
             
-            salary_progression_score=0.7,  # TODO: Implémenter SalaryProgressionScorer
-            salary_progression_details={},
+            # ✨ NOUVEAU : SalaryProgressionScorer intégré
+            salary_progression_score=scores_dict.get("salary_progression", 0.6),
+            salary_progression_details=details_dict.get("salary_progression", {}),
             
             listening_reason_score=0.7,  # TODO: Implémenter ListeningReasonScorer
             listening_reason_details={},
@@ -436,7 +458,7 @@ class EnhancedBidirectionalScorerV3:
             if "REMUNERATION" in primary_reason.value:
                 return ExtendedComponentWeightsV3(
                     semantic=0.20,      # -4%
-                    salary=0.30,        # +11%
+                    salary=0.28,        # +9%
                     experience=0.12,    # -2%
                     location=0.08,      # -1%
                     contract_flexibility=0.08,  # +3%
@@ -444,7 +466,23 @@ class EnhancedBidirectionalScorerV3:
                     work_modality=0.04,
                     motivations=0.06,
                     sector_compatibility=0.04,
-                    salary_progression=0.02
+                    salary_progression=0.04  # ✨ +1% pour progression salariale
+                )
+            
+            elif "EVOLUTION_CARRIERE" in primary_reason.value:
+                return ExtendedComponentWeightsV3(
+                    semantic=0.20,      # -4%
+                    salary=0.16,        # -3%
+                    experience=0.14,    # maintenu
+                    location=0.08,      # -1%
+                    work_modality=0.06, # +2%
+                    timing_compatibility=0.05,
+                    contract_flexibility=0.04,
+                    motivations=0.08,   # +2%
+                    sector_compatibility=0.05,
+                    salary_progression=0.08,  # ✨ +5% pour évolution carrière
+                    listening_reason=0.02,
+                    candidate_status=0.04
                 )
             
             elif "LOCALISATION" in primary_reason.value:
@@ -458,7 +496,7 @@ class EnhancedBidirectionalScorerV3:
                     contract_flexibility=0.04,
                     motivations=0.07,
                     sector_compatibility=0.05,
-                    salary_progression=0.03,
+                    salary_progression=0.03,  # ✨ maintenu
                     listening_reason=0.02
                 )
         
@@ -482,7 +520,7 @@ class EnhancedBidirectionalScorerV3:
             component_scores.contract_flexibility_score * weights.contract_flexibility +
             component_scores.timing_compatibility_score * weights.timing_compatibility +
             component_scores.work_modality_score * weights.work_modality +
-            component_scores.salary_progression_score * weights.salary_progression +
+            component_scores.salary_progression_score * weights.salary_progression +  # ✨ NOUVEAU
             component_scores.listening_reason_score * weights.listening_reason +
             component_scores.candidate_status_score * weights.candidate_status
         )
@@ -536,6 +574,16 @@ class EnhancedBidirectionalScorerV3:
                 "⏰ Timing de disponibilité idéal"
             )
         
+        # ✨ NOUVEAU : Recommandations progression salariale
+        if component_scores.salary_progression_score >= 0.8:
+            recommendations["points_forts_match"].append(
+                "📈 Excellente compatibilité évolution salariale"
+            )
+        elif component_scores.salary_progression_score < 0.4:
+            recommendations["points_attention"].append(
+                "💸 Attentes d'évolution salariale à clarifier"
+            )
+        
         # Analyse points d'attention
         if component_scores.contract_flexibility_score < 0.5:
             recommendations["points_attention"].append(
@@ -558,6 +606,12 @@ class EnhancedBidirectionalScorerV3:
                 "⏱️ Timing incompatible - urgence vs disponibilité"
             )
         
+        # ✨ NOUVEAU : Deal breaker progression salariale
+        if component_scores.salary_progression_score < 0.2:
+            recommendations["deal_breakers"].append(
+                "📊 Évolution salariale incompatible - attentes irréalistes"
+            )
+        
         # Recommandations candidat
         if component_scores.contract_flexibility_score < 0.6:
             recommendations["recommandations_candidat"].append(
@@ -569,6 +623,12 @@ class EnhancedBidirectionalScorerV3:
                 "🏢 Revoir préférences télétravail/présentiel"
             )
         
+        # ✨ NOUVEAU : Recommandations progression
+        if component_scores.salary_progression_score < 0.6:
+            recommendations["recommandations_candidat"].append(
+                "📈 Ajuster attentes d'évolution salariale selon niveau d'expérience"
+            )
+        
         # Recommandations entreprise
         if component_scores.salary_score < 0.6:
             recommendations["recommandations_entreprise"].append(
@@ -578,6 +638,12 @@ class EnhancedBidirectionalScorerV3:
         if component_scores.timing_compatibility_score < 0.6:
             recommendations["recommandations_entreprise"].append(
                 "⏰ Assouplir délais de recrutement ou gérer préavis"
+            )
+        
+        # ✨ NOUVEAU : Recommandations entreprise progression
+        if component_scores.salary_progression_score < 0.6:
+            recommendations["recommandations_entreprise"].append(
+                "🚀 Améliorer offre d'évolution - timeline, budget formation, chemin carrière"
             )
         
         return recommendations
@@ -609,7 +675,8 @@ class EnhancedBidirectionalScorerV3:
         v3_impact = {
             "timing_intelligence": component_scores.timing_compatibility_score - 0.5,
             "contract_intelligence": component_scores.contract_flexibility_score - 0.5,
-            "environment_intelligence": component_scores.work_modality_score - 0.5
+            "environment_intelligence": component_scores.work_modality_score - 0.5,
+            "salary_progression_intelligence": component_scores.salary_progression_score - 0.5  # ✨ NOUVEAU
         }
         
         return {
@@ -628,21 +695,22 @@ class EnhancedBidirectionalScorerV3:
         
         target_achieved = processing_time <= self.performance_config["target_time_ms"]
         
-        # Temps par composant (estimation)
+        # Temps par composant (estimation) - mise à jour avec SalaryProgressionScorer
         component_times = {
-            "semantic": processing_time * 0.20,
-            "salary": processing_time * 0.15,
-            "experience": processing_time * 0.15,
-            "location": processing_time * 0.25,
-            "timing": processing_time * 0.10,
-            "contract": processing_time * 0.08,
-            "environment": processing_time * 0.07
+            "semantic": processing_time * 0.18,        # -2%
+            "salary": processing_time * 0.14,          # -1%
+            "experience": processing_time * 0.14,      # -1%
+            "location": processing_time * 0.24,        # -1%
+            "timing": processing_time * 0.09,          # -1%
+            "contract": processing_time * 0.07,        # -1%
+            "environment": processing_time * 0.06,     # -1%
+            "salary_progression": processing_time * 0.05  # ✨ +5% (3% poids + 2% calcul)
         }
         
         return PerformanceMonitoringV3(
             total_processing_time_ms=processing_time,
             component_times_ms=component_times,
-            adaptive_weighting_time_ms=processing_time * 0.05,
+            adaptive_weighting_time_ms=processing_time * 0.03,  # -2%
             google_maps_time_ms=processing_time * 0.20 if request.use_google_maps_intelligence else 0.0,
             target_achieved=target_achieved,
             cache_hits=0,  # TODO: Implémenter cache
@@ -688,7 +756,7 @@ class EnhancedBidirectionalScorerV3:
             unused_questionnaire_data=questionnaire_analysis["unused_data"],
             v3_features_impact=questionnaire_analysis["v3_features_impact"],
             performance_monitoring=performance_monitoring,
-            algorithm_version="3.0.0-enhanced",
+            algorithm_version="3.0.0-enhanced-with-salary-progression",  # ✨ NOUVEAU
             v2_compatibility_maintained=True
         )
     
@@ -713,7 +781,7 @@ class EnhancedBidirectionalScorerV3:
             contract_flexibility_score=0.6,
             timing_compatibility_score=0.6,
             work_modality_score=0.6,
-            salary_progression_score=0.6,
+            salary_progression_score=0.6,  # ✨ NOUVEAU
             listening_reason_score=0.6,
             candidate_status_score=0.6
         )
@@ -743,7 +811,7 @@ class EnhancedBidirectionalScorerV3:
             unused_questionnaire_data=["Données partiellement exploitées"],
             v3_features_impact={"error": error_message},
             performance_monitoring=performance_monitoring,
-            algorithm_version="3.0.0-fallback"
+            algorithm_version="3.0.0-fallback-with-salary-progression"  # ✨ NOUVEAU
         )
     
     def _create_fallback_score_result(self, component_name: str, score: float) -> dict:
@@ -797,7 +865,8 @@ class EnhancedBidirectionalScorerV3:
             "component_scorers": {
                 "timing": self.availability_timing_scorer.get_performance_stats(),
                 "contract": self.contract_types_scorer.get_performance_stats(),
-                "environment": self.work_environment_scorer.get_performance_stats()
+                "environment": self.work_environment_scorer.get_performance_stats(),
+                "salary_progression": self.salary_progression_scorer.get_performance_stats()  # ✨ NOUVEAU
             },
             "configuration": self.performance_config
         }
@@ -816,3 +885,9 @@ class EnhancedBidirectionalScorerV3:
         self.availability_timing_scorer.reset_stats()
         self.contract_types_scorer.reset_stats()
         self.work_environment_scorer.reset_stats()
+        self.salary_progression_scorer.stats = {  # ✨ NOUVEAU
+            "calculations": 0,
+            "average_processing_time": 0.0,
+            "realism_distribution": {},
+            "timeline_distribution": {}
+        }
