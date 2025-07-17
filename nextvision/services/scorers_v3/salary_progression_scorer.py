@@ -1,13 +1,12 @@
 """
 💰 Nextvision V3.0 - SalaryProgressionScorer (3% Weight)
-=======================================================
+========================================================
 
 Score la compatibilité évolution salariale candidat vs opportunités entreprise
 - Analyse salary_progression_expectations candidat vs career_progression_timeline
-- Réalisme attentes selon niveau d'expérience et marché
-- Compatibilité timeline progression souhaitée vs offerte
-- Opportunités concrètes : position_evolution_path vs ambitions
-- Integration motivations EVOLUTION_CARRIERE
+- Validation réalisme attentes selon niveau d'expérience
+- Evaluation opportunités concrètes (position_evolution_path, budget formation)
+- Cohérence avec motivations évolution carrière
 - Performance ultra-optimisée <5ms (3% du budget 175ms)
 
 Author: NEXTEN Team
@@ -15,7 +14,7 @@ Version: 3.0.0 - Salary Progression Intelligence
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
 import re
@@ -23,120 +22,91 @@ import re
 from nextvision.models.extended_bidirectional_models_v3 import (
     ExtendedCandidateProfileV3,
     ExtendedCompanyProfileV3,
+    NiveauExperience,
     MotivationType
 )
-from nextvision.models.bidirectional_models import NiveauExperience
 
 logger = logging.getLogger(__name__)
 
-class ProgressionCompatibilityLevel(str, Enum):
-    """Niveaux de compatibilité progression salariale"""
-    EXCELLENT = "excellent"
-    GOOD = "good"
+class ProgressionRealism(str, Enum):
+    """Niveaux de réalisme progression"""
     REALISTIC = "realistic"
     OPTIMISTIC = "optimistic"
+    AGGRESSIVE = "aggressive"
     UNREALISTIC = "unrealistic"
+
+class TimelineCompatibility(str, Enum):
+    """Niveaux compatibilité timeline"""
+    PERFECT = "perfect"
+    ALIGNED = "aligned"
+    ACCEPTABLE = "acceptable"
+    MISALIGNED = "misaligned"
+    INCOMPATIBLE = "incompatible"
 
 class SalaryProgressionScorer:
     """
     💰 Salary Progression Scorer V3.0 - Intelligence Évolution Salariale
     
-    Évalue la compatibilité progression salariale avec logique métier avancée :
-    - Analyse attentes candidat vs opportunités réelles entreprise
-    - Réalisme selon niveau d'expérience et standards marché
-    - Compatibilité timeline progression (1-2 ans vs 3-5 ans)
-    - Opportunités concrètes : budget formation, évolution path
-    - Integration motivations EVOLUTION_CARRIERE
-    - Performance <5ms ultra-optimisée
+    Évalue la compatibilité évolution salariale avec logique métier :
+    - Compatibilité timeline progression candidat vs entreprise
+    - Validation réalisme attentes selon niveau d'expérience
+    - Évaluation opportunités concrètes d'évolution
+    - Cohérence avec motivations évolution carrière
+    - Performance ultra-optimisée <5ms
     """
     
     def __init__(self):
         self.name = "SalaryProgressionScorer"
         self.version = "3.0.0"
         
-        # Références marché par niveau d'expérience (optimisées performance)
-        self.market_progression_standards = {
+        # Grilles salariales de référence par niveau (données marché)
+        self.salary_benchmarks = {
             NiveauExperience.JUNIOR: {
-                "annual_increase_range": (0.05, 0.15),  # 5-15% par an
-                "3_year_total_increase": (0.20, 0.45),  # 20-45% sur 3 ans
-                "realistic_ceiling": 1.5,  # Max 50% d'augmentation réaliste
-                "typical_timeline": "2-3 ans",
-                "progression_speed": "moderate"
+                "base_range": (30000, 45000),
+                "progression_1_year": 1.15,  # +15% après 1 an
+                "progression_3_years": 1.40,  # +40% après 3 ans
+                "max_realistic": 55000
             },
             NiveauExperience.CONFIRME: {
-                "annual_increase_range": (0.03, 0.10),  # 3-10% par an
-                "3_year_total_increase": (0.10, 0.30),  # 10-30% sur 3 ans
-                "realistic_ceiling": 1.3,  # Max 30% d'augmentation réaliste
-                "typical_timeline": "3-4 ans",
-                "progression_speed": "steady"
+                "base_range": (45000, 65000),
+                "progression_1_year": 1.10,  # +10% après 1 an
+                "progression_3_years": 1.25,  # +25% après 3 ans
+                "max_realistic": 80000
             },
             NiveauExperience.SENIOR: {
-                "annual_increase_range": (0.02, 0.08),  # 2-8% par an
-                "3_year_total_increase": (0.08, 0.25),  # 8-25% sur 3 ans
-                "realistic_ceiling": 1.25,  # Max 25% d'augmentation réaliste
-                "typical_timeline": "3-5 ans",
-                "progression_speed": "gradual"
+                "base_range": (65000, 90000),
+                "progression_1_year": 1.08,  # +8% après 1 an
+                "progression_3_years": 1.20,  # +20% après 3 ans
+                "max_realistic": 120000
             },
             NiveauExperience.EXPERT: {
-                "annual_increase_range": (0.02, 0.06),  # 2-6% par an
-                "3_year_total_increase": (0.06, 0.20),  # 6-20% sur 3 ans
-                "realistic_ceiling": 1.20,  # Max 20% d'augmentation réaliste
-                "typical_timeline": "4-6 ans",
-                "progression_speed": "slow"
+                "base_range": (90000, 150000),
+                "progression_1_year": 1.05,  # +5% après 1 an
+                "progression_3_years": 1.15,  # +15% après 3 ans
+                "max_realistic": 200000
             }
         }
         
-        # Modifiers selon contexte entreprise
-        self.company_modifiers = {
-            "startup": {
-                "progression_multiplier": 1.3,
-                "timeline_acceleration": 0.8,  # Plus rapide
-                "risk_factor": 1.2,
-                "description": "Startup - Progression rapide mais risquée"
-            },
-            "scale-up": {
-                "progression_multiplier": 1.2,
-                "timeline_acceleration": 0.9,
-                "risk_factor": 1.1,
-                "description": "Scale-up - Croissance soutenue"
-            },
-            "growth": {
-                "progression_multiplier": 1.15,
-                "timeline_acceleration": 0.95,
-                "risk_factor": 1.0,
-                "description": "Croissance - Opportunités régulières"
-            },
-            "stable": {
-                "progression_multiplier": 1.0,
-                "timeline_acceleration": 1.0,
-                "risk_factor": 0.9,
-                "description": "Stable - Progression prévisible"
-            },
-            "restructuring": {
-                "progression_multiplier": 0.8,
-                "timeline_acceleration": 1.3,  # Plus lent
-                "risk_factor": 1.4,
-                "description": "Restructuration - Progression limitée"
-            }
-        }
-        
-        # Timeline parsing (optimisé performance)
+        # Parsing timeline entreprise
         self.timeline_patterns = {
-            r"1-2|1 à 2": {"min_years": 1, "max_years": 2, "avg_years": 1.5},
-            r"2-3|2 à 3": {"min_years": 2, "max_years": 3, "avg_years": 2.5},
-            r"3-4|3 à 4": {"min_years": 3, "max_years": 4, "avg_years": 3.5},
-            r"3-5|3 à 5": {"min_years": 3, "max_years": 5, "avg_years": 4.0},
-            r"4-6|4 à 6": {"min_years": 4, "max_years": 6, "avg_years": 5.0},
-            r"1 an": {"min_years": 1, "max_years": 1, "avg_years": 1.0},
-            r"2 ans": {"min_years": 2, "max_years": 2, "avg_years": 2.0},
-            r"3 ans": {"min_years": 3, "max_years": 3, "avg_years": 3.0},
+            "immediat": 0,
+            "6mois": 0.5,
+            "1an": 1,
+            "1-2ans": 1.5,
+            "2ans": 2,
+            "2-3ans": 2.5,
+            "3ans": 3,
+            "3-5ans": 4,
+            "5ans": 5,
+            "long terme": 6
         }
         
-        # Métriques performance
+        # Métriques
         self.stats = {
             "calculations": 0,
             "average_processing_time": 0.0,
-            "compatibility_distribution": {level.value: 0 for level in ProgressionCompatibilityLevel}
+            "realism_distribution": {level.value: 0 for level in ProgressionRealism},
+            "timeline_distribution": {level.value: 0 for level in TimelineCompatibility}
         }
     
     def calculate_salary_progression_score(
@@ -146,7 +116,7 @@ class SalaryProgressionScorer:
         context: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """
-        💰 Calcule score compatibilité progression salariale
+        💰 Calcule score compatibilité évolution salariale
         
         Target: <5ms (3% du budget 175ms)
         """
@@ -157,40 +127,40 @@ class SalaryProgressionScorer:
             # 1. Extraction rapide données progression
             progression_data = self._extract_progression_data(candidate, company)
             
-            if not progression_data["has_candidate_expectations"]:
-                return self._create_fallback_score("Pas d'attentes progression candidat")
+            if not progression_data["has_expectations"]:
+                return self._create_fallback_score("Pas d'attentes progression salariale")
             
             # 2. Analyse réalisme attentes candidat
-            realism_analysis = self._analyze_candidate_realism(progression_data)
+            realism_analysis = self._analyze_expectations_realism(progression_data)
             
-            # 3. Analyse opportunités entreprise
-            company_opportunities = self._analyze_company_opportunities(progression_data)
+            # 3. Analyse compatibilité timeline
+            timeline_analysis = self._analyze_timeline_compatibility(progression_data)
             
-            # 4. Calcul compatibilité timeline
-            timeline_compatibility = self._calculate_timeline_compatibility(
-                progression_data, company_opportunities
-            )
+            # 4. Evaluation opportunités entreprise
+            opportunities_analysis = self._evaluate_company_opportunities(progression_data)
             
-            # 5. Score final avec modifiers
-            final_score = self._calculate_final_progression_score(
-                realism_analysis, company_opportunities, timeline_compatibility
+            # 5. Score final pondéré
+            final_score = self._calculate_weighted_progression_score(
+                realism_analysis, timeline_analysis, opportunities_analysis
             )
             
             # 6. Enrichissement résultat
             result = self._enrich_progression_result(
-                final_score, progression_data, realism_analysis,
-                company_opportunities, timeline_compatibility, context
+                final_score, realism_analysis, timeline_analysis, 
+                opportunities_analysis, progression_data, context
             )
             
             processing_time = (datetime.now() - start_time).total_seconds() * 1000
             result["processing_time_ms"] = processing_time
             
             # Mise à jour stats
-            self._update_stats(processing_time, realism_analysis["compatibility_level"])
+            self._update_stats(processing_time, realism_analysis["realism_level"], 
+                             timeline_analysis["timeline_compatibility"])
             
             logger.info(
                 f"💰 SalaryProgressionScorer: {final_score:.3f} "
-                f"({realism_analysis['compatibility_level']}, {processing_time:.1f}ms)"
+                f"({realism_analysis['realism_level']}/{timeline_analysis['timeline_compatibility']}, "
+                f"{processing_time:.1f}ms)"
             )
             
             return result
@@ -207,427 +177,345 @@ class SalaryProgressionScorer:
         """📊 Extraction données progression salariale"""
         
         # Données candidat
-        salary_expectations = candidate.salary_progression_expectations or {}
+        progression_expectations = candidate.salary_progression_expectations
         current_salary = candidate.base_profile.attentes.salaire_souhaite or 0
         experience_level = candidate.base_profile.experience.niveau
         
         # Motivations évolution carrière
-        motivations = candidate.motivations_ranking.motivations_ranking or {}
-        career_motivation = motivations.get(MotivationType.EVOLUTION_CARRIERE, 0)
+        evolution_motivation_score = 0
+        if candidate.motivations_ranking.motivations_ranking:
+            evolution_motivation_score = candidate.motivations_ranking.motivations_ranking.get(
+                MotivationType.EVOLUTION_CARRIERE, 0
+            )
         
         # Données entreprise
-        progression_timeline = company.job_benefits.career_progression_timeline or "2-3 ans"
+        career_timeline = company.job_benefits.career_progression_timeline
+        evolution_path = company.position_evolution_path
         development_budget = company.job_benefits.professional_development_budget
-        bonus_structure = company.job_benefits.bonus_structure or "None"
-        evolution_path = company.position_evolution_path or []
-        growth_stage = company.company_profile_v3.growth_stage or "stable"
+        bonus_structure = company.job_benefits.bonus_structure
         
         return {
-            # Candidat
-            "salary_expectations": salary_expectations,
+            "has_expectations": bool(progression_expectations),
+            "progression_expectations": progression_expectations,
             "current_salary": current_salary,
             "experience_level": experience_level,
-            "career_motivation": career_motivation,
-            "has_candidate_expectations": bool(salary_expectations),
-            
-            # Entreprise
-            "progression_timeline": progression_timeline,
-            "development_budget": development_budget,
-            "bonus_structure": bonus_structure,
+            "evolution_motivation_score": evolution_motivation_score,
+            "career_timeline": career_timeline,
             "evolution_path": evolution_path,
-            "growth_stage": growth_stage,
-            
-            # Métadonnées
-            "has_development_budget": development_budget is not None and development_budget > 0,
-            "has_evolution_path": bool(evolution_path),
-            "has_variable_compensation": bonus_structure in ["Variable", "Commission"]
+            "development_budget": development_budget,
+            "bonus_structure": bonus_structure
         }
     
-    def _analyze_candidate_realism(self, progression_data: Dict[str, Any]) -> Dict[str, Any]:
-        """🔍 Analyse réalisme attentes candidat"""
+    def _analyze_expectations_realism(self, progression_data: Dict[str, Any]) -> Dict[str, Any]:
+        """🎯 Analyse réalisme attentes candidat"""
         
-        expectations = progression_data["salary_expectations"]
-        current_salary = progression_data["current_salary"]
         experience_level = progression_data["experience_level"]
+        current_salary = progression_data["current_salary"]
+        expectations = progression_data["progression_expectations"]
         
-        if not expectations or current_salary <= 0:
+        if not expectations or experience_level not in self.salary_benchmarks:
             return {
+                "realism_level": ProgressionRealism.REALISTIC,
                 "realism_score": 0.5,
-                "compatibility_level": ProgressionCompatibilityLevel.REALISTIC,
-                "realism_factors": ["Données insuffisantes pour analyse"],
-                "concerns": []
+                "realism_factors": ["Données insuffisantes pour analyse réalisme"]
             }
         
-        # Standards marché pour ce niveau
-        market_standards = self.market_progression_standards.get(
-            experience_level, self.market_progression_standards[NiveauExperience.CONFIRME]
-        )
-        
+        benchmark = self.salary_benchmarks[experience_level]
         realism_factors = []
-        concerns = []
-        total_realism_score = 0.0
-        analyses_count = 0
+        realism_score = 1.0
         
-        # Analyse par période d'expectation
-        for period, target_salary in expectations.items():
-            if target_salary <= current_salary:
-                continue
+        # Analyse attentes 1 an
+        if "1_an" in expectations:
+            target_1_year = expectations["1_an"]
+            expected_1_year = current_salary * benchmark["progression_1_year"]
             
-            years = self._extract_years_from_period(period)
-            if years <= 0:
-                continue
-            
-            # Calcul augmentation demandée
-            increase_factor = target_salary / current_salary
-            annual_increase = (increase_factor ** (1/years)) - 1
-            total_increase = increase_factor - 1
-            
-            # Évaluation réalisme
-            annual_range = market_standards["annual_increase_range"]
-            total_ceiling = market_standards["realistic_ceiling"] - 1
-            
-            period_realism = 1.0
-            
-            # Vérification augmentation annuelle
-            if annual_increase <= annual_range[1]:
-                if annual_increase >= annual_range[0]:
-                    realism_factors.append(f"Augmentation {period} réaliste ({annual_increase:.1%}/an)")
-                    period_realism *= 1.0
-                else:
-                    realism_factors.append(f"Augmentation {period} modeste ({annual_increase:.1%}/an)")
-                    period_realism *= 0.9
+            if target_1_year <= expected_1_year:
+                realism_factors.append("Attentes 1 an réalistes")
+            elif target_1_year <= expected_1_year * 1.1:
+                realism_factors.append("Attentes 1 an légèrement optimistes")
+                realism_score *= 0.9
+            elif target_1_year <= expected_1_year * 1.2:
+                realism_factors.append("Attentes 1 an ambitieuses")
+                realism_score *= 0.7
             else:
-                if annual_increase <= annual_range[1] * 1.5:
-                    concerns.append(f"Augmentation {period} optimiste ({annual_increase:.1%}/an)")
-                    period_realism *= 0.7
-                else:
-                    concerns.append(f"Augmentation {period} irréaliste ({annual_increase:.1%}/an)")
-                    period_realism *= 0.4
+                realism_factors.append("Attentes 1 an irréalistes")
+                realism_score *= 0.5
+        
+        # Analyse attentes 3 ans
+        if "3_ans" in expectations:
+            target_3_years = expectations["3_ans"]
+            expected_3_years = current_salary * benchmark["progression_3_years"]
+            max_realistic = benchmark["max_realistic"]
             
-            # Vérification plafond total
-            if total_increase <= total_ceiling:
-                period_realism *= 1.0
-            elif total_increase <= total_ceiling * 1.3:
-                period_realism *= 0.8
+            if target_3_years <= expected_3_years:
+                realism_factors.append("Attentes 3 ans réalistes")
+            elif target_3_years <= max_realistic:
+                realism_factors.append("Attentes 3 ans ambitieuses mais possibles")
+                realism_score *= 0.8
             else:
-                period_realism *= 0.5
-                concerns.append(f"Augmentation totale {period} excessive ({total_increase:.1%})")
-            
-            total_realism_score += period_realism
-            analyses_count += 1
+                realism_factors.append("Attentes 3 ans dépassent le marché")
+                realism_score *= 0.6
         
-        # Score global
-        if analyses_count > 0:
-            average_realism = total_realism_score / analyses_count
-        else:
-            average_realism = 0.5
+        # Cohérence progression
+        if "1_an" in expectations and "3_ans" in expectations:
+            progression_rate = expectations["3_ans"] / expectations["1_an"]
+            if 1.1 <= progression_rate <= 1.4:
+                realism_factors.append("Progression cohérente entre 1 et 3 ans")
+            else:
+                realism_factors.append("Progression incohérente entre 1 et 3 ans")
+                realism_score *= 0.85
         
-        # Détermination niveau compatibilité
-        if average_realism >= 0.9:
-            compatibility_level = ProgressionCompatibilityLevel.EXCELLENT
-        elif average_realism >= 0.75:
-            compatibility_level = ProgressionCompatibilityLevel.GOOD
-        elif average_realism >= 0.6:
-            compatibility_level = ProgressionCompatibilityLevel.REALISTIC
-        elif average_realism >= 0.4:
-            compatibility_level = ProgressionCompatibilityLevel.OPTIMISTIC
+        # Détermination niveau réalisme
+        if realism_score >= 0.9:
+            realism_level = ProgressionRealism.REALISTIC
+        elif realism_score >= 0.7:
+            realism_level = ProgressionRealism.OPTIMISTIC
+        elif realism_score >= 0.5:
+            realism_level = ProgressionRealism.AGGRESSIVE
         else:
-            compatibility_level = ProgressionCompatibilityLevel.UNREALISTIC
+            realism_level = ProgressionRealism.UNREALISTIC
         
         return {
-            "realism_score": average_realism,
-            "compatibility_level": compatibility_level,
+            "realism_level": realism_level,
+            "realism_score": realism_score,
             "realism_factors": realism_factors,
-            "concerns": concerns,
-            "analyses_count": analyses_count,
-            "market_standards": {
+            "benchmark_analysis": {
                 "experience_level": experience_level.value,
-                "annual_range": f"{market_standards['annual_increase_range'][0]:.1%}-{market_standards['annual_increase_range'][1]:.1%}",
-                "typical_timeline": market_standards["typical_timeline"]
+                "expected_1_year": current_salary * benchmark["progression_1_year"] if current_salary else 0,
+                "expected_3_years": current_salary * benchmark["progression_3_years"] if current_salary else 0,
+                "max_realistic": benchmark["max_realistic"]
             }
         }
     
-    def _analyze_company_opportunities(self, progression_data: Dict[str, Any]) -> Dict[str, Any]:
-        """🏢 Analyse opportunités entreprise"""
+    def _analyze_timeline_compatibility(self, progression_data: Dict[str, Any]) -> Dict[str, Any]:
+        """⏰ Analyse compatibilité timeline progression"""
         
-        # Parse timeline entreprise
-        timeline_data = self._parse_progression_timeline(progression_data["progression_timeline"])
+        career_timeline = progression_data["career_timeline"]
+        expectations = progression_data["progression_expectations"]
         
-        # Évaluation opportunités
-        opportunities_score = 0.5  # Base
+        if not career_timeline:
+            return {
+                "timeline_compatibility": TimelineCompatibility.ACCEPTABLE,
+                "compatibility_score": 0.5,
+                "timeline_factors": ["Timeline entreprise non définie"]
+            }
+        
+        # Parsing timeline entreprise
+        company_timeline_years = self._parse_timeline(career_timeline)
+        
+        timeline_factors = []
+        compatibility_score = 1.0
+        
+        # Analyse compatibilité avec attentes candidat
+        if expectations:
+            # Si candidat a des attentes 1 an et entreprise > 2 ans
+            if "1_an" in expectations and company_timeline_years > 2:
+                timeline_factors.append("Candidat attend évolution 1 an, entreprise propose > 2 ans")
+                compatibility_score *= 0.6
+            
+            # Si candidat a des attentes 3 ans et entreprise < 1 an
+            elif "3_ans" in expectations and company_timeline_years < 1:
+                timeline_factors.append("Timeline entreprise plus rapide qu'attendu")
+                compatibility_score *= 1.1  # Légèrement positif
+            
+            # Timeline alignée
+            elif "1_an" in expectations and 1 <= company_timeline_years <= 2:
+                timeline_factors.append("Timeline progression bien alignée")
+            elif "3_ans" in expectations and 2 <= company_timeline_years <= 4:
+                timeline_factors.append("Timeline progression bien alignée")
+            else:
+                timeline_factors.append("Timeline partiellement alignée")
+                compatibility_score *= 0.8
+        
+        # Analyse qualité timeline entreprise
+        if company_timeline_years <= 2:
+            timeline_factors.append("Progression rapide offerte")
+            compatibility_score *= 1.05
+        elif company_timeline_years <= 3:
+            timeline_factors.append("Progression standard")
+        else:
+            timeline_factors.append("Progression lente")
+            compatibility_score *= 0.9
+        
+        # Détermination niveau compatibilité
+        if compatibility_score >= 1.0:
+            timeline_compatibility = TimelineCompatibility.PERFECT
+        elif compatibility_score >= 0.8:
+            timeline_compatibility = TimelineCompatibility.ALIGNED
+        elif compatibility_score >= 0.6:
+            timeline_compatibility = TimelineCompatibility.ACCEPTABLE
+        elif compatibility_score >= 0.4:
+            timeline_compatibility = TimelineCompatibility.MISALIGNED
+        else:
+            timeline_compatibility = TimelineCompatibility.INCOMPATIBLE
+        
+        return {
+            "timeline_compatibility": timeline_compatibility,
+            "compatibility_score": min(1.0, compatibility_score),
+            "timeline_factors": timeline_factors,
+            "company_timeline_years": company_timeline_years,
+            "timeline_analysis": {
+                "raw_timeline": career_timeline,
+                "parsed_years": company_timeline_years
+            }
+        }
+    
+    def _parse_timeline(self, timeline: str) -> float:
+        """🔍 Parsing timeline entreprise vers années"""
+        
+        timeline_lower = timeline.lower().strip()
+        
+        # Vérification patterns prédéfinis
+        for pattern, years in self.timeline_patterns.items():
+            if pattern in timeline_lower:
+                return years
+        
+        # Extraction numérique avec regex
+        # Exemples: "2-3 ans", "18 mois", "1.5 années"
+        
+        # Recherche années
+        year_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:an|year)', timeline_lower)
+        if year_match:
+            return float(year_match.group(1))
+        
+        # Recherche mois
+        month_match = re.search(r'(\d+)\s*mois', timeline_lower)
+        if month_match:
+            return float(month_match.group(1)) / 12
+        
+        # Recherche range (ex: "2-3")
+        range_match = re.search(r'(\d+)-(\d+)', timeline_lower)
+        if range_match:
+            start, end = float(range_match.group(1)), float(range_match.group(2))
+            return (start + end) / 2
+        
+        # Valeur par défaut
+        return 2.5
+    
+    def _evaluate_company_opportunities(self, progression_data: Dict[str, Any]) -> Dict[str, Any]:
+        """🚀 Évaluation opportunités entreprise"""
+        
+        evolution_path = progression_data["evolution_path"]
+        development_budget = progression_data["development_budget"]
+        bonus_structure = progression_data["bonus_structure"]
+        
+        opportunities_score = 0.5  # Base neutre
         opportunity_factors = []
-        limitations = []
         
-        # 1. Timeline progression
-        if timeline_data["avg_years"] <= 2.5:
-            opportunities_score += 0.2
-            opportunity_factors.append("Timeline progression rapide")
-        elif timeline_data["avg_years"] <= 3.5:
-            opportunities_score += 0.1
-            opportunity_factors.append("Timeline progression standard")
-        else:
-            limitations.append("Timeline progression lente")
-        
-        # 2. Budget développement
-        if progression_data["has_development_budget"]:
-            budget = progression_data["development_budget"]
-            if budget >= 5000:
-                opportunities_score += 0.15
-                opportunity_factors.append(f"Budget formation élevé ({budget}€)")
-            elif budget >= 2000:
+        # Analyse chemin d'évolution
+        if evolution_path:
+            if len(evolution_path) >= 3:
+                opportunities_score += 0.3
+                opportunity_factors.append(f"Chemin évolution clair ({len(evolution_path)} niveaux)")
+            elif len(evolution_path) >= 2:
+                opportunities_score += 0.2
+                opportunity_factors.append(f"Évolution possible ({len(evolution_path)} niveaux)")
+            else:
                 opportunities_score += 0.1
-                opportunity_factors.append(f"Budget formation correct ({budget}€)")
+                opportunity_factors.append("Évolution limitée")
+        else:
+            opportunity_factors.append("Pas de chemin d'évolution défini")
+        
+        # Analyse budget développement
+        if development_budget:
+            if development_budget >= 3000:
+                opportunities_score += 0.2
+                opportunity_factors.append(f"Budget formation important ({development_budget}€)")
+            elif development_budget >= 1000:
+                opportunities_score += 0.1
+                opportunity_factors.append(f"Budget formation correct ({development_budget}€)")
             else:
                 opportunities_score += 0.05
-                opportunity_factors.append(f"Budget formation limité ({budget}€)")
+                opportunity_factors.append(f"Budget formation limité ({development_budget}€)")
         else:
-            limitations.append("Pas de budget formation défini")
+            opportunity_factors.append("Budget formation non précisé")
         
-        # 3. Path d'évolution
-        if progression_data["has_evolution_path"]:
-            path_length = len(progression_data["evolution_path"])
-            if path_length >= 3:
+        # Analyse structure bonus
+        if bonus_structure and bonus_structure != "None":
+            if bonus_structure == "Variable":
                 opportunities_score += 0.15
-                opportunity_factors.append(f"Path évolution détaillé ({path_length} étapes)")
-            elif path_length >= 2:
+                opportunity_factors.append("Rémunération variable liée performance")
+            elif bonus_structure == "Commission":
                 opportunities_score += 0.1
-                opportunity_factors.append(f"Path évolution défini ({path_length} étapes)")
-            else:
+                opportunity_factors.append("Rémunération commission possible")
+            elif bonus_structure == "Fixed":
                 opportunities_score += 0.05
-                opportunity_factors.append("Path évolution basique")
-        else:
-            limitations.append("Pas de path d'évolution défini")
-        
-        # 4. Structure rémunération variable
-        if progression_data["has_variable_compensation"]:
-            opportunities_score += 0.1
-            opportunity_factors.append(f"Rémunération variable ({progression_data['bonus_structure']})")
-        
-        # 5. Modifier selon stade croissance
-        growth_stage = progression_data["growth_stage"]
-        if growth_stage in self.company_modifiers:
-            modifier = self.company_modifiers[growth_stage]
-            opportunities_score *= modifier["progression_multiplier"]
-            opportunity_factors.append(modifier["description"])
+                opportunity_factors.append("Bonus fixe prévu")
         
         return {
             "opportunities_score": min(1.0, opportunities_score),
-            "timeline_data": timeline_data,
             "opportunity_factors": opportunity_factors,
-            "limitations": limitations,
-            "growth_context": {
-                "stage": growth_stage,
-                "modifier": self.company_modifiers.get(growth_stage, {})
+            "concrete_opportunities": {
+                "evolution_levels": len(evolution_path) if evolution_path else 0,
+                "development_budget": development_budget,
+                "bonus_available": bonus_structure != "None" if bonus_structure else False
             }
         }
     
-    def _calculate_timeline_compatibility(
-        self,
-        progression_data: Dict[str, Any],
-        company_opportunities: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """⏱️ Calcul compatibilité timeline"""
-        
-        expectations = progression_data["salary_expectations"]
-        timeline_data = company_opportunities["timeline_data"]
-        company_avg_years = timeline_data["avg_years"]
-        
-        compatibility_scores = []
-        timeline_matches = []
-        
-        for period, target_salary in expectations.items():
-            candidate_years = self._extract_years_from_period(period)
-            if candidate_years <= 0:
-                continue
-            
-            # Calcul compatibilité timeline
-            if candidate_years <= company_avg_years * 0.8:
-                # Candidat plus rapide que l'entreprise
-                timeline_score = 0.8
-                match_type = "candidate_faster"
-            elif candidate_years <= company_avg_years * 1.2:
-                # Timeline compatible
-                timeline_score = 1.0
-                match_type = "compatible"
-            elif candidate_years <= company_avg_years * 1.5:
-                # Candidat plus patient
-                timeline_score = 0.9
-                match_type = "candidate_patient"
-            else:
-                # Timeline incompatible
-                timeline_score = 0.6
-                match_type = "incompatible"
-            
-            compatibility_scores.append(timeline_score)
-            timeline_matches.append({
-                "period": period,
-                "candidate_years": candidate_years,
-                "company_years": company_avg_years,
-                "score": timeline_score,
-                "match_type": match_type
-            })
-        
-        # Score global timeline
-        if compatibility_scores:
-            average_timeline_score = sum(compatibility_scores) / len(compatibility_scores)
-        else:
-            average_timeline_score = 0.5
-        
-        return {
-            "timeline_score": average_timeline_score,
-            "timeline_matches": timeline_matches,
-            "company_timeline": f"{timeline_data['min_years']}-{timeline_data['max_years']} ans",
-            "compatibility_summary": self._generate_timeline_summary(timeline_matches)
-        }
-    
-    def _calculate_final_progression_score(
+    def _calculate_weighted_progression_score(
         self,
         realism_analysis: Dict[str, Any],
-        company_opportunities: Dict[str, Any],
-        timeline_compatibility: Dict[str, Any]
+        timeline_analysis: Dict[str, Any],
+        opportunities_analysis: Dict[str, Any]
     ) -> float:
-        """🧮 Calcul score final progression"""
+        """🧮 Calcul score progression pondéré"""
         
-        # Pondération des facteurs
+        # Pondération des composants
         weights = {
-            "realism": 0.4,          # 40% réalisme attentes
-            "opportunities": 0.35,   # 35% opportunités entreprise
-            "timeline": 0.25         # 25% compatibilité timeline
+            "realism": 0.40,        # 40% - Réalisme attentes
+            "timeline": 0.35,       # 35% - Compatibilité timeline
+            "opportunities": 0.25   # 25% - Opportunités entreprise
         }
         
-        base_score = (
+        final_score = (
             realism_analysis["realism_score"] * weights["realism"] +
-            company_opportunities["opportunities_score"] * weights["opportunities"] +
-            timeline_compatibility["timeline_score"] * weights["timeline"]
+            timeline_analysis["compatibility_score"] * weights["timeline"] +
+            opportunities_analysis["opportunities_score"] * weights["opportunities"]
         )
         
-        # Bonus/malus finaux
-        final_score = base_score
-        
-        # Bonus si excellente cohérence
-        if (realism_analysis["compatibility_level"] == ProgressionCompatibilityLevel.EXCELLENT 
-            and company_opportunities["opportunities_score"] >= 0.8):
-            final_score = min(1.0, final_score * 1.1)
-        
-        # Malus si attentes irréalistes
-        if realism_analysis["compatibility_level"] == ProgressionCompatibilityLevel.UNREALISTIC:
-            final_score *= 0.7
-        
-        # Malus si peu d'opportunités
-        if company_opportunities["opportunities_score"] < 0.4:
-            final_score *= 0.85
-        
-        return min(1.0, max(0.0, final_score))
-    
-    def _parse_progression_timeline(self, timeline: str) -> Dict[str, Any]:
-        """📅 Parse timeline progression entreprise"""
-        
-        timeline_lower = timeline.lower()
-        
-        # Recherche pattern
-        for pattern, data in self.timeline_patterns.items():
-            if re.search(pattern, timeline_lower):
-                return data
-        
-        # Fallback extraction numérique
-        numbers = re.findall(r'\d+', timeline)
-        if len(numbers) >= 2:
-            min_years = int(numbers[0])
-            max_years = int(numbers[1])
-            return {
-                "min_years": min_years,
-                "max_years": max_years,
-                "avg_years": (min_years + max_years) / 2
-            }
-        elif len(numbers) == 1:
-            years = int(numbers[0])
-            return {
-                "min_years": years,
-                "max_years": years,
-                "avg_years": years
-            }
-        
-        # Défaut
-        return {"min_years": 2, "max_years": 3, "avg_years": 2.5}
-    
-    def _extract_years_from_period(self, period: str) -> float:
-        """📊 Extraction années depuis période candidat"""
-        
-        period_lower = period.lower()
-        
-        # Patterns communs
-        if "1_an" in period_lower or "1an" in period_lower:
-            return 1.0
-        elif "2_ans" in period_lower or "2ans" in period_lower:
-            return 2.0
-        elif "3_ans" in period_lower or "3ans" in period_lower:
-            return 3.0
-        elif "5_ans" in period_lower or "5ans" in period_lower:
-            return 5.0
-        
-        # Extraction numérique
-        numbers = re.findall(r'\d+', period)
-        if numbers:
-            return float(numbers[0])
-        
-        return 0.0
-    
-    def _generate_timeline_summary(self, timeline_matches: List[Dict]) -> str:
-        """📋 Génération résumé compatibilité timeline"""
-        
-        if not timeline_matches:
-            return "Pas de données timeline"
-        
-        compatible_count = sum(1 for match in timeline_matches if match["score"] >= 0.9)
-        total_count = len(timeline_matches)
-        
-        if compatible_count == total_count:
-            return "Timeline parfaitement compatible"
-        elif compatible_count >= total_count * 0.7:
-            return "Timeline majoritairement compatible"
-        elif compatible_count >= total_count * 0.3:
-            return "Timeline partiellement compatible"
-        else:
-            return "Timeline peu compatible"
+        return min(1.0, final_score)
     
     def _enrich_progression_result(
         self,
         final_score: float,
-        progression_data: Dict[str, Any],
         realism_analysis: Dict[str, Any],
-        company_opportunities: Dict[str, Any],
-        timeline_compatibility: Dict[str, Any],
+        timeline_analysis: Dict[str, Any],
+        opportunities_analysis: Dict[str, Any],
+        progression_data: Dict[str, Any],
         context: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """🔧 Enrichissement résultat progression"""
         
         # Recommandations intelligentes
         recommendations = self._generate_progression_recommendations(
-            final_score, realism_analysis, company_opportunities, timeline_compatibility
+            final_score, realism_analysis, timeline_analysis, 
+            opportunities_analysis, progression_data
         )
         
         # Analyse détaillée
         detailed_analysis = self._generate_detailed_progression_analysis(
-            progression_data, realism_analysis, company_opportunities
+            realism_analysis, timeline_analysis, opportunities_analysis, progression_data
         )
         
         return {
             "final_score": final_score,
-            "compatibility_level": realism_analysis["compatibility_level"].value,
             "progression_analysis": {
-                "candidate_expectations": progression_data["salary_expectations"],
-                "current_salary": progression_data["current_salary"],
-                "experience_level": progression_data["experience_level"].value,
-                "career_motivation": progression_data["career_motivation"],
-                "company_timeline": company_opportunities["timeline_data"],
-                "realism_score": realism_analysis["realism_score"],
-                "opportunities_score": company_opportunities["opportunities_score"]
+                "realism_level": realism_analysis["realism_level"].value,
+                "timeline_compatibility": timeline_analysis["timeline_compatibility"].value,
+                "opportunities_score": opportunities_analysis["opportunities_score"],
+                "evolution_motivation_score": progression_data["evolution_motivation_score"]
             },
-            "realism_factors": realism_analysis["realism_factors"],
-            "concerns": realism_analysis["concerns"],
-            "opportunity_factors": company_opportunities["opportunity_factors"],
-            "limitations": company_opportunities["limitations"],
-            "timeline_compatibility": timeline_compatibility,
+            "score_breakdown": {
+                "realism_score": realism_analysis["realism_score"],
+                "timeline_score": timeline_analysis["compatibility_score"],
+                "opportunities_score": opportunities_analysis["opportunities_score"],
+                "weighted_final": final_score
+            },
+            "analysis_factors": {
+                "realism_factors": realism_analysis["realism_factors"],
+                "timeline_factors": timeline_analysis["timeline_factors"],
+                "opportunity_factors": opportunities_analysis["opportunity_factors"]
+            },
             "detailed_analysis": detailed_analysis,
             "recommendations": recommendations,
             "calculated_at": datetime.now().isoformat(),
@@ -639,79 +527,88 @@ class SalaryProgressionScorer:
         self,
         final_score: float,
         realism_analysis: Dict[str, Any],
-        company_opportunities: Dict[str, Any],
-        timeline_compatibility: Dict[str, Any]
+        timeline_analysis: Dict[str, Any],
+        opportunities_analysis: Dict[str, Any],
+        progression_data: Dict[str, Any]
     ) -> List[str]:
         """💡 Génération recommandations progression"""
         
         recommendations = []
         
         # Recommandations globales
-        if realism_analysis["compatibility_level"] == ProgressionCompatibilityLevel.EXCELLENT:
-            recommendations.append("🌟 Attentes salariales excellentes - Parfaitement réalistes")
-        elif realism_analysis["compatibility_level"] == ProgressionCompatibilityLevel.GOOD:
-            recommendations.append("✅ Attentes salariales bonnes - Bien calibrées")
-        elif realism_analysis["compatibility_level"] == ProgressionCompatibilityLevel.REALISTIC:
-            recommendations.append("👍 Attentes salariales réalistes - Négociables")
-        elif realism_analysis["compatibility_level"] == ProgressionCompatibilityLevel.OPTIMISTIC:
-            recommendations.append("⚠️ Attentes optimistes - À tempérer")
+        if final_score >= 0.8:
+            recommendations.append("🌟 Excellente compatibilité évolution salariale")
+        elif final_score >= 0.6:
+            recommendations.append("✅ Bonne compatibilité progression - Négociation possible")
+        elif final_score >= 0.4:
+            recommendations.append("⚠️ Compatibilité modérée - Clarifier attentes")
         else:
-            recommendations.append("❌ Attentes irréalistes - Revoir les expectations")
+            recommendations.append("❌ Faible compatibilité - Risque désaccord salarial")
         
-        # Recommandations opportunités
-        if company_opportunities["opportunities_score"] >= 0.8:
-            recommendations.append("🚀 Excellentes opportunités progression entreprise")
-        elif company_opportunities["opportunities_score"] >= 0.6:
-            recommendations.append("📈 Bonnes opportunités progression disponibles")
-        else:
-            recommendations.append("⚠️ Opportunités progression limitées - Clarifier plan carrière")
+        # Recommandations réalisme
+        realism_level = realism_analysis["realism_level"]
+        if realism_level == ProgressionRealism.UNREALISTIC:
+            recommendations.append("🎯 Recadrer attentes candidat - Irréalistes pour son niveau")
+        elif realism_level == ProgressionRealism.AGGRESSIVE:
+            recommendations.append("📈 Attentes ambitieuses - Justifier par performance")
+        elif realism_level == ProgressionRealism.REALISTIC:
+            recommendations.append("✅ Attentes réalistes - Bon profil progression")
         
         # Recommandations timeline
-        timeline_score = timeline_compatibility["timeline_score"]
-        if timeline_score >= 0.9:
-            recommendations.append("⏱️ Timeline progression parfaitement alignée")
-        elif timeline_score >= 0.7:
-            recommendations.append("📅 Timeline progression compatible")
-        else:
-            recommendations.append("⏰ Timeline progression à ajuster - Négocier délais")
+        timeline_compat = timeline_analysis["timeline_compatibility"]
+        if timeline_compat == TimelineCompatibility.INCOMPATIBLE:
+            recommendations.append("⏰ Timeline incompatible - Revoir planning évolution")
+        elif timeline_compat == TimelineCompatibility.PERFECT:
+            recommendations.append("🎯 Timeline parfaitement alignée")
         
-        # Recommandations spécifiques
-        if len(company_opportunities["limitations"]) > 2:
-            recommendations.append("💡 Mettre en avant les opportunités existantes")
+        # Recommandations opportunités
+        if opportunities_analysis["opportunities_score"] < 0.4:
+            recommendations.append("🚀 Améliorer offre évolution - Budget formation, chemin carrière")
+        elif opportunities_analysis["opportunities_score"] > 0.8:
+            recommendations.append("💼 Excellentes opportunités - Mettre en avant")
         
-        if len(realism_analysis["concerns"]) > 0:
-            recommendations.append("🔍 Expliquer la progression salariale réaliste")
+        # Recommandations selon motivation
+        evolution_motivation = progression_data["evolution_motivation_score"]
+        if evolution_motivation >= 4:
+            recommendations.append("🎯 Évolution prioritaire - Candidat très motivé")
+        elif evolution_motivation <= 2:
+            recommendations.append("💡 Évolution secondaire - Autres motivations prioritaires")
         
         return recommendations
     
     def _generate_detailed_progression_analysis(
         self,
-        progression_data: Dict[str, Any],
         realism_analysis: Dict[str, Any],
-        company_opportunities: Dict[str, Any]
+        timeline_analysis: Dict[str, Any],
+        opportunities_analysis: Dict[str, Any],
+        progression_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """📊 Analyse détaillée progression"""
         
         return {
             "candidate_profile": {
+                "current_salary": progression_data["current_salary"],
                 "experience_level": progression_data["experience_level"].value,
-                "career_motivation": progression_data["career_motivation"],
-                "expectations_count": len(progression_data["salary_expectations"]),
-                "has_realistic_expectations": realism_analysis["realism_score"] >= 0.6
+                "expectations": progression_data["progression_expectations"],
+                "evolution_motivation": progression_data["evolution_motivation_score"],
+                "realism_assessment": realism_analysis["realism_level"].value
             },
             "company_profile": {
-                "growth_stage": progression_data["growth_stage"],
-                "has_development_budget": progression_data["has_development_budget"],
-                "has_evolution_path": progression_data["has_evolution_path"],
-                "has_variable_compensation": progression_data["has_variable_compensation"],
-                "progression_timeline": progression_data["progression_timeline"]
+                "career_timeline": progression_data["career_timeline"],
+                "timeline_years": timeline_analysis.get("company_timeline_years", 0),
+                "evolution_path": progression_data["evolution_path"],
+                "development_budget": progression_data["development_budget"],
+                "bonus_structure": progression_data["bonus_structure"]
             },
-            "market_context": realism_analysis["market_standards"],
-            "growth_context": company_opportunities["growth_context"],
-            "risk_assessment": {
-                "candidate_risk": "high" if realism_analysis["compatibility_level"] == ProgressionCompatibilityLevel.UNREALISTIC else "low",
-                "company_risk": "high" if company_opportunities["opportunities_score"] < 0.4 else "low"
-            }
+            "compatibility_analysis": {
+                "timeline_match": timeline_analysis["timeline_compatibility"].value,
+                "opportunities_level": "high" if opportunities_analysis["opportunities_score"] > 0.7 else 
+                                     "medium" if opportunities_analysis["opportunities_score"] > 0.4 else "low",
+                "overall_fit": "excellent" if final_score > 0.8 else
+                              "good" if final_score > 0.6 else
+                              "moderate" if final_score > 0.4 else "poor"
+            },
+            "market_benchmarks": realism_analysis.get("benchmark_analysis", {})
         }
     
     def _create_fallback_score(self, reason: str) -> Dict[str, Any]:
@@ -721,28 +618,27 @@ class SalaryProgressionScorer:
         
         return {
             "final_score": 0.5,  # Score neutre
-            "compatibility_level": ProgressionCompatibilityLevel.REALISTIC.value,
             "progression_analysis": {
-                "candidate_expectations": {},
-                "current_salary": 0,
-                "experience_level": "confirme",
-                "career_motivation": 0,
-                "company_timeline": {},
-                "realism_score": 0.5,
-                "opportunities_score": 0.5
+                "realism_level": ProgressionRealism.REALISTIC.value,
+                "timeline_compatibility": TimelineCompatibility.ACCEPTABLE.value,
+                "opportunities_score": 0.5,
+                "evolution_motivation_score": 0
             },
-            "realism_factors": [],
-            "concerns": [f"Mode dégradé: {reason}"],
-            "opportunity_factors": [],
-            "limitations": [],
-            "timeline_compatibility": {
+            "score_breakdown": {
+                "realism_score": 0.5,
                 "timeline_score": 0.5,
-                "compatibility_summary": "Données insuffisantes"
+                "opportunities_score": 0.5,
+                "weighted_final": 0.5
+            },
+            "analysis_factors": {
+                "realism_factors": [f"Mode dégradé: {reason}"],
+                "timeline_factors": [],
+                "opportunity_factors": []
             },
             "detailed_analysis": {},
             "recommendations": [
                 f"⚠️ {reason}",
-                "🛠️ Vérifier manuellement les attentes progression"
+                "🛠️ Vérifier manuellement la progression salariale"
             ],
             "calculated_at": datetime.now().isoformat(),
             "version": f"{self.version}-fallback",
@@ -750,7 +646,8 @@ class SalaryProgressionScorer:
             "error": reason
         }
     
-    def _update_stats(self, processing_time: float, compatibility_level: ProgressionCompatibilityLevel):
+    def _update_stats(self, processing_time: float, realism_level: ProgressionRealism, 
+                     timeline_compatibility: TimelineCompatibility):
         """📊 Mise à jour statistiques"""
         
         # Moyenne temps de traitement
@@ -760,45 +657,53 @@ class SalaryProgressionScorer:
             (current_avg * (total - 1) + processing_time) / total
         )
         
-        # Distribution compatibilité
-        self.stats["compatibility_distribution"][compatibility_level.value] += 1
+        # Distribution réalisme et timeline
+        self.stats["realism_distribution"][realism_level.value] += 1
+        self.stats["timeline_distribution"][timeline_compatibility.value] += 1
     
     def get_performance_stats(self) -> Dict[str, Any]:
         """📈 Statistiques performance"""
         
-        compatibility_rates = {}
+        # Calcul taux distribution
+        realism_rates = {}
+        timeline_rates = {}
+        
         if self.stats["calculations"] > 0:
-            for level, count in self.stats["compatibility_distribution"].items():
-                compatibility_rates[level] = count / self.stats["calculations"]
+            for level, count in self.stats["realism_distribution"].items():
+                realism_rates[level] = count / self.stats["calculations"]
+            for level, count in self.stats["timeline_distribution"].items():
+                timeline_rates[level] = count / self.stats["calculations"]
         
         return {
             "scorer_stats": self.stats.copy(),
             "performance_metrics": {
                 "average_processing_time_ms": self.stats["average_processing_time"],
                 "target_achieved": self.stats["average_processing_time"] < 5.0,
-                "compatibility_rates": compatibility_rates
+                "realism_rates": realism_rates,
+                "timeline_rates": timeline_rates
             },
-            "market_standards": {
-                "levels_covered": len(self.market_progression_standards),
-                "company_modifiers": len(self.company_modifiers)
+            "benchmark_info": {
+                "experience_levels": list(self.salary_benchmarks.keys()),
+                "timeline_patterns": len(self.timeline_patterns)
             }
         }
     
-    def get_market_standards_preview(self, experience_level: NiveauExperience) -> Dict[str, Any]:
-        """📊 Aperçu standards marché"""
+    def get_salary_benchmark_preview(self, experience_level: NiveauExperience) -> Dict[str, Any]:
+        """🔍 Aperçu benchmarks salariaux"""
         
-        if experience_level in self.market_progression_standards:
-            standards = self.market_progression_standards[experience_level]
+        if experience_level in self.salary_benchmarks:
+            benchmark = self.salary_benchmarks[experience_level]
             return {
                 "experience_level": experience_level.value,
-                "annual_increase_range": f"{standards['annual_increase_range'][0]:.1%}-{standards['annual_increase_range'][1]:.1%}",
-                "3_year_total_increase": f"{standards['3_year_total_increase'][0]:.1%}-{standards['3_year_total_increase'][1]:.1%}",
-                "realistic_ceiling": f"{(standards['realistic_ceiling'] - 1):.1%}",
-                "typical_timeline": standards["typical_timeline"],
-                "progression_speed": standards["progression_speed"]
+                "has_benchmark": True,
+                "base_range": benchmark["base_range"],
+                "progression_1_year": f"+{(benchmark['progression_1_year'] - 1) * 100:.0f}%",
+                "progression_3_years": f"+{(benchmark['progression_3_years'] - 1) * 100:.0f}%",
+                "max_realistic": benchmark["max_realistic"]
             }
         else:
             return {
-                "experience_level": experience_level.value,
-                "message": f"Pas de standards définis pour {experience_level.value}"
+                "experience_level": experience_level.value if experience_level else "unknown",
+                "has_benchmark": False,
+                "message": f"Pas de benchmark pour {experience_level.value if experience_level else 'ce niveau'}"
             }
