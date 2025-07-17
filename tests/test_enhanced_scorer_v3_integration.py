@@ -62,11 +62,17 @@ class MockExtendedProfile:
 
 class MockRequest:
     """Mock pour requêtes matching"""
-    def __init__(self, candidate=None, company=None, **kwargs):
-        self.candidate = candidate or MockExtendedProfile()
-        self.company = company or MockExtendedProfile()
+    def __init__(self, **kwargs):
+        # Attributs par défaut
+        self.candidate = kwargs.get('candidate', MockExtendedProfile())
+        self.company = kwargs.get('company', MockExtendedProfile())
+        self.use_adaptive_weighting = kwargs.get('use_adaptive_weighting', True)
+        self.use_google_maps_intelligence = kwargs.get('use_google_maps_intelligence', False)
+        
+        # Autres attributs
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            if key not in ['candidate', 'company', 'use_adaptive_weighting', 'use_google_maps_intelligence']:
+                setattr(self, key, value)
 
 class MockResponse:
     """Mock pour réponses matching"""
@@ -180,7 +186,8 @@ class MockEnhancedScorerV3:
             matching_score=min(1.0, base_score),
             component_scores=component_scores,
             applied_weights=weights,
-            performance_monitoring=performance_monitoring
+            performance_monitoring=performance_monitoring,
+            adaptive_weighting_applied=getattr(request, 'use_adaptive_weighting', True)
         )
     
     def get_global_performance_stats(self):
@@ -244,14 +251,19 @@ class TestDataFactory:
     
     @staticmethod
     def create_test_request_v3(candidate=None, company=None, **kwargs):
-        """Création requête test"""
-        return MockRequest(
-            candidate=candidate or TestDataFactory.create_test_candidate_v3(),
-            company=company or TestDataFactory.create_test_company_v3(),
-            use_adaptive_weighting=kwargs.get('use_adaptive_weighting', True),
-            use_google_maps_intelligence=kwargs.get('use_google_maps_intelligence', False),
-            **kwargs
-        )
+        """Création requête test - CORRECTION: Eviter conflit paramètres"""
+        # Paramètres par défaut
+        params = {
+            'candidate': candidate or TestDataFactory.create_test_candidate_v3(),
+            'company': company or TestDataFactory.create_test_company_v3(),
+            'use_adaptive_weighting': kwargs.pop('use_adaptive_weighting', True),
+            'use_google_maps_intelligence': kwargs.pop('use_google_maps_intelligence', False)
+        }
+        
+        # Ajouter les autres paramètres
+        params.update(kwargs)
+        
+        return MockRequest(**params)
 
 # TESTS UNITAIRES
 class TestEnhancedScorerV3Individual:
@@ -540,6 +552,8 @@ class TestComponentWeightsValidation:
         """Test poids adaptatifs = 1.000000"""
         
         scorer = MockEnhancedScorerV3()
+        
+        # CORRECTION: Utiliser la factory corrigée
         request = TestDataFactory.create_test_request_v3(
             use_adaptive_weighting=True
         )
@@ -695,6 +709,7 @@ class TestErrorHandlingAndFallback:
         print("✅ Timeout handling test passed")
 
 # TEST BOUT-EN-BOUT
+@pytest.mark.end_to_end
 @pytest.mark.asyncio
 async def test_full_system_integration_end_to_end():
     """🎯 Test intégration système bout-en-bout"""
@@ -719,6 +734,7 @@ async def test_full_system_integration_end_to_end():
         candidate = TestDataFactory.create_test_candidate_v3()
         company = TestDataFactory.create_test_company_v3()
         
+        # CORRECTION: Utiliser la factory corrigée
         request = TestDataFactory.create_test_request_v3(
             candidate=candidate,
             company=company,
