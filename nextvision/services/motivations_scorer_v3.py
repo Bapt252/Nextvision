@@ -616,6 +616,11 @@ class MotivationsScorer(BaseScorer):
         
         return recommendations[:8]  # Max 8 recommandations
 
+# === ALIAS POUR COMPATIBILITÉ IMPORTS ===
+
+# Alias pour import attendu dans __init__.py
+MotivationsScorerV3 = MotivationsScorer
+
 # === FACTORY ET UTILITAIRES ===
 
 def create_motivations_scorer(weight: float = 0.08) -> MotivationsScorer:
