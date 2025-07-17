@@ -1,117 +1,145 @@
 """
-🚀 Nextvision Services v3.2.1 - ARCHITECTURE OPTIMISÉE
-Services d'intégration GPT Direct + Transport Intelligence pour NEXTEN
+🚀 Nextvision V3.0 - Package Services CORRIGÉ
+==============================================
 
-Version optimisée après nettoyage architecture - Services essentiels uniquement
-Doublons supprimés - Performance améliorée
+Module central des services Nextvision avec imports optimisés 
+pour couverture de code maximale.
 
-Author: NEXTEN Team
-Version: 3.2.1 Optimized
+🔧 CORRECTION COUVERTURE DE CODE:
+- Imports directs sans try/except masquant
+- Exposition de tous les modules pour coverage
+- 12 scorers opérationnels (9 V3.0 + 3 V2.0)
+
+Author: NEXTEN Team  
+Version: 3.0.0 - Coverage Fix
 """
 
-# 🚀 SERVICE PRINCIPAL: GPT Direct unifié
-# 🔧 TEMPORAIREMENT COMMENTÉ pour éviter problème import OpenAI
-# from .gpt_direct_service import (
-#     GPTDirectService,
-#     CVData,
-#     JobData,
-#     get_gpt_service,
-#     parse_cv_direct,
-#     parse_job_direct
-# )
+# ============================================================================
+# IMPORTS DIRECTS SCORERS V3.0 (9 modules)
+# ============================================================================
 
-# 🆕 Utilisation du service optimisé à la place (fonctionne correctement)
-from .gpt_direct_service_optimized import (
-    GPTDirectServiceOptimized,
-    CVData,
-    JobData,
-    get_gpt_service_optimized as get_gpt_service,
-    parse_cv_direct_optimized as parse_cv_direct,
-    parse_job_direct_optimized as parse_job_direct
-)
+# Scorer principal bidirectionnel V3.0
+from .enhanced_bidirectional_scorer_v3 import EnhancedBidirectionalScorerV3
 
-# 🌉 Bridge Commitment (service principal conservé)
-from .commitment_bridge import CommitmentNextvisionBridge, BridgeRequest, BridgeResponse, BridgeConfig
+# Scorers motivations V3.0
+from .motivations_scorer_v3 import MotivationsScorerV3
+from .listening_reasons_scorer_v3 import ListeningReasonsScorerV3
+from .professional_motivations_scorer_v3 import ProfessionalMotivationsScorerV3
 
-# 🗺️ Transport Intelligence services
+# Scorer localisation/transport V3.0 (sous-package)
+from .scorers_v3.location_transport_scorer_v3 import LocationTransportScorerV3
+
+# Services géolocalisation V3.0
 from .google_maps_service import GoogleMapsService
 from .transport_calculator import TransportCalculator
 
-# 🎯 Matching & Scoring services (si disponibles)
-try:
-    from .bidirectional_matcher import BidirectionalMatcher
-    from .bidirectional_scorer import BidirectionalScorer
-    MATCHING_SERVICES_AVAILABLE = True
-except ImportError:
-    MATCHING_SERVICES_AVAILABLE = False
+# Services parsing/intégration V3.0
+from .gpt_direct_service import GPTDirectService
+from .enhanced_commitment_bridge_v3 import EnhancedCommitmentBridgeV3
 
-# 🧮 Advanced scorers (si disponibles) 
-try:
-    from .listening_reasons_scorer_v3 import ListeningReasonsScorer
-    from .motivations_scorer_v3 import MotivationsScorer
-    from .professional_motivations_scorer_v3 import ProfessionalMotivationsScorer
-    ADVANCED_SCORERS_AVAILABLE = True
-except ImportError:
-    ADVANCED_SCORERS_AVAILABLE = False
+# ============================================================================
+# IMPORTS DIRECTS SCORERS V2.0 (3 modules legacy)
+# ============================================================================
+
+# Scorer bidirectionnel V2.0 (compatibilité)
+from .bidirectional_scorer import BidirectionalScorer
+
+# Matcher bidirectionnel V2.0
+from .bidirectional_matcher import BidirectionalMatcher
+
+# Bridge commitment V2.0
+from .commitment_bridge import CommitmentBridge
+
+# ============================================================================
+# EXPOSITION PUBLIQUE POUR COUVERTURE
+# ============================================================================
 
 __all__ = [
-    # 🚀 Services GPT Direct (PRINCIPAL) - via optimized service
-    "GPTDirectServiceOptimized",
-    "CVData", 
-    "JobData",
-    "get_gpt_service",
-    "parse_cv_direct",
-    "parse_job_direct",
+    # === SCORERS V3.0 (9 modules) ===
+    'EnhancedBidirectionalScorerV3',    # Scorer principal V3.0
+    'MotivationsScorerV3',              # Motivations générales V3.0
+    'ListeningReasonsScorerV3',         # Raisons d'écoute V3.0  
+    'ProfessionalMotivationsScorerV3',  # Motivations pro V3.0
+    'LocationTransportScorerV3',        # Localisation/transport V3.0
+    'GoogleMapsService',                # Service Google Maps V3.0
+    'TransportCalculator',              # Calculateur transport V3.0
+    'GPTDirectService',                 # Service GPT direct V3.0
+    'EnhancedCommitmentBridgeV3',       # Bridge commitment V3.0
     
-    # 🌉 Bridge services (conservés)
-    "CommitmentNextvisionBridge",
-    "BridgeRequest",
-    "BridgeResponse", 
-    "BridgeConfig",
-    
-    # 🗺️ Transport Intelligence
-    "GoogleMapsService",
-    "TransportCalculator"
+    # === SCORERS V2.0 (3 modules legacy) ===
+    'BidirectionalScorer',              # Scorer bidirectionnel V2.0
+    'BidirectionalMatcher',             # Matcher bidirectionnel V2.0
+    'CommitmentBridge'                  # Bridge commitment V2.0
 ]
 
-# Ajout conditionnel des services optionnels
-if MATCHING_SERVICES_AVAILABLE:
-    __all__.extend(["BidirectionalMatcher", "BidirectionalScorer"])
+# ============================================================================
+# MÉTADONNÉES & VALIDATION
+# ============================================================================
 
-if ADVANCED_SCORERS_AVAILABLE:
-    __all__.extend([
-        "ListeningReasonsScorer",
-        "MotivationsScorer", 
-        "ProfessionalMotivationsScorer"
-    ])
-
-# 🎯 Factory functions optimisées
-def create_gpt_service():
-    """🚀 Créer service GPT Direct (recommandé)"""
-    return get_gpt_service()
-
-def create_bridge():
-    """🌉 Créer bridge Commitment (legacy)"""
-    config = BridgeConfig()
-    return CommitmentNextvisionBridge(config)
-
-def create_transport_service():
-    """🗺️ Créer service transport"""
-    return GoogleMapsService()
-
-# 📊 Status des services
-def get_services_status():
-    """📊 Status de tous les services disponibles"""
+def get_services_info():
+    """Retourne les informations sur les services disponibles."""
     return {
-        "gpt_direct": True,
-        "gpt_direct_optimized": True,  # 🆕 Utilisation du service optimisé
-        "commitment_bridge": True,
-        "transport_intelligence": True,
-        "matching_services": MATCHING_SERVICES_AVAILABLE,
-        "advanced_scorers": ADVANCED_SCORERS_AVAILABLE,
-        "version": "3.2.1",
-        "architecture": "optimized",
-        "note": "Using gpt_direct_service_optimized (OpenAI import issue bypassed)"
+        'version': '3.0.0',
+        'total_modules': len(__all__),
+        'v3_modules': 9,
+        'v2_modules': 3,
+        'services': {
+            'v3.0': [
+                'EnhancedBidirectionalScorerV3',
+                'MotivationsScorerV3', 
+                'ListeningReasonsScorerV3',
+                'ProfessionalMotivationsScorerV3',
+                'LocationTransportScorerV3',
+                'GoogleMapsService',
+                'TransportCalculator', 
+                'GPTDirectService',
+                'EnhancedCommitmentBridgeV3'
+            ],
+            'v2.0': [
+                'BidirectionalScorer',
+                'BidirectionalMatcher', 
+                'CommitmentBridge'
+            ]
+        }
     }
 
-__version__ = "3.2.1"
+def validate_services():
+    """Valide que tous les services sont correctement importés."""
+    try:
+        info = get_services_info()
+        available_count = 0
+        
+        for module_name in __all__:
+            if module_name in globals():
+                available_count += 1
+                print(f"✅ Service disponible: {module_name}")
+            else:
+                print(f"❌ Service manquant: {module_name}")
+        
+        print(f"\n📊 Résumé: {available_count}/{info['total_modules']} services disponibles")
+        return available_count == info['total_modules']
+        
+    except Exception as e:
+        print(f"❌ Erreur validation services: {e}")
+        return False
+
+# ============================================================================
+# COMPATIBILITÉ & ALIASES
+# ============================================================================
+
+# Alias pour compatibilité ascendante
+BidirectionalScorerV3 = EnhancedBidirectionalScorerV3
+CommitmentBridgeV3 = EnhancedCommitmentBridgeV3
+
+# Version info
+__version__ = "3.0.0"
+__author__ = "NEXTEN Team"
+
+# ============================================================================
+# AUTO-VALIDATION (MODE DEBUG)
+# ============================================================================
+
+import os
+if os.environ.get('NEXTVISION_DEBUG', '').lower() == 'true':
+    print("🔍 Validation automatique services Nextvision...")
+    validate_services()
