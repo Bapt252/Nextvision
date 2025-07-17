@@ -1,0 +1,63 @@
+# Configuration Coverage.py pour Nextvision V3.0 - Couverture Optimisée
+# ========================================================================
+
+[run]
+# Source principal à analyser
+source = nextvision
+
+# Analyse des branches
+branch = True
+
+# Fichiers à exclure de la couverture
+omit = 
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */migrations/*
+    */venv/*
+    */env/*
+    setup.py
+    */backup_*/*
+    */.git/*
+    */node_modules/*
+    *.old
+    *.backup
+
+# Configuration avancée
+parallel = True
+concurrency = multiprocessing
+
+[report]
+# Lignes à exclure du rapport
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    pass
+    \.\.\.
+
+# Configuration rapport
+precision = 2
+show_missing = True
+sort = Cover
+skip_covered = False
+skip_empty = True
+
+[html]
+# Configuration rapport HTML
+directory = reports/coverage_html
+title = Nextvision V3.0 Coverage Report
+skip_covered = False
+
+[xml]
+# Configuration rapport XML
+output = reports/coverage.xml
+
+[json]
+# Configuration rapport JSON
+output = reports/coverage.json
