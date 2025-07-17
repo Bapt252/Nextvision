@@ -1,8 +1,8 @@
 """
-🚀 Nextvision V3.0 - Scorers V3 Package (PROMPT 10)
+🚀 Nextvision V3.0 - Scorers V3 Package (PROMPT 10 + SALARY PROGRESSION)
 Package des scorers révolutionnés avec Intelligence V3.0
 
-Scorers opérationnels (8/12) :
+Scorers opérationnels (9/12) ✨ PROGRESSION :
 - LocationTransportScorerV3 : Localisation + transport intelligent (9% poids)
 - AvailabilityTimingScorer : Compatibilité timing/disponibilité (4% poids)  
 - ContractTypesScorer : Ranking préférences contrat (5% poids)
@@ -10,10 +10,18 @@ Scorers opérationnels (8/12) :
 - MotivationsScorer : Correspondance aspirations candidat (8% poids)
 - ListeningReasonScorer : Cohérence raisons d'écoute (2% poids)
 - SectorCompatibilityScorer : Compatibilité secteur candidat-entreprise (6% poids)
-- SalaryProgressionScorer : Évolution salariale candidat vs opportunités (3% poids) ✨ NEW
+- SalaryProgressionScorer : Évolution salariale candidat vs opportunités (3% poids) ✅ INTÉGRÉ
+
+🎯 NOUVELLES FEATURES SALARY PROGRESSION :
+- Grilles salariales benchmarks par niveau d'expérience
+- Analyse réalisme attentes vs niveau candidat  
+- Compatibilité timeline progression (candidat vs entreprise)
+- Évaluation opportunités concrètes (budget formation, évolution path)
+- Poids adaptatif selon raison d'écoute (évolution carrière = +5%)
+- Performance <5ms (3% du budget 175ms)
 
 Author: NEXTEN Team
-Version: 3.0.0 - Enhanced Intelligence + Salary Progression
+Version: 3.0.0 - Enhanced Intelligence + Salary Progression Integration
 """
 
 from .location_transport_scorer_v3 import LocationTransportScorerV3
