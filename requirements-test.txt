@@ -1,0 +1,60 @@
+# 🚀 Nextvision V3.0 - Requirements Tests - PROMPT 7
+# ====================================================
+#
+# Dépendances pour suite tests intégration V3.0
+# Installation: pip install -r requirements-test.txt
+
+# Framework de tests principal
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Tests performance et reporting  
+pytest-benchmark>=4.0.0
+pytest-timeout>=2.1.0
+pytest-html>=3.2.0
+
+# Couverture de code
+pytest-cov>=4.1.0
+coverage>=7.2.0
+
+# Tests parallèles (optionnel)
+pytest-xdist>=3.3.0
+
+# Mocking avancé
+pytest-mock>=3.11.0
+
+# Tests de charge (optionnel)
+pytest-stress>=1.0.1
+
+# Reporting avancé
+pytest-json-report>=1.5.0
+pytest-metadata>=3.0.0
+
+# Validation données
+pytest-datadir>=1.4.1
+pytest-factoryboy>=2.5.1
+
+# Debugging
+pytest-pdb>=0.2.0
+pytest-sugar>=0.9.7
+
+# Configuration et fixtures
+pytest-env>=0.8.2
+pytest-fixture-config>=1.7.0
+
+# Tests sécurité (optionnel)
+bandit>=1.7.5
+
+# Outils complémentaires
+freezegun>=1.2.2  # Mock datetime pour tests
+responses>=0.23.0  # Mock HTTP requests
+factory-boy>=3.3.0  # Factory pour données test
+
+# Validation compatibilité
+packaging>=23.0
+importlib-metadata>=6.0.0
+
+# Note: Ces dépendances sont EN PLUS des requirements principaux du projet
+# Installation complète:
+# pip install -r requirements.txt  # Dépendances principales
+# pip install -r requirements-test.txt  # Dépendances tests
