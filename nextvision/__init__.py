@@ -1,11 +1,29 @@
 """
-🎯 Nextvision - Package principal
-Algorithme de matching IA adaptatif pour NEXTEN
+🚀 Nextvision V3.0 - Package Principal
+=====================================
+
+Système de matching intelligent candidat-entreprise basé sur l'IA.
+Version 3.0.0 Enhanced avec 12 scorers opérationnels.
 
 Author: NEXTEN Team
-Version: 1.0.0
+Version: 3.0.0 - Enhanced Performance
 """
 
-__version__ = "1.0.0"
+__version__ = "3.0.0"
 __author__ = "NEXTEN Team"
-__description__ = "Algorithme de matching IA adaptatif avec pondération contextuelle"
+
+# Import des classes principales pour faciliter l'accès
+try:
+    from nextvision.services.enhanced_bidirectional_scorer_v3 import EnhancedBidirectionalScorerV3
+except ImportError:
+    EnhancedBidirectionalScorerV3 = None
+
+try:
+    from nextvision.services.bidirectional_scorer import BidirectionalScorer
+except ImportError:
+    BidirectionalScorer = None
+
+__all__ = [
+    'EnhancedBidirectionalScorerV3',
+    'BidirectionalScorer'
+]
