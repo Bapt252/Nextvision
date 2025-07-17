@@ -543,6 +543,12 @@ class ProfessionalMotivationsScorer:
         return recommendations
 
 
+# === ALIAS POUR COMPATIBILITÉ IMPORTS ===
+
+# Alias pour import attendu dans __init__.py
+ProfessionalMotivationsScorerV3 = ProfessionalMotivationsScorer
+
+
 # ================================
 # INTÉGRATION ET UTILITAIRES  
 # ================================
