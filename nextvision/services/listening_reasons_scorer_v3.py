@@ -490,6 +490,12 @@ class ListeningReasonScorer:
             return f"Adaptation forte - refocus majeur sur '{biggest_boost['component']}' - candidat très motivé"
 
 
+# === ALIAS POUR COMPATIBILITÉ IMPORTS ===
+
+# Alias pour import attendu dans __init__.py
+ListeningReasonsScorerV3 = ListeningReasonScorer
+
+
 # ================================
 # INTÉGRATION ET UTILITAIRES
 # ================================
